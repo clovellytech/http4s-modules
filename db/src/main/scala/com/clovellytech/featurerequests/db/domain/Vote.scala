@@ -1,5 +1,4 @@
-package com.clovellytech.featurerequests.domain
-package votes
+package com.clovellytech.featurerequests.db.domain
 
 import java.util.UUID
 

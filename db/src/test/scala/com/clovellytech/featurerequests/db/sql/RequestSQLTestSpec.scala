@@ -1,19 +1,17 @@
-package com.clovellytech.featurerequests
-package infrastructure.repository.persistent
-
+package com.clovellytech.featurerequests.db
+package sql
 
 import java.util.UUID
 
 import cats.effect.IO
-import org.scalatest._
-import doobie.scalatest._
-import domain.requests._
+import com.clovellytech.featurerequests.db.domain.Feature
+import doobie.scalatest.IOChecker
 import org.joda.time.DateTime
+import org.scalatest._
 
-
+import requests._
 
 class RequestSQLTestSpec extends FlatSpec with Matchers with IOChecker {
-  import RequestSQL._
 
   val transactor: doobie.Transactor[IO] = testTransactor
 

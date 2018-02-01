@@ -50,7 +50,7 @@ lazy val db = (project in file("./db"))
   .settings(commonSettings)
   .settings(
     name := "db",
-    libraryDependencies ++= commonDeps ++ dbDeps
+    libraryDependencies ++= commonDeps ++ dbDeps ++ testDeps
   )
 
 lazy val featurerequests = (project in file("./features"))

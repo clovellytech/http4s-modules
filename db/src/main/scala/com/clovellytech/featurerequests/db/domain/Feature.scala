@@ -1,5 +1,4 @@
-package com.clovellytech.featurerequests.domain
-package requests
+package com.clovellytech.featurerequests.db.domain
 
 import java.util.UUID
 
