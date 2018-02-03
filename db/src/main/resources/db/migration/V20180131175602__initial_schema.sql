@@ -12,5 +12,6 @@ create table if not exists vote (
   create_date timestamp with time zone not null default now(),
   by_user_id uuid,
   vote smallint,
-  comment text
+  comment text,
+  unique(feature_request_id, by_user_id)
 );

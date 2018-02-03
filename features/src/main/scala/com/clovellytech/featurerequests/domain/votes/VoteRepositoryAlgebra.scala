@@ -1,8 +1,9 @@
 package com.clovellytech.featurerequests
-package domain.votes
+package domain
+package votes
 
 import db.domain._
 
 trait VoteRepositoryAlgebra[F[_]]{
-  def create(v: Vote[FeatureId]) : F[Unit]
+  def put(v: Vote) : F[Unit]
 }

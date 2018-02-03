@@ -57,6 +57,7 @@ lazy val featurerequests = (project in file("./features"))
   .settings(commonSettings)
   .settings(
     name := "features",
+    mainClass in reStart := Some("com.clovellytech.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDeps
   )
   .dependsOn(db)
