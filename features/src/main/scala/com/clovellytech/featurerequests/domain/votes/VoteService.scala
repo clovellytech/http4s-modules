@@ -1,8 +1,8 @@
-package com.clovellytech.featurerequests.domain
-package votes
+package com.clovellytech.featurerequests
+package domain.votes
 
-import requests._
+import db.domain._
 
 class VoteService[F[_]](voteRepo : VoteRepositoryAlgebra[F]) {
-  def makeVote(v: Vote[FeatureId]) : F[Unit] = voteRepo.create(v)
+  def makeVote(v: Vote) : F[Unit] = voteRepo.put(v)
 }
