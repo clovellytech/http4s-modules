@@ -1,17 +1,19 @@
 package com.clovellytech.featurerequests.db
 package sql
 
-import cats.effect.IO
+import cats.effect.{Async, IO}
 import config.{DatabaseConfig, loadConfig}
 import doobie.util.transactor.Transactor
 
 object testTransactor {
-  lazy val testTransactor : Transactor[IO] = {
-    val t: IO[Transactor[IO]] = for {
-      cfg <- loadConfig[IO, DatabaseConfig]("db")
-      tr <- getTransactor(cfg)
+  def configTransactor[F[_]: Async] : F[Transactor[F]] = {
+    val t: F[Transactor[F]] = for {
+      cfg <- loadConfig[F, DatabaseConfig]("db")
+      tr <- getTransactor[F](cfg)
     } yield tr
-
-    t.unsafeRunSync()
   }
+
+  def getTestTransactor : IO[Transactor[IO]] = configTransactor[IO]
+
+  lazy val testTransactor: Transactor[IO] = getTestTransactor.unsafeRunSync()
 }

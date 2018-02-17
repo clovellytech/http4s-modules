@@ -4,21 +4,26 @@ import cats.effect._
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import org.http4s.server.blaze.BlazeBuilder
-
 import db.config._
 import config._
 import domain.votes.VoteService
 import domain.requests.RequestService
-
 import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
 import infrastructure.endpoint._
 
+import scala.concurrent.ExecutionContext
+
 object Server extends StreamApp[IO] {
 
-  override def stream(args: List[String], shutdown: IO[Unit]): Stream[IO, ExitCode] =
-    createStream[IO](args, shutdown)
+  override def stream(args: List[String], shutdown: IO[Unit]): Stream[IO, ExitCode] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
 
-  def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] = for {
+    createStream[IO](args, shutdown)
+  }
+
+  def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit])(
+    implicit ec : ExecutionContext
+  ): Stream[F, ExitCode] = for {
     conf             <- Stream.eval(loadConfig[F, FeatureRequestConfig]("featurerequests"))
     xa               <- Stream.eval(conf.db.dbTransactor[F])
     _                <- Stream.eval(DatabaseConfig.initializeDb[F](xa))
@@ -26,9 +31,9 @@ object Server extends StreamApp[IO] {
     requestRepo      =  new RequestRepositoryInterpreter[F](xa)
     voteService      =  new VoteService[F](voteRepo)
     requestService   =  new RequestService[F](requestRepo)
-    voteEndpoints    = new VoteEndpoints[F].endpoints(voteService)
-    requestEndpoints = new RequestEndpoints[F].endpoints(requestService)
-    exitCode         <- BlazeBuilder[F]
+    voteEndpoints    =  new VoteEndpoints[F].endpoints(voteService)
+    requestEndpoints =  new RequestEndpoints[F].endpoints(requestService)
+    exitCode            <- BlazeBuilder[F]
       .bindHttp(8080, "localhost")
       .mountService(requestEndpoints, "/")
       .mountService(voteEndpoints, "/")
