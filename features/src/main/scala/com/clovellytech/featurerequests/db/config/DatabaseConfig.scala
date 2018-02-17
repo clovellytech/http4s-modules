@@ -3,6 +3,7 @@ package com.clovellytech.featurerequests.db.config
 import cats.effect.{Async, Sync}
 import doobie.hikari.HikariTransactor
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.FlywayException
 
 final case class DatabaseConfig(host: String, port: String, user: String, password: String, databaseName: String){
   def driver: String = "org.postgresql.Driver"
@@ -21,7 +22,13 @@ object DatabaseConfig {
       S.delay {
         val fw = new Flyway()
         fw.setDataSource(ds)
-        fw.migrate()
+        try{
+          fw.migrate()
+        } catch {
+          case _ : FlywayException =>
+            fw.repair()
+            fw.migrate()
+        }
         ()
       }
     }

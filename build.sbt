@@ -46,13 +46,6 @@ val commonDeps = Seq(
   "joda-time" % "joda-time" % dependencies.joda
 )
 
-lazy val db = (project in file("./db"))
-  .settings(commonSettings)
-  .settings(
-    name := "db",
-    libraryDependencies ++= commonDeps ++ dbDeps ++ testDeps
-  )
-
 lazy val featurerequests = (project in file("./features"))
   .settings(commonSettings)
   .settings(
@@ -60,7 +53,6 @@ lazy val featurerequests = (project in file("./features"))
     mainClass in reStart := Some("com.clovellytech.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDeps
   )
-  .dependsOn(db)
 
 lazy val docs = (project in file("./docs"))
   .enablePlugins(TutPlugin)
@@ -68,9 +60,9 @@ lazy val docs = (project in file("./docs"))
   .settings(
     name := "docs"
   )
-  .dependsOn(db, featurerequests)
+  .dependsOn(featurerequests)
 
 lazy val root = (project in file("."))
   .settings(commonSettings)
-  .dependsOn(db, featurerequests)
-  .aggregate(db, featurerequests)
+  .dependsOn(featurerequests)
+  .aggregate(featurerequests)
