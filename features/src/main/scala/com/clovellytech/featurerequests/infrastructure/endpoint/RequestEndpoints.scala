@@ -24,7 +24,7 @@ class RequestEndpoints[F[_]: Effect] extends Http4sDsl[F] {
       result <- Ok()
     } yield result
 
-    case GET -> Root / "requests" => for {
+    case GET -> Root / "request" => for {
       res <- requestService.listAll
       feats = res.map(VotedFeatures.tupled)
       resp <- Ok(DefaultResult(feats))
