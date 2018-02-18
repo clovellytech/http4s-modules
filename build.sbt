@@ -23,7 +23,8 @@ val httpDeps = Seq(
 
 val testDeps = Seq(
   "org.scalatest" %% "scalatest" % dependencies.scalaTest,
-  "org.tpolecat" %% "doobie-scalatest" % dependencies.doobie
+  "org.tpolecat" %% "doobie-scalatest" % dependencies.doobie,
+  "org.scalacheck" %% "scalacheck" % dependencies.scalaCheck
 ).map(_ % "test")
 
 val dbDeps = Seq(

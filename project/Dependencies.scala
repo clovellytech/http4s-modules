@@ -30,5 +30,6 @@ object dependencies {
   val joda = "2.9.9"
   val cryptobits = "1.1"
   val logback = "1.2.3"
+  val scalaCheck = "1.13.4"
 }
 
