@@ -7,12 +7,12 @@ import java.util.UUID
 import cats.Monad
 import cats.data.OptionT
 import cats.implicits._
-import com.clovellytech.auth.db.sql.BearerToken
+import tsec.common.SecureRandomId
+
 import com.clovellytech.auth.domain.tokens.TokenRepositoryAlgebra
 import com.clovellytech.auth.domain.users.UserRepositoryAlgebra
 import tsec.authentication._
 import db.domain._
-import tsec.common.SecureRandomId
 
 trait FunctionKK[X[_[_]], Y[_[_]]] {
   def apply[M[_]: Monad](xa: X[M]) : Y[M]

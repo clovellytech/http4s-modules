@@ -2,8 +2,9 @@ package com.clovellytech.featurerequests
 package infrastructure.endpoint
 
 import cats.data.OptionT
-import cats.effect.{Async, Effect}
+import cats.effect.Sync
 import cats.implicits._
+import com.clovellytech.auth.testing.AuthTestEndpoints
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
@@ -12,18 +13,22 @@ import domain.votes.VoteService
 import doobie.util.transactor.Transactor
 import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
 
-class TestRequests[F[_]: Effect : Async](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
+class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
+
+  val authTestEndpoints = new AuthTestEndpoints(xa)
+
+  val Auth = authTestEndpoints.authEndpoints.Auth
 
   val requestEndpoints: HttpService[F] = {
     val interp = new RequestRepositoryInterpreter[F](xa)
     val service = new RequestService[F](interp)
-    new RequestEndpoints[F].endpoints(service)
+    new RequestEndpoints[F](service).endpoints
   }
 
   val voteEndpoints: HttpService[F] = {
     val interp = new VoteRepositoryInterpreter[F](xa)
     val service = new VoteService[F](interp)
-    new VoteEndpoints[F].endpoints(service)
+    new VoteEndpoints[F](service).endpoints
   }
 
   def addRequest(req: FeatureRequest) : F[OptionT[F, Response[F]]] =

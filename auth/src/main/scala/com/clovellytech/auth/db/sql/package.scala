@@ -1,21 +1,14 @@
-package com.clovellytech.auth.db
-
-import java.util.UUID
+package com.clovellytech.auth
+package db
 
 import doobie.Meta
-import tsec.authentication.TSecBearerToken
+
 import tsec.common.SecureRandomId
 import doobie.postgres.implicits._
 
 package object sql {
   object users extends UserSQL
   object tokens extends BearerSQL
-
-  type Instant = java.time.Instant
-  type UserId = UUID
-
-  type BearerToken = TSecBearerToken[UserId]
-  val BearerToken = TSecBearerToken
 
   implicit val userIdMeta = Meta[UserId]
   implicit val instantMeta = Meta[Instant]

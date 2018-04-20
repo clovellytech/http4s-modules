@@ -5,7 +5,7 @@ package infrastructure.endpoint
 import java.time.Instant
 import java.util.UUID
 
-import cats.effect.Effect
+import cats.effect.Sync
 import cats.implicits._
 import com.clovellytech.featurerequests.db.domain.{Feature, FeatureId}
 import domain.requests.{FeatureRequest, RequestService}
@@ -14,9 +14,9 @@ import org.http4s.dsl.Http4sDsl
 
 final case class VotedFeatures(featureId: FeatureId, feature: Feature, dateCreated: Instant, upvotes: Long, downvotes: Long)
 
-class RequestEndpoints[F[_]: Effect] extends Http4sDsl[F] {
-
-  def endpoints(requestService: RequestService[F]) : HttpService[F] = HttpService {
+class RequestEndpoints[F[_]: Sync](requestService: RequestService[F]) extends Http4sDsl[F] {
+  def endpoints
+  : HttpService[F] = HttpService {
     case req @ POST -> Root / "request" => for {
       featureRequest <- req.as[FeatureRequest]
       feature : Feature = Feature(UUID.randomUUID().some, featureRequest.title, featureRequest.description)

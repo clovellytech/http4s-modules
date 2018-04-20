@@ -1,21 +1,20 @@
 package com.clovellytech.auth
-package infrastructure
-package endpoint
+package testing
 
 import cats.implicits._
-import cats.effect.Effect
+import cats.effect.Sync
+import com.clovellytech.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
 import doobie.util.transactor.Transactor
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 import tsec.passwordhashers.jca.BCrypt
-
 import domain.tokens.TokenService
 import domain.users.UserService
-import repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 
 
-class TestEndpoints[F[_]: Effect](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
+class AuthTestEndpoints[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
   val authEndpoints: AuthEndpoints[F, BCrypt] = {
     val uinterp = new UserRepositoryInterpreter[F](xa)
     val uservice = new UserService[F](uinterp)

@@ -5,9 +5,7 @@ package endpoint
 import cats.data.OptionT
 import org.scalatest._
 import cats.effect.IO
-import com.clovellytech.auth.infrastructure.endpoint.IOTest
 import domain.requests._
-import db.sql.testTransactor.testTransactor
 import org.http4s.Response
 import db.sql.testTransactor.testTransactor
 
