@@ -1,11 +1,9 @@
 package com.clovellytech.auth
 package infrastructure.endpoint
 
-import java.util.UUID
-
 import scala.concurrent.duration._
 import cats.data.OptionT
-import cats.effect.Effect
+import cats.effect.Sync
 import cats.implicits._
 import io.circe.syntax._
 import org.http4s._
@@ -20,7 +18,7 @@ import domain.users.UserService
 import domain.tokens.TokenService
 import infrastructure.authentication.TransBackingStore._
 
-class AuthEndpoints[F[_]: Effect, A](
+class AuthEndpoints[F[_]: Sync, A](
   userService : UserService[F],
   tokenService : TokenService[F],
   hasher : JCAPasswordPlatform[A]
@@ -67,7 +65,7 @@ extends Http4sDsl[F] {
   }
 
 
-  val authService: TSecAuthService[User, TSecBearerToken[UUID], F] = TSecAuthService {
+  val authService: BearerAuthService[F] = BearerAuthService {
     case GET -> Root / "user" / name asAuthed _ =>
       (for {
         u <- userService.byUsername(name)

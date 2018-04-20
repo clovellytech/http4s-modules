@@ -1,7 +1,6 @@
 package com.clovellytech.auth
 package domain.tokens
 
-import com.clovellytech.auth.db.sql.BearerToken
 import com.clovellytech.db.CRUDService
 import tsec.common.SecureRandomId
 

@@ -7,8 +7,7 @@ import cats.implicits._
 import doobie._
 import doobie.implicits._
 import domain.tokens.TokenRepositoryAlgebra
-import db.sql.{BearerToken, tokens}
-import tsec.common.SecureRandomId
+import db.sql.tokens
 
 class TokenRepositoryInterpreter[M[_] : Monad](xa : Transactor[M]) extends TokenRepositoryAlgebra[M] {
   def insert(a: BearerToken): M[Unit] = tokens.insert(a).run.as(()).transact(xa)

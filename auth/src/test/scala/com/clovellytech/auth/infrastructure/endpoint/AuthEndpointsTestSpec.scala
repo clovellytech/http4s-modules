@@ -1,14 +1,16 @@
 package com.clovellytech.auth.infrastructure
 package endpoint
 
+import org.scalatest._
 
 import cats.effect.IO
 import cats.implicits._
-import org.scalatest._
 import org.http4s.Status
 
+import com.clovellytech.auth.testing.AuthTestEndpoints
+
 class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
-  val endpoints = new TestEndpoints(testTransactor)
+  val endpoints = new AuthTestEndpoints(testTransactor)
 
   val user = UserRequest("zak", "password".getBytes)
 
