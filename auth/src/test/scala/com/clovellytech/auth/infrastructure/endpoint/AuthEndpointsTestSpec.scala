@@ -20,7 +20,7 @@ class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
     endpoints.loginUser(user).map{
       r =>
         r.status should equal (Status.Ok)
-        r.cookies should not be empty
+        r.headers.map(_.name.toString) should contain ("Authorization")
     }
   }
 
