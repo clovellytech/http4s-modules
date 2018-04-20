@@ -1,4 +1,4 @@
-package com.clovellytech.featurerequests.infrastructure.endpoint
+package com.clovellytech.auth.infrastructure.endpoint
 
 import cats.effect.IO
 import org.scalatest.FunSuite

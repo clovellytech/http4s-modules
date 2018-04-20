@@ -2,6 +2,7 @@ package com.clovellytech.featurerequests
 package infrastructure.endpoint
 
 
+import java.time.Instant
 import java.util.UUID
 
 import cats.effect.Effect
@@ -10,9 +11,8 @@ import com.clovellytech.featurerequests.db.domain.{Feature, FeatureId}
 import domain.requests.{FeatureRequest, RequestService}
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
-import org.joda.time.DateTime
 
-final case class VotedFeatures(featureId: FeatureId, feature: Feature, dateCreated: DateTime, upvotes: Long, downvotes: Long)
+final case class VotedFeatures(featureId: FeatureId, feature: Feature, dateCreated: Instant, upvotes: Long, downvotes: Long)
 
 class RequestEndpoints[F[_]: Effect] extends Http4sDsl[F] {
 

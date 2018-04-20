@@ -1,4 +1,4 @@
-package com.clovellytech.featurerequests.db
+package com.clovellytech.db
 
 import cats.effect.Effect
 import cats.syntax.flatMap._

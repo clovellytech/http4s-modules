@@ -27,7 +27,7 @@ class TestRequests[F[_]: Effect : Async](xa: Transactor[F]) extends Http4sDsl[F]
   }
 
   def addRequest(req: FeatureRequest) : F[OptionT[F, Response[F]]] =
-    POST(uri("/request"), req).map(requestEndpoints.run(_))
+    POST(uri("/request"), req).map(requestEndpoints run _)
 
-  def getRequests: F[OptionT[F, Response[F]]] = GET(uri("/request")).map(requestEndpoints.run(_))
+  def getRequests: F[OptionT[F, Response[F]]] = GET(uri("/request")).map(requestEndpoints run _)
 }
