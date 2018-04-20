@@ -1,20 +1,20 @@
 package com.clovellytech.featurerequests.infrastructure
 
+import java.time.Instant
+
 import cats.effect.Sync
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe._
-import org.joda.time.DateTime
-
 import com.clovellytech.featurerequests.db.domain.Feature
 import com.clovellytech.featurerequests.domain.requests.FeatureRequest
 import com.clovellytech.featurerequests.domain.votes.VoteRequest
 
 package object endpoint {
-  implicit val dateTimeEncoder: Encoder[DateTime] = Encoder.instance(a => a.getMillis.asJson)
-  implicit val dateTimeDecoder: Decoder[DateTime] = Decoder.instance(a => a.as[Long].map(new DateTime(_)))
+  implicit val dateTimeEncoder: Encoder[Instant] = Encoder.instance(a => a.toEpochMilli.asJson)
+  implicit val dateTimeDecoder: Decoder[Instant] = Decoder.instance(a => a.as[Long].map(Instant.ofEpochMilli(_)))
 
   implicit val voteReqDec : Decoder[VoteRequest] = deriveDecoder[VoteRequest]
 

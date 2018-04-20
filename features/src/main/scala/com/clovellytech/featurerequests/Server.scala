@@ -4,8 +4,6 @@ import cats.effect._
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import org.http4s.server.blaze.BlazeBuilder
-import db.config._
-import config._
 import domain.votes.VoteService
 import domain.requests.RequestService
 import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
@@ -24,9 +22,7 @@ object Server extends StreamApp[IO] {
   def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit])(
     implicit ec : ExecutionContext
   ): Stream[F, ExitCode] = for {
-    conf             <- Stream.eval(loadConfig[F, FeatureRequestConfig]("featurerequests"))
-    xa               <- Stream.eval(conf.db.dbTransactor[F])
-    _                <- Stream.eval(DatabaseConfig.initializeDb[F](xa))
+    xa               <- Stream.eval(db.getTransactor[F])
     voteRepo         =  new VoteRepositoryInterpreter[F](xa)
     requestRepo      =  new RequestRepositoryInterpreter[F](xa)
     voteService      =  new VoteService[F](voteRepo)
