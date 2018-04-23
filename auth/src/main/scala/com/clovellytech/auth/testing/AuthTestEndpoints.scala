@@ -1,6 +1,7 @@
 package com.clovellytech.auth
 package testing
 
+import cats.data.OptionT
 import cats.implicits._
 import cats.effect.Sync
 import com.clovellytech.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
@@ -15,13 +16,15 @@ import infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRep
 
 
 class AuthTestEndpoints[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
-  val authEndpoints: AuthEndpoints[F, BCrypt] = {
-    val uinterp = new UserRepositoryInterpreter[F](xa)
-    val uservice = new UserService[F](uinterp)
-    val tinterp = new TokenRepositoryInterpreter[F](xa)
-    val tservice = new TokenService[F](tinterp)
-    new AuthEndpoints[F, BCrypt](uservice, tservice, BCrypt)
-  }
+  val uinterp = new UserRepositoryInterpreter[F](xa)
+  val uservice = new UserService[F](uinterp)
+  val tinterp = new TokenRepositoryInterpreter[F](xa)
+  val tservice = new TokenService[F](tinterp)
+
+  val authEndpoints: AuthEndpoints[F, BCrypt] = new AuthEndpoints[F, BCrypt](uservice, tservice, BCrypt)
+
+  def injectAuthHeader(from: Response[F])(to : Request[F]) : Request[F] =
+    to.withHeaders(from.headers.filter(_.name.toString == "Authorization"))
 
   def auth(req : F[Request[F]]) = req.flatMap(authEndpoints.endpoints.orNotFound run _)
 
@@ -29,6 +32,12 @@ class AuthTestEndpoints[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with
     val sessionReq = req.withHeaders(resp.headers.filter(_.name.toString.startsWith("Authorization")))
     authEndpoints.endpoints.orNotFound run sessionReq
   }
+
+  def deleteUser(username : String) : F[Unit] = (for {
+    u <- uservice.byUsername(username)
+    (_, uid, _) = u
+    _ <- OptionT.liftF(uservice.delete(uid))
+  } yield ()).getOrElse(())
 
   def postUser(userRequest: UserRequest): F[Response[F]] = auth(POST(uri("/user"), userRequest))
 
