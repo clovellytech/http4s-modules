@@ -13,12 +13,12 @@ object dependencies {
   )
 
   val compilerPlugins = Seq(
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
   )
 
   val bcrypt = "3.1"
   val cats = "1.1.0"
-  val catsEffect = "0.10"
+  val catsEffect = "0.10.1"
   val circe = "0.9.3"
   val cryptobits = "1.1"
   val doobie = "0.5.2"
@@ -28,7 +28,7 @@ object dependencies {
   val http4s = "0.18.9"
   val logback = "1.2.3"
   val pureConfig = "0.9.1"
-  val scalaCheck = "1.13.5"
+  val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
   val tsec = "0.0.1-M11"
   val typesafeConfig = "1.3.1"
