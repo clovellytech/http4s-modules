@@ -1,6 +1,7 @@
 package com.clovellytech.featurerequests
 
 import cats.effect._
+import cats.implicits._
 import com.clovellytech.auth.domain.tokens.TokenService
 import com.clovellytech.auth.domain.users.UserService
 import com.clovellytech.auth.infrastructure.endpoint.AuthEndpoints
@@ -40,11 +41,12 @@ object Server extends StreamApp[IO] {
       authEndpoints    =  new AuthEndpoints(userService, tokenService, BCrypt)
       authService      =  authEndpoints.Auth
       requestEndpoints =  new RequestEndpoints(requestService)
+      voteEndpoints    =  new VoteEndpoints(voteService)
       exitCode         <- BlazeBuilder[F]
                           .bindHttp(8080, "localhost")
                           .mountService(authEndpoints.endpoints, "/auth/")
-                          .mountService(requestEndpoints.endpoints, "/")
-                          .mountService(new VoteEndpoints(voteService).endpoints, "/")
+                          .mountService(requestEndpoints.unAuthEndpoints <+> authService.liftService(requestEndpoints.authEndpoints), "/")
+                          .mountService(authService.liftService(voteEndpoints.endpoints), "/")
                           .serve
     } yield exitCode
 }

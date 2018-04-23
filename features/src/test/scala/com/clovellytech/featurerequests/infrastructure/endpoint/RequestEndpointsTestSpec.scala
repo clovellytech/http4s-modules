@@ -2,22 +2,38 @@ package com.clovellytech.featurerequests
 package infrastructure
 package endpoint
 
-import cats.data.OptionT
 import org.scalatest._
 import cats.effect.IO
+import org.http4s._
+
+import com.clovellytech.auth.infrastructure.endpoint.UserRequest
 import domain.requests._
-import org.http4s.Response
 import db.sql.testTransactor.testTransactor
 
 class RequestEndpointsTestSpec extends FunSuite with IOTest with Matchers {
   val eps = new TestRequests[IO](testTransactor)
   import eps._
 
+  val user = UserRequest("zak", "password".getBytes)
+
+  val featureRequest = FeatureRequest("Hi", "My good idea")
+
   testIO("new request") {
-    val req: IO[OptionT[IO, Response[IO]]] = addRequest(FeatureRequest("hi", "do this"))
+    for {
+      register <- authTestEndpoints.postUser(user)
+      login <- authTestEndpoints.loginUser(user)
+      addReq <- addRequest(featureRequest)(login)
+    } yield {
+      addReq.status should equal (Status.Ok)
+    }
+  }
 
-    val test: IO[OptionT[IO, Assertion]] = req.map(_.map(_.status.code should equal (200)))
-
-    test.map(_.getOrElse(fail("Request failed")))
+  testIO("check requests") {
+    for {
+      r <- getRequests
+      all <- r.as[DefaultResult[List[VotedFeatures]]]
+    } yield {
+      all.result should not be empty
+    }
   }
 }
