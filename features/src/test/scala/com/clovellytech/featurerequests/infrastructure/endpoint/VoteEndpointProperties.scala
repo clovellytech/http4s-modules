@@ -9,21 +9,21 @@ import com.clovellytech.auth.infrastructure.endpoint.UserRequest
 import db.sql.testTransactor.testTransactor
 import domain.requests._
 
-object RequestEndpointProperties extends Properties("RequestEndpoint") {
+
+class VoteEndpointProperties extends Properties("VoteEndpoint") {
   val eps = new TestRequests[IO](testTransactor)
   import eps._
   import authTestEndpoints._
 
-  property("request can be stored") = forAll { (feat: FeatureRequest, u: UserRequest) =>
+  property("vote can be submitted") = forAll { (feat : FeatureRequest, user : UserRequest) =>
     val test : IO[Boolean] = for {
-      register <- postUser(u)
-      login <- loginUser(u)
+      register <- postUser(user)
+      login <- loginUser(user)
       addRes <- addRequest(feat)(login)
-      all <- getRequests
-      res <- all.as[DefaultResult[List[VotedFeatures]]]
-      _ <- deleteUser(u.username)
+      featuresResp <- getRequests
+      allFeatures <- featuresResp.as[DefaultResult[List[VotedFeatures]]]
     } yield {
-      res.result.exists(_.feature.title == feat.title)
+      allFeatures.result.exists(_.feature.title == feat.title)
     }
 
     test.unsafeRunSync()
