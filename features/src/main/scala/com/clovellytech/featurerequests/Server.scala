@@ -2,16 +2,10 @@ package com.clovellytech.featurerequests
 
 import cats.effect._
 import cats.implicits._
-import com.clovellytech.auth.domain.tokens.TokenService
-import com.clovellytech.auth.domain.users.UserService
 import com.clovellytech.auth.infrastructure.endpoint.AuthEndpoints
-import com.clovellytech.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import org.http4s.server.blaze.BlazeBuilder
-import domain.votes.VoteService
-import domain.requests.RequestService
-import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
 import infrastructure.endpoint._
 import tsec.passwordhashers.jca.BCrypt
 
@@ -30,18 +24,10 @@ object Server extends StreamApp[IO] {
   ): Stream[F, ExitCode] =
     for {
       xa               <- Stream.eval(db.getTransactor[F])
-      voteRepo         =  new VoteRepositoryInterpreter(xa)
-      requestRepo      =  new RequestRepositoryInterpreter(xa)
-      userRepo         =  new UserRepositoryInterpreter(xa)
-      tokenRepo        =  new TokenRepositoryInterpreter(xa)
-      userService      =  new UserService(userRepo)
-      tokenService     =  new TokenService(tokenRepo)
-      voteService      =  new VoteService(voteRepo)
-      requestService   =  new RequestService(requestRepo)
-      authEndpoints    =  new AuthEndpoints(userService, tokenService, BCrypt)
+      authEndpoints    =  AuthEndpoints.persistingEndpoints(xa, BCrypt)
       authService      =  authEndpoints.Auth
-      requestEndpoints =  new RequestEndpoints(requestService)
-      voteEndpoints    =  new VoteEndpoints(voteService)
+      requestEndpoints =  RequestEndpoints.persistingEndpoints(xa)
+      voteEndpoints    =  VoteEndpoints.persistingEndpoints(xa)
       exitCode         <- BlazeBuilder[F]
                           .bindHttp(8080, "localhost")
                           .mountService(authEndpoints.endpoints, "/auth/")

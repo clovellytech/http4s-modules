@@ -16,7 +16,10 @@ import tsec.authentication._
 import db.domain.User
 import domain.users.UserService
 import domain.tokens.TokenService
+import doobie.util.transactor.Transactor
+
 import infrastructure.authentication.TransBackingStore._
+import infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 
 class AuthEndpoints[F[_]: Sync, A](
   userService : UserService[F],
@@ -75,4 +78,19 @@ extends Http4sDsl[F] {
   }
 
   def endpoints : HttpService[F] = unauthService <+> Auth.liftService(authService)
+}
+
+
+object AuthEndpoints {
+
+  def persistingEndpoints[F[_] : Sync, A](xa: Transactor[F], crypt: JCAPasswordPlatform[A])(
+    implicit P : PasswordHasher[F, A]
+  ) : AuthEndpoints[F, A] = {
+    val userRepo      =  new UserRepositoryInterpreter(xa)
+    val tokenRepo     =  new TokenRepositoryInterpreter(xa)
+    val userService   =  new UserService(userRepo)
+    val tokenService  =  new TokenService(tokenRepo)
+    val authEndpoints =  new AuthEndpoints(userService, tokenService, crypt)
+    authEndpoints
+  }
 }
