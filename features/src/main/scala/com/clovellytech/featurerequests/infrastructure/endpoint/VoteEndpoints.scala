@@ -5,11 +5,11 @@ package endpoint
 import cats.effect.Sync
 import cats.implicits._
 import org.http4s.dsl.Http4sDsl
-
 import com.clovellytech.auth.BearerAuthService
+import com.clovellytech.featurerequests.infrastructure.repository.persistent.VoteRepositoryInterpreter
 import db.domain.Vote
 import domain.votes.{VoteRequest, VoteService}
-
+import doobie.util.transactor.Transactor
 import tsec.authentication._
 
 class VoteEndpoints[F[_]: Sync](voteService: VoteService[F]) extends Http4sDsl[F] {
@@ -26,4 +26,12 @@ class VoteEndpoints[F[_]: Sync](voteService: VoteService[F]) extends Http4sDsl[F
   }
 
   def endpoints : BearerAuthService[F] = submitVote
+}
+
+object VoteEndpoints {
+  def persistingEndpoints[F[_]: Sync](xa: Transactor[F]) : VoteEndpoints[F] = {
+    val voteRepo =  new VoteRepositoryInterpreter(xa)
+    val voteService =  new VoteService(voteRepo)
+    new VoteEndpoints(voteService)
+  }
 }
