@@ -72,9 +72,9 @@ object dependencies {
   )
 
   val http4smodules = Seq(
-    "com.clovellytech" %% "db" % "0.0.2-SNAPSHOT",
-    "com.clovellytech" %% "auth" % "0.0.2-SNAPSHOT",
-    "com.clovellytech" %% "features" % "0.0.2-SNAPSHOT"
+    "com.clovellytech" %% "db" % "0.0.3-SNAPSHOT",
+    "com.clovellytech" %% "auth" % "0.0.3-SNAPSHOT",
+    "com.clovellytech" %% "features" % "0.0.3-SNAPSHOT"
   )
 }
 
