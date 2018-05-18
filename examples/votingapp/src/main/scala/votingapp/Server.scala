@@ -12,15 +12,12 @@ import tsec.passwordhashers.jca.BCrypt
 
 import scala.concurrent.ExecutionContext
 
-object Server extends StreamApp[IO] {
+class Server[F[_] : Effect] extends StreamApp[F] {
 
-  override def stream(args: List[String], shutdown: IO[Unit]): Stream[IO, ExitCode] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
+  override def stream(args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
+    createStream(args, shutdown)(ExecutionContext.global)
 
-    createStream[IO](args, shutdown)
-  }
-
-  def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit])(
+  def createStream(args: List[String], shutdown: F[Unit])(
     implicit ec : ExecutionContext
   ): Stream[F, ExitCode] = for {
       conf <- Stream.eval(loadConfig[F, DatabaseConfig]("db"))
@@ -37,5 +34,6 @@ object Server extends StreamApp[IO] {
         .mountService(authService.liftService(voteEndpoints.endpoints), "/vote")
         .serve
     } yield exitCode
-
 }
+
+object IOServer extends Server[IO]
