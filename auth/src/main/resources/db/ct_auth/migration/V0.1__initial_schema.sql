@@ -20,7 +20,7 @@ $$ language 'plpgsql';
 
 
 create schema if not exists ct_auth;
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema public;
 
 create table if not exists ct_auth.user(
 	user_id uuid primary key default gen_random_uuid(),
