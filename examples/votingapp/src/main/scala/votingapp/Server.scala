@@ -25,7 +25,7 @@ object Server extends StreamApp[IO] {
   ): Stream[F, ExitCode] = for {
       conf <- Stream.eval(loadConfig[F, DatabaseConfig]("db"))
       xa <- Stream.eval(conf.dbTransactor[F])
-      _ <- Stream.eval(com.clovellytech.featurerequests.db.initializeAll(xa))
+      _ <- Stream.eval(com.clovellytech.featurerequests.db.initializeAll(xa.kernel))
       authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
       authService =  authEndpoints.Auth
       requestEndpoints =  RequestEndpoints.persistingEndpoints(xa)

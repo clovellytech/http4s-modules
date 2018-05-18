@@ -1,22 +1,24 @@
 package com.clovellytech.featurerequests
 
-import cats.effect.{Effect, Sync}
+import cats.effect.{Async, Sync}
 import cats.implicits._
 import com.clovellytech.db.config.{DatabaseConfig, loadConfig}
-import com.clovellytech.featurerequests.config.FeatureRequestConfig
-import doobie.hikari.HikariTransactor
+import config.FeatureRequestConfig
 import doobie.util.transactor.Transactor
+import javax.sql.DataSource
+
+import scala.util.Try
 
 package object db {
-  def getTransactor[M[_]: Effect] : M[Transactor[M]] = for {
+  def getTransactor[M[_]: Async] : M[Transactor[M]] = for {
     cfg <- loadConfig[M, FeatureRequestConfig]("featurerequests")
     xa <- cfg.db.dbTransactor[M]
-    _ <- initializeAll[M](xa)
+    _ <- initializeAll[M](xa.kernel)
   } yield xa
 
-  def initializeDb[M[_] : Sync](xa: HikariTransactor[M]): M[Unit] =
-    DatabaseConfig.initializeDb(xa)("ct_feature_requests")
+  def initializeDb[M[_] : Sync](ds: DataSource): M[Try[Unit]] =
+    DatabaseConfig.initializeDb(ds)("ct_feature_requests")
 
-  def initializeAll[M[_]: Sync](xa: HikariTransactor[M]): M[Unit] =
-    com.clovellytech.auth.db.initializeDb[M](xa) *> initializeDb(xa)
+  def initializeAll[M[_]: Sync](ds: DataSource): M[Unit] =
+    (com.clovellytech.auth.db.initializeDb(ds) *> initializeDb(ds)).as(())
 }

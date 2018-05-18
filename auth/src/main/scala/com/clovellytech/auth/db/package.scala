@@ -1,11 +1,12 @@
 package com.clovellytech.auth
 
 import cats.effect.Sync
-import doobie.hikari.HikariTransactor
-
 import com.clovellytech.db.config.DatabaseConfig
+import javax.sql.DataSource
+
+import scala.util.Try
 
 package object db {
-  def initializeDb[M[_] : Sync](xa: HikariTransactor[M]): M[Unit] =
-    DatabaseConfig.initializeDb(xa)("ct_auth")
+  def initializeDb[M[_] : Sync](ds : DataSource): M[Try[Unit]] =
+    DatabaseConfig.initializeDb(ds)("ct_auth")
 }

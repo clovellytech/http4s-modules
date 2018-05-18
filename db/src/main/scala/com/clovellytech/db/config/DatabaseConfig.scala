@@ -1,10 +1,10 @@
 package com.clovellytech.db.config
 
 import scala.util.Try
-
-import cats.syntax.functor._
 import cats.effect.{Async, Sync}
 import doobie.hikari.HikariTransactor
+import doobie.util.transactor.Transactor
+import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
 
@@ -26,31 +26,34 @@ object DatabaseConfig {
   /**
     * Runs the flyway migrations against the target database
     */
-  def initializeDb[M[_] : Sync](xa: HikariTransactor[M])(schemaName: String): M[Unit] =
-    xa.configure { ds =>
-      Sync[M].delay {
-        val fw = new Flyway()
-        fw.setDataSource(ds)
-        fw.setSchemas(schemaName)
-        fw.setLocations(s"db/$schemaName/migration")
-        Try{
+  def initializeDb[M[_] : Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] = Sync[M].delay {
+    val fw = new Flyway()
+    fw.setDataSource(ds)
+    fw.setSchemas(schemaName)
+    fw.setLocations(s"db/$schemaName/migration")
+    Try{
+      fw.migrate()
+      ()
+    }.recoverWith{
+      case e : FlywayException =>
+        println("Got flyway exception")
+        println(e)
+        println("Attempting to recover.")
+        Try {
+          fw.repair()
           fw.migrate()
-        }.recoverWith{
+          ()
+        }.recover{
           case e : FlywayException =>
-            println("Got flyway exception")
+            println("Recovery failed")
             println(e)
-            println("Attempting to recover.")
-            Try {
-              fw.repair()
-              fw.migrate()
-            }.recover{
-              case e : FlywayException =>
-                println("Recovery failed")
-                println(e)
-                ()
-            }
+            ()
         }
-      }
-      .as(())
     }
+  }
+
+  def initializeFromTransactor[M[_] : Sync, A <: DataSource](xa: Transactor.Aux[M, A])(
+    schemaName: String
+  ): M[Try[Unit]] = initializeDb(xa.kernel)(schemaName)
+
 }
