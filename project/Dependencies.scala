@@ -50,7 +50,9 @@ object dependencies {
     "org.scalatest" %% "scalatest" % scalaTest,
     "org.tpolecat" %% "doobie-scalatest" % doobie,
     "org.scalacheck" %% "scalacheck" % scalaCheck
-  ).map(_ % "test")
+  )
+
+  val testDepsInTestOnly = testDeps.map(_ % "test")
 
   val dbDeps = Seq(
     "org.flywaydb" % "flyway-core" % flyway,

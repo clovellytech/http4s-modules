@@ -1,4 +1,5 @@
-package com.clovellytech.auth.db
+package com.clovellytech
+package auth.db
 package sql
 
 import java.util.UUID
@@ -11,6 +12,9 @@ import doobie.util.transactor.Transactor
 import domain._
 import com.clovellytech.auth.infrastructure.testTransactor
 
+import dbtesting.arbitraries._
+import arbitraries._
+
 class UserQueriesTestSpec extends FunSuite with IOChecker {
   val transactor: Transactor[IO] = testTransactor
 
@@ -19,9 +23,9 @@ class UserQueriesTestSpec extends FunSuite with IOChecker {
   val u = User("name", "hash".getBytes())
   val uuid = UUID.randomUUID()
 
-  test("insert should typecheck")(check(insert(u)))
+  test("insert should typecheck")(check(applyArb(insert _)))
   test("select should typecheck")(check(select))
-  test("select by id should typecheck")(check(selectById(uuid)))
-  test("update should typecheck")(check(update(uuid, u)))
-  test("delete should typecheck")(check(delete(uuid)))
+  test("select by id should typecheck")(check(applyArb(selectById _)))
+  test("update should typecheck")(check(applyArb((update _).tupled)))
+  test("delete should typecheck")(check(applyArb(delete _)))
 }

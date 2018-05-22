@@ -3,11 +3,11 @@ package infrastructure.endpoint
 
 import org.scalacheck.Properties
 import org.scalacheck.Prop.forAll
-import arbitraries._
 import cats.effect.IO
 import com.clovellytech.auth.infrastructure.endpoint.UserRequest
 import db.sql.testTransactor.testTransactor
 import domain.requests._
+import arbitraries._
 
 object RequestEndpointProperties extends Properties("RequestEndpoint") {
   val eps = new TestRequests[IO](testTransactor)

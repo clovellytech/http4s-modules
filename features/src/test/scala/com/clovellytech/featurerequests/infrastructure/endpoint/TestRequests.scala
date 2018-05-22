@@ -7,8 +7,8 @@ import com.clovellytech.auth.testing.AuthTestEndpoints
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
-import domain.requests.{FeatureRequest, RequestService}
-import domain.votes.{VoteRequest, VoteService}
+import domain.requests._
+import domain.votes._
 import doobie.util.transactor.Transactor
 import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
 

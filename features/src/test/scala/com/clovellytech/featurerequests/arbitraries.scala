@@ -1,12 +1,13 @@
-package com.clovellytech.featurerequests
+package com.clovellytech
+package featurerequests
 
 import com.clovellytech.auth.infrastructure.endpoint.UserRequest
 import com.clovellytech.featurerequests.domain.requests.FeatureRequest
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary
+import dbtesting.arbitraries._
+
 
 object arbitraries {
-  val nonEmptyString = Gen.nonEmptyListOf(Gen.alphaChar).map(_.mkString)
-
   implicit val featureRequest: Arbitrary[FeatureRequest] = Arbitrary {
     for {
       s <- nonEmptyString
