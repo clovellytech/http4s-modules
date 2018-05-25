@@ -16,8 +16,8 @@ class TokenQueriesTestSpec extends FunSuite with IOChecker {
 
   test("insert should typecheck")(check(applyArb(insert)))
   test("select should typecheck")(check(select))
-  test("select by id should typecheck")(check(applyArb(byId _)))
-  test("select by user id should typecheck")(check(applyArb(byUserId _)))
+  test("select by id should typecheck")(check(applyArb(byId)))
+  test("select by user id should typecheck")(check(applyArb(byUserId)))
   test("update should typecheck")(check(applyArb((update _).tupled)))
-  test("delete should typecheck")(check(applyArb(delete _)))
+  test("delete should typecheck")(check(applyArb(delete)))
 }
