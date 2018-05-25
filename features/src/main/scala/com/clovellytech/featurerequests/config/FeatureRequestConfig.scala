@@ -3,4 +3,4 @@ package config
 
 import com.clovellytech.db.config.DatabaseConfig
 
-final case class FeatureRequestConfig(db: DatabaseConfig)
+final case class FeatureRequestConfig(host : String, port : Int, db: DatabaseConfig)

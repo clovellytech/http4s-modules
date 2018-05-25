@@ -1,8 +1,7 @@
 package com.clovellytech.db.config
 
 import scala.util.Try
-import cats.effect.{Async, Sync}
-import doobie.hikari.HikariTransactor
+import cats.effect.Sync
 import doobie.util.transactor.Transactor
 import javax.sql.DataSource
 import org.flywaydb.core.Flyway
@@ -17,9 +16,6 @@ final case class DatabaseConfig(
 ){
   def driver: String = "org.postgresql.Driver"
   def url : String = s"jdbc:postgresql://$host:$port/$databaseName"
-
-  def dbTransactor[M[_]: Async]: M[HikariTransactor[M]] =
-    HikariTransactor.newHikariTransactor[M](driver, url, user, password)
 }
 
 object DatabaseConfig {

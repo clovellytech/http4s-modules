@@ -2,8 +2,8 @@ package com.clovellytech.featurerequests
 
 import cats.effect.{Async, Sync}
 import cats.implicits._
-import com.clovellytech.db.config.{DatabaseConfig, loadConfig}
-import config.FeatureRequestConfig
+import com.clovellytech.db.config.DatabaseConfig
+import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
 import javax.sql.DataSource
 
@@ -11,8 +11,8 @@ import scala.util.Try
 
 package object db {
   def getTransactor[M[_]: Async] : M[Transactor[M]] = for {
-    cfg <- loadConfig[M, FeatureRequestConfig]("featurerequests")
-    xa <- cfg.db.dbTransactor[M]
+    cfg <- pureconfig.loadConfigOrThrow[DatabaseConfig]("db").pure[M]
+    xa <- HikariTransactor.newHikariTransactor[M](cfg.driver, cfg.url, cfg.user, cfg.password)
     _ <- initializeAll[M](xa.kernel)
   } yield xa
 
