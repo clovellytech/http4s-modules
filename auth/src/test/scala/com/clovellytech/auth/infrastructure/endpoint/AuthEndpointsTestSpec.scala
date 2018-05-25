@@ -7,10 +7,10 @@ import cats.effect.IO
 import cats.implicits._
 import org.http4s.Status
 
-import com.clovellytech.auth.testing.AuthTestEndpoints
+import com.clovellytech.auth.client.AuthClient
 
 class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
-  val endpoints = new AuthTestEndpoints(testTransactor)
+  val endpoints = AuthClient.fromTransactor(testTransactor)
   import endpoints._
 
   val user = UserRequest("zak", "password".getBytes)

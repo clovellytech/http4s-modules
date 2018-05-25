@@ -3,7 +3,7 @@ package infrastructure.endpoint
 
 import cats.effect.Sync
 import cats.implicits._
-import com.clovellytech.auth.testing.AuthTestEndpoints
+import com.clovellytech.auth.client.AuthClient
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
@@ -14,7 +14,7 @@ import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteR
 
 class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
 
-  val authTestEndpoints = new AuthTestEndpoints(xa)
+  val authTestEndpoints = AuthClient.fromTransactor(xa)
 
   val authEndpoints = authTestEndpoints.authEndpoints
   val Auth = authEndpoints.Auth

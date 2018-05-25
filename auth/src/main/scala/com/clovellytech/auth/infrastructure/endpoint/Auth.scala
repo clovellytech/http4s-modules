@@ -52,7 +52,7 @@ extends Http4sDsl[F] {
     } yield result
 
     case req @ POST -> Root / "login" => {
-      val r = for {
+      val r: OptionT[F, Response[F]] = for {
         userRequest <- OptionT.liftF(req.as[UserRequest])
         u <- userService.byUsername(userRequest.username)
         (user, uuid, joinTime) = u
