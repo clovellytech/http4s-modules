@@ -2,7 +2,7 @@ package com.clovellytech.auth
 package infrastructure.endpoint
 
 import scala.concurrent.duration._
-import cats.data.OptionT
+import cats.data.{EitherT, OptionT}
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.syntax._
@@ -14,10 +14,10 @@ import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 import tsec.passwordhashers.jca.JCAPasswordPlatform
 import tsec.authentication._
 import db.domain.User
+import domain.Error
 import domain.users.UserService
 import domain.tokens.TokenService
 import doobie.util.transactor.Transactor
-
 import infrastructure.authentication.TransBackingStore._
 import infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 
@@ -44,12 +44,17 @@ extends Http4sDsl[F] {
 
 
   val unauthService : HttpService[F] = HttpService {
-    case req @ POST -> Root / "user" => for {
-      userRequest <- req.as[UserRequest]
-      hash <- hasher.hashpw[F](userRequest.password)
-      _ <- userService.insert(User(userRequest.username, hash.getBytes))
-      result <- Ok()
-    } yield result
+    case req @ POST -> Root / "user" => {
+      val job: EitherT[F, Error, Response[F]] = for {
+        userRequest <- EitherT.liftF(req.as[UserRequest])
+        user <- EitherT.fromOptionF(userService.byUsername(userRequest.username).value, ()).as(Error.Duplicate()).swap
+        hash <- EitherT.liftF(hasher.hashpw[F](userRequest.password))
+        _ <- EitherT.liftF(userService.insert(User(userRequest.username, hash.getBytes)))
+        result <- EitherT.liftF(Ok())
+      } yield result
+
+      job.getOrElseF(BadRequest())
+    }
 
     case req @ POST -> Root / "login" => {
       val r: OptionT[F, Response[F]] = for {

@@ -27,6 +27,20 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with PropertyChecks
     }
   }
 
+  "A duplicate registration" should "fail" in {
+    forAll { u: UserRequest =>
+      val test : IO[Assertion] = for {
+        _ <- authClient.postUser(u)
+        post <- authClient.postUser(u)
+        _ <- authClient.deleteUser(u.username)
+      } yield {
+        post.status should equal(Status.BadRequest)
+      }
+
+      test.unsafeRunSync()
+    }
+  }
+
   "A login" should "create usable session" in {
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
