@@ -11,6 +11,8 @@ import tsec.common.SecureRandomId
 
 object arbitraries {
 
+  implicit val userIdArb : Arbitrary[UserId] = Arbitrary(Gen.uuid)
+
   implicit val secureRandomIdArb : Arbitrary[SecureRandomId] = Arbitrary {
     Gen.posNum[Int].map(num => SecureRandomId(num.toString))
   }
