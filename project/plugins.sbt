@@ -1,5 +1,3 @@
-addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC8")
-
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.0")
 
 addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.6.0")
