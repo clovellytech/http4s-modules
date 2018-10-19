@@ -1,4 +1,5 @@
 import sbt._
+import sbt.librarymanagement.DependencyBuilders
 
 object dependencies {
   val addResolvers = Seq(
@@ -18,6 +19,7 @@ object dependencies {
 
   val bcrypt = "3.1"
   val cats = "1.1.0"
+  val catsMtl = "0.4.0"
   val catsEffect = "0.10.1"
   val circe = "0.9.3"
   val cryptobits = "1.1"
@@ -33,18 +35,20 @@ object dependencies {
   val tsec = "0.0.1-M11"
   val typesafeConfig = "1.3.1"
 
+  def orgVer(org : String, ver : String)(deps : String*) : Seq[ModuleID] = deps.map(org %% _ % ver)
+  def org(org : String)(as : (String, String)*) : Seq[ModuleID] = as.map{ case (p, v) => org %% p % v }
 
-  val httpDeps = Seq(
-    "org.http4s" %% "http4s-blaze-server",
-    "org.http4s" %% "http4s-blaze-client",
-    "org.http4s" %% "http4s-circe",
-    "org.http4s" %% "http4s-dsl"
-  ).map(_ % dependencies.http4s) ++ Seq(
-    "io.circe" %% "circe-core",
-    "io.circe" %% "circe-generic",
-    "io.circe" %% "circe-parser",
-    "io.circe" %% "circe-java8"
-  ).map(_ % dependencies.circe)
+  val httpDeps = orgVer("org.http4s", dependencies.http4s)(
+    "http4s-blaze-server",
+    "http4s-blaze-client",
+    "http4s-circe",
+    "http4s-dsl"
+  ) ++ orgVer("io.circe", dependencies.circe)(
+    "circe-core",
+    "circe-generic",
+    "circe-parser",
+    "circe-java8"
+  )
 
   val testDeps = Seq(
     "org.scalatest" %% "scalatest" % scalaTest,
@@ -57,35 +61,38 @@ object dependencies {
   val dbDeps = Seq(
     "org.flywaydb" % "flyway-core" % flyway,
     "org.postgresql" % "postgresql" % "42.2.2"
-  ) ++ Seq(
-    "org.tpolecat" %% "doobie-core",
-    "org.tpolecat" %% "doobie-postgres",
-    "org.tpolecat" %% "doobie-hikari"
-  ).map(_ % doobie)
-
-  val commonDeps = Seq(
-    "com.github.pureconfig" %% "pureconfig" % pureConfig,
-    "ch.qos.logback" %  "logback-classic" % logback,
-    "org.typelevel" %% "cats-core" % cats,
-    "org.typelevel" %% "cats-effect" % catsEffect,
-    "co.fs2" %% "fs2-core" % fs2,
-    "co.fs2" %% "fs2-cats" % fs2cats,
-    "co.fs2" %% "fs2-io" % fs2
+  ) ++ orgVer("org.tpolecat", doobie)(
+    "doobie-core",
+    "doobie-postgres",
+    "doobie-hikari"
   )
 
-  val authDeps = Seq(
-    "io.github.jmcardon" %% "tsec-common" % tsec,
-    "io.github.jmcardon" %% "tsec-password" % tsec,
-    "io.github.jmcardon" %% "tsec-cipher-jca" % tsec,
-    "io.github.jmcardon" %% "tsec-cipher-bouncy" % tsec,
-    "io.github.jmcardon" %% "tsec-mac" % tsec,
-    "io.github.jmcardon" %% "tsec-signatures" % tsec,
-    "io.github.jmcardon" %% "tsec-hash-jca" % tsec,
-    "io.github.jmcardon" %% "tsec-hash-bouncy" % tsec,
-    "io.github.jmcardon" %% "tsec-libsodium" % tsec,
-    "io.github.jmcardon" %% "tsec-jwt-mac" % tsec,
-    "io.github.jmcardon" %% "tsec-jwt-sig" % tsec,
-    "io.github.jmcardon" %% "tsec-http4s" % tsec
+  val commonDeps = org("org.typelevel")(
+    "cats-core" -> cats,
+    "cats-effect" -> catsEffect,
+    "cats-mtl-core" -> catsMtl
+  ) ++ Seq(
+    "com.github.pureconfig" %% "pureconfig" % pureConfig,
+    "ch.qos.logback" %  "logback-classic" % logback
+  ) ++ org("co.fs2")(
+    "fs2-core" -> fs2,
+    "fs2-cats" -> fs2cats,
+    "fs2-io" -> fs2
+  )
+
+  val authDeps = orgVer("io.github.jmcardon", tsec)(
+    "tsec-common",
+    "tsec-password",
+    "tsec-cipher-jca",
+    "tsec-cipher-bouncy",
+    "tsec-mac",
+    "tsec-signatures",
+    "tsec-hash-jca",
+    "tsec-hash-bouncy",
+    "tsec-libsodium",
+    "tsec-jwt-mac",
+    "tsec-jwt-sig",
+    "tsec-http4s"
   )
 }
 
