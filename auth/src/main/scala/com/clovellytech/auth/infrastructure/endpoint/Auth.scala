@@ -1,6 +1,8 @@
 package com.clovellytech.auth
 package infrastructure.endpoint
 
+import java.util.UUID
+
 import scala.concurrent.duration._
 import cats.data.{EitherT, OptionT}
 import cats.effect.Sync
@@ -73,13 +75,18 @@ extends Http4sDsl[F] {
   }
 
 
-  val authService: BearerAuthService[F] = BearerAuthService {
-    case GET -> Root / "user" / name asAuthed _ =>
-      (for {
-        u <- userService.byUsername(name)
-        (user, _, joinTime) = u
-        resp <- OptionT.liftF(Ok(UserDetail(user.username, joinTime).asJson))
-      } yield resp).getOrElseF(BadRequest())
+  val authService: BearerAuthService[F] = {
+    def respUser(ou : OptionT[F, (User, UUID, Instant)]) : F[Response[F]] = (for {
+      u <- ou
+      (user, _, joinTime) = u
+      resp <- OptionT.liftF(Ok(UserDetail(user.username, joinTime).asJson))
+    } yield resp).getOrElseF(BadRequest())
+
+    BearerAuthService {
+      case req@GET -> Root / "user" asAuthed _ => respUser(userService.byId(req.authenticator.identity))
+
+      case GET -> Root / "user" / name asAuthed _ => respUser(userService.byUsername(name))
+    }
   }
 
   def endpoints : HttpService[F] = unauthService <+> Auth.liftService(authService)
