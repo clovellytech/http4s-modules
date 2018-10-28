@@ -4,7 +4,7 @@ package client
 import cats.data.OptionT
 import cats.implicits._
 import cats.effect.Sync
-import com.clovellytech.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
+import com.clovellytech.auth.infrastructure.endpoint.{AuthEndpoints, UserDetail, UserRequest}
 import com.clovellytech.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import org.http4s._
 import org.http4s.dsl._
@@ -14,18 +14,21 @@ import domain.tokens.TokenService
 import domain.users.UserService
 import doobie.util.transactor.Transactor
 
-
 class AuthClient[F[_]: Sync](userService: UserService[F], tokenService: TokenService[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
   val authEndpoints: AuthEndpoints[F, BCrypt] = new AuthEndpoints[F, BCrypt](userService, tokenService, BCrypt)
+  val auth = authEndpoints.endpoints.orNotFound
+
+  def getAuthHeaders(from: Response[F]) : Headers =
+    from.headers.filter(_.name.toString == "Authorization")
 
   def injectAuthHeader(from: Response[F])(to: Request[F]): Request[F] =
-    to.withHeaders(from.headers.filter(_.name.toString == "Authorization"))
+    to.withHeaders(getAuthHeaders(from))
 
   def lookupOrThrow(req: F[Request[F]]): F[Response[F]] = req.flatMap(authEndpoints.endpoints.orNotFound run _)
 
   def threadResponse(resp: Response[F])(req: Request[F]): F[Response[F]] = {
     val sessionReq = req.withHeaders(resp.headers.filter(_.name.toString.startsWith("Authorization")))
-    authEndpoints.endpoints.orNotFound run sessionReq
+    auth.run(sessionReq)
   }
 
   def deleteUser(username: String): F[Unit] = (for {
@@ -38,13 +41,23 @@ class AuthClient[F[_]: Sync](userService: UserService[F], tokenService: TokenSer
 
   def loginUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(uri("/login"), userRequest))
 
-
   // For the client, simply thread the most recent response back into any request that needs
   // authorization. There should probably be a better way to do this, maybe state monad or something.
   def getUser(userName: String, continue: Response[F]): Either[ParseFailure, F[Response[F]]] =
     Uri.fromString(s"/user/$userName").map(uri => GET(uri).flatMap(threadResponse(continue)(_)))
 
+  def getUser(headers : Headers) : F[UserDetail] = for {
+    req <- GET(uri("/user"))
+    res <- auth.run(req.withHeaders(headers))
+    userDetail <- res.as[UserDetail]
+  } yield userDetail
 
+  def withUser[A](u : UserRequest)(f : Headers => F[A]) : F[A] = for {
+    register <- postUser(u)
+    login <- loginUser(u)
+    result <- f(getAuthHeaders(login))
+    _ <- deleteUser(u.username)
+  } yield result
 }
 
 object AuthClient {
