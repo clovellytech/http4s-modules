@@ -14,28 +14,26 @@ object dependencies {
   )
 
   val compilerPlugins = Seq(
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-    addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17")
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
   )
 
   val bcrypt = "3.1"
-  val cats = "1.1.0"
+  val cats = "1.4.0"
   val catsMtl = "0.4.0"
   val catsEffect = "0.10.1"
   val circe = "0.9.3"
   val cryptobits = "1.1"
-  val doobie = "0.5.2"
+  val doobie = "0.5.3"
   val flyway = "5.0.7"
-  val fs2 = "0.10.3"
-  val fs2cats = "0.5.0"
-  val http4s = "0.18.9"
+  val fs2 = "0.10.6"
+  val http4s = "0.18.21"
   val logback = "1.2.3"
-  val pureConfig = "0.9.1"
+  val pureConfig = "0.9.2"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
-  val tsec = "0.0.1-M11"
-  val typesafeConfig = "1.3.1"
+  val simulacrum = "0.14.0"
+  val tsec = "0.0.1-RC1"
 
   def orgVer(org : String, ver : String)(deps : String*) : Seq[ModuleID] = deps.map(org %% _ % ver)
   def org(org : String)(as : (String, String)*) : Seq[ModuleID] = as.map{ case (p, v) => org %% p % v }
@@ -76,10 +74,9 @@ object dependencies {
   ) ++ Seq(
     "com.github.pureconfig" %% "pureconfig" % pureConfig,
     "ch.qos.logback" %  "logback-classic" % logback,
-    "com.github.mpilquist" %% "simulacrum" % "0.14.0"
+    "com.github.mpilquist" %% "simulacrum" % simulacrum
   ) ++ org("co.fs2")(
     "fs2-core" -> fs2,
-    "fs2-cats" -> fs2cats,
     "fs2-io" -> fs2
   )
 
@@ -87,15 +84,11 @@ object dependencies {
     "tsec-common",
     "tsec-password",
     "tsec-cipher-jca",
-    "tsec-cipher-bouncy",
     "tsec-mac",
     "tsec-signatures",
     "tsec-hash-jca",
-    "tsec-hash-bouncy",
-    "tsec-libsodium",
     "tsec-jwt-mac",
     "tsec-jwt-sig",
     "tsec-http4s"
   )
 }
-
