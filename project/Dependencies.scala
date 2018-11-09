@@ -14,7 +14,9 @@ object dependencies {
   )
 
   val compilerPlugins = Seq(
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17")
   )
 
   val bcrypt = "3.1"
@@ -73,7 +75,8 @@ object dependencies {
     "cats-mtl-core" -> catsMtl
   ) ++ Seq(
     "com.github.pureconfig" %% "pureconfig" % pureConfig,
-    "ch.qos.logback" %  "logback-classic" % logback
+    "ch.qos.logback" %  "logback-classic" % logback,
+    "com.github.mpilquist" %% "simulacrum" % "0.14.0"
   ) ++ org("co.fs2")(
     "fs2-core" -> fs2,
     "fs2-cats" -> fs2cats,

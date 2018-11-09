@@ -13,5 +13,4 @@ package object infrastructure {
     xa <- HikariTransactor.newHikariTransactor[IO](cfg.driver, cfg.url, cfg.user, cfg.password)
     _ <- DatabaseConfig.initializeFromTransactor(xa)("ct_auth")
   } yield xa).unsafeRunSync()
-
 }

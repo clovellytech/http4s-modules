@@ -15,9 +15,9 @@ import tsec.passwordhashers.jca.BCrypt
 
 class Server[F[_] : Effect] extends StreamApp[F] {
   override def stream(args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
-    createStream(args, shutdown)(ExecutionContext.Implicits.global)
+    createStream(shutdown)(ExecutionContext.Implicits.global)
 
-  def createStream(args: List[String], shutdown: F[Unit])(implicit ec : ExecutionContext): Stream[F, ExitCode] = {
+  def createStream(shutdown: F[Unit])(implicit ec : ExecutionContext): Stream[F, ExitCode] = {
     val FeatureRequestConfig(host, port, db) = pureconfig.loadConfigOrThrow[FeatureRequestConfig]
     for {
       xa <- Stream.eval(HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password))
@@ -32,6 +32,7 @@ class Server[F[_] : Effect] extends StreamApp[F] {
         .mountService(requestEndpoints.unAuthEndpoints <+> authService.liftService(requestEndpoints.authEndpoints), "/")
         .mountService(authService.liftService(voteEndpoints.endpoints), "/")
         .serve
+      _ <- Stream.eval(shutdown)
     } yield exitCode
   }
 }

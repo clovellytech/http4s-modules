@@ -19,7 +19,7 @@ class AuthClient[F[_]: Sync](userService: UserService[F], tokenService: TokenSer
   val auth = authEndpoints.endpoints.orNotFound
 
   def getAuthHeaders(from: Response[F]) : Headers =
-    from.headers.filter(_.name.toString == "Authorization")
+    from.headers.filter(_.name.toString startsWith "Authorization")
 
   def injectAuthHeader(from: Response[F])(to: Request[F]): Request[F] =
     to.withHeaders(getAuthHeaders(from))

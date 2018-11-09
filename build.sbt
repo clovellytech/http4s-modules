@@ -10,6 +10,8 @@ val commonSettings = Seq(
   scalacOptions in (Compile, console) ~= (_.filterNot(options.badScalacConsoleFlags.contains(_)))
 ) ++ compilerPlugins
 
+val withTests : String = "compile->compile;test->test"
+val testOnly : String = "test->test"
 
 lazy val db = (project in file("./db"))
   .settings(commonSettings)
@@ -35,6 +37,14 @@ lazy val auth = (project in file("./auth"))
   .dependsOn(db)
   .dependsOn(dbtesting % "test->test")
 
+lazy val files = (project in file("./files"))
+  .settings(commonSettings)
+  .settings(
+    name := "files",
+    libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
+  )
+  .dependsOn(db % withTests, auth % withTests, dbtesting % withTests)
+
 lazy val features = (project in file("./features"))
   .settings(commonSettings)
   .settings(
@@ -42,8 +52,7 @@ lazy val features = (project in file("./features"))
     mainClass in reStart := Some("com.clovellytech.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth, db)
-  .dependsOn(dbtesting % "test->test")
+  .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
 lazy val docs = (project in file("./docs"))
   .settings(name := "features-docs")
@@ -58,6 +67,6 @@ lazy val docs = (project in file("./docs"))
 lazy val featureRequests = (project in file("."))
   .settings(name := "feature-requests")
   .settings(commonSettings)
-  .dependsOn(auth, db, features)
+  .dependsOn(auth, db, files, features)
   .dependsOn(dbtesting % "test->test")
-  .aggregate(auth, db, features, dbtesting)
+  .aggregate(auth, db, files, features, dbtesting)
