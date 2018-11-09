@@ -16,14 +16,14 @@ val testOnly : String = "test->test"
 lazy val db = (project in file("./db"))
   .settings(commonSettings)
   .settings(
-    name := "db",
+    name := "h4sm-db",
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDepsInTestOnly
   )
 
 lazy val dbtesting = (project in file("./dbtesting"))
   .settings(commonSettings)
   .settings(
-    name := "dbtesting",
+    name := "h4sm-dbtesting",
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDeps
   )
   .dependsOn(db)
@@ -31,7 +31,7 @@ lazy val dbtesting = (project in file("./dbtesting"))
 lazy val auth = (project in file("./auth"))
   .settings(commonSettings)
   .settings(
-    name := "auth",
+    name := "h4sm-auth",
     libraryDependencies ++= commonDeps ++ authDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(db)
@@ -40,7 +40,7 @@ lazy val auth = (project in file("./auth"))
 lazy val files = (project in file("./files"))
   .settings(commonSettings)
   .settings(
-    name := "files",
+    name := "h4sm-files",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(db % withTests, auth % withTests, dbtesting % withTests)
@@ -48,25 +48,26 @@ lazy val files = (project in file("./files"))
 lazy val features = (project in file("./features"))
   .settings(commonSettings)
   .settings(
-    name := "features",
-    mainClass in reStart := Some("com.clovellytech.featurerequests.Server"),
+    name := "h4sm-features",
+    mainClass in reStart := Some("h4sm.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
 lazy val docs = (project in file("./docs"))
-  .settings(name := "features-docs")
+  .settings(name := "h4sm-docs")
   .enablePlugins(TutPlugin)
   .settings(commonSettings)
   .settings(
     name := "docs"
   )
-  .dependsOn(auth, db, features)
+  .dependsOn(auth, db, features, files)
   .dependsOn(dbtesting % "test->test")
 
-lazy val featureRequests = (project in file("."))
-  .settings(name := "feature-requests")
+lazy val h4sm = (project in file("."))
+  .settings(name := "h4sm")
   .settings(commonSettings)
+  .settings(skip in publish := true)
   .dependsOn(auth, db, files, features)
   .dependsOn(dbtesting % "test->test")
   .aggregate(auth, db, files, features, dbtesting)

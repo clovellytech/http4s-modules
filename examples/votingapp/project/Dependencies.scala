@@ -17,22 +17,22 @@ object dependencies {
   )
 
   val bcrypt = "3.1"
-  val cats = "1.1.0"
-  val catsEffect = "0.10"
+  val cats = "1.4.0"
+  val catsMtl = "0.4.0"
+  val catsEffect = "0.10.1"
   val circe = "0.9.3"
   val cryptobits = "1.1"
-  val doobie = "0.5.2"
+  val doobie = "0.5.3"
   val flyway = "5.0.7"
-  val fs2 = "0.10.3"
-  val fs2cats = "0.5.0"
-  val http4s = "0.18.9"
+  val h4sm = "0.0.7"
+  val fs2 = "0.10.6"
+  val http4s = "0.18.21"
   val logback = "1.2.3"
-  val pureConfig = "0.9.1"
-  val scalaCheck = "1.13.5"
+  val pureConfig = "0.9.2"
+  val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
-  val tsec = "0.0.1-M11"
-  val typesafeConfig = "1.3.1"
-
+  val simulacrum = "0.14.0"
+  val tsec = "0.0.1-RC1"
 
   val httpDeps = Seq(
     "org.http4s" %% "http4s-blaze-server",
@@ -67,14 +67,12 @@ object dependencies {
     "org.typelevel" %% "cats-core" % cats,
     "org.typelevel" %% "cats-effect" % catsEffect,
     "co.fs2" %% "fs2-core" % fs2,
-    "co.fs2" %% "fs2-cats" % fs2cats,
-    "co.fs2" %% "fs2-io" % fs2
   )
 
-  val http4smodules = Seq(
-    "com.clovellytech" %% "db" % "0.0.4-SNAPSHOT",
-    "com.clovellytech" %% "auth" % "0.0.4-SNAPSHOT",
-    "com.clovellytech" %% "features" % "0.0.4-SNAPSHOT"
-  )
+  val h4smodules = Seq(
+    "h4sm-db",
+    "h4sm-auth",
+    "h4sm-features"
+  ).map("com.clovellytech" %% _ % h4sm)
 }
 

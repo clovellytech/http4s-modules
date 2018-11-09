@@ -9,7 +9,7 @@ Let's create a server that allows users to log in and submit feature requests fo
 import cats._
 import cats.implicits._
 import cats.effect.IO
-import com.clovellytech._
+import h4sm._
 import doobie.hikari.HikariTransactor
 import db.config.DatabaseConfig
 ```
@@ -19,7 +19,7 @@ Initializing Databases
 
 Database schemas come pre-packaged with each module. Here we will import the needed modules and initialize all our namespaces on the fly. We'll import the auth module for user accounts and authentication, and the features module for our features request service.
 
-The below will initialize our database schema and create a transactor that we can use for the rest of this documentation. A proper main function that would launch a server is provided as an example in `com.clovellytech.featurerequests.Server`
+The below will initialize our database schema and create a transactor that we can use for the rest of this documentation. A proper main function that would launch a server is provided as an example in `h4sm.featurerequests.Server`
 
 ```tut
 val db = pureconfig.loadConfigOrThrow[DatabaseConfig]("db")

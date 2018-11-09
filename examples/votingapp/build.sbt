@@ -14,6 +14,6 @@ scalacOptions ++= options.scalac
 
 scalacOptions in (Compile, console) ~= (_.filterNot(options.badScalacConsoleFlags.contains(_)))
 
-libraryDependencies ++= commonDeps ++ http4smodules ++ dbDeps ++ httpDeps ++ testDeps
+libraryDependencies ++= commonDeps ++ h4smodules ++ dbDeps ++ httpDeps ++ testDeps
 
 mainClass in reStart := Some("votingapp.IOServer")

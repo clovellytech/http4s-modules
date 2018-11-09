@@ -1,8 +1,0 @@
-package com.clovellytech.auth
-package db.domain
-
-
-final case class User(
-  username: String,
-  hash: Array[Byte]
-)
