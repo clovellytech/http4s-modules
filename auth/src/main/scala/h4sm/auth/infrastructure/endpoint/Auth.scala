@@ -17,8 +17,8 @@ import tsec.passwordhashers.jca.{BCrypt, JCAPasswordPlatform}
 import tsec.authentication._
 import db.domain.User
 import domain.Error
-import domain.users.UserService
-import domain.tokens.TokenService
+import domain.users.UserRepositoryAlgebra
+import domain.tokens.TokenRepositoryAlgebra
 import doobie.util.transactor.Transactor
 import infrastructure.authentication.TransBackingStore._
 import infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
@@ -28,28 +28,22 @@ object AuthEndpoints {
   def persistingEndpoints[F[_] : Sync, A](xa: Transactor[F], crypt: JCAPasswordPlatform[A] = BCrypt)(
     implicit P : PasswordHasher[F, A]
   ) : AuthEndpoints[F, A] = {
-    val userRepo      =  new UserRepositoryInterpreter(xa)
-    val tokenRepo     =  new TokenRepositoryInterpreter(xa)
-    val userService   =  new UserService(userRepo)
-    val tokenService  =  new TokenService(tokenRepo)
-    val authEndpoints =  new AuthEndpoints(userService, tokenService, crypt)
+    implicit val userService = new UserRepositoryInterpreter(xa)
+    implicit val tokenService = new TokenRepositoryInterpreter(xa)
+    val authEndpoints =  new AuthEndpoints(crypt)
     authEndpoints
   }
 }
 
-class AuthEndpoints[F[_], A](
-  userService : UserService[F],
-  tokenService : TokenService[F],
-  hasher : JCAPasswordPlatform[A]
-)(implicit
-  P : PasswordHasher[F, A],
-  F : Sync[F]
-)
+class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra, A : PasswordHasher[F, ?]](hasher : JCAPasswordPlatform[A])
 extends Http4sDsl[F] {
+  val userService = implicitly[UserRepositoryAlgebra[F]]
+  val tokenService = implicitly[TokenRepositoryAlgebra[F]]
+  val F = implicitly[Sync[F]]
 
   val bearerTokenAuth = BearerTokenAuthenticator(
-    tokenTrans(tokenService.algebra),
-    userTrans(userService.algebra),
+    tokenTrans(tokenService),
+    userTrans(userService),
     TSecTokenSettings(
       expiryDuration = 10.minutes,
       maxIdle = None

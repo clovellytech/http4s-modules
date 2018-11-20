@@ -24,7 +24,7 @@ object dependencies {
   val cryptobits = "1.1"
   val doobie = "0.5.3"
   val flyway = "5.0.7"
-  val h4sm = "0.0.7"
+  val h4sm = "0.0.8"
   val fs2 = "0.10.6"
   val http4s = "0.18.21"
   val logback = "1.2.3"

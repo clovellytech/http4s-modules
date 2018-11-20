@@ -10,12 +10,16 @@ import org.http4s._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 import tsec.passwordhashers.jca.BCrypt
-import domain.tokens.TokenService
-import domain.users.UserService
+import domain.tokens.TokenRepositoryAlgebra
+import domain.users.UserRepositoryAlgebra
 import doobie.util.transactor.Transactor
 
-class AuthClient[F[_]: Sync](userService: UserService[F], tokenService: TokenService[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
-  val authEndpoints: AuthEndpoints[F, BCrypt] = new AuthEndpoints[F, BCrypt](userService, tokenService, BCrypt)
+class AuthClient[F[_]: Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra]
+extends Http4sDsl[F] with Http4sClientDsl[F] {
+  val userService = implicitly[UserRepositoryAlgebra[F]]
+  val tokenService = implicitly[TokenRepositoryAlgebra[F]]
+
+  val authEndpoints: AuthEndpoints[F, BCrypt] = new AuthEndpoints[F, BCrypt](BCrypt)
   val auth = authEndpoints.endpoints.orNotFound
 
   def getAuthHeaders(from: Response[F]) : Headers =
@@ -62,10 +66,8 @@ class AuthClient[F[_]: Sync](userService: UserService[F], tokenService: TokenSer
 
 object AuthClient {
   def fromTransactor[F[_] : Sync](xa : Transactor[F]) : AuthClient[F] = {
-    val userInterpreter = new UserRepositoryInterpreter[F](xa)
-    val userService = new UserService[F](userInterpreter)
-    val tokenInterpreter = new TokenRepositoryInterpreter[F](xa)
-    val tokenService = new TokenService[F](tokenInterpreter)
-    new AuthClient[F](userService, tokenService)
+    implicit val userService = new UserRepositoryInterpreter[F](xa)
+    implicit val tokenService = new TokenRepositoryInterpreter[F](xa)
+    new AuthClient[F]
   }
 }
