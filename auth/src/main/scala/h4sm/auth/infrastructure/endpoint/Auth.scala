@@ -35,7 +35,9 @@ object AuthEndpoints {
   }
 }
 
-class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra, A : PasswordHasher[F, ?]](hasher : JCAPasswordPlatform[A])
+class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra, A](hasher : JCAPasswordPlatform[A])(
+  implicit P : PasswordHasher[F, A]
+)
 extends Http4sDsl[F] {
   val userService = implicitly[UserRepositoryAlgebra[F]]
   val tokenService = implicitly[TokenRepositoryAlgebra[F]]
