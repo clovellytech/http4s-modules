@@ -3,6 +3,7 @@ package db.sql
 
 import doobie._
 import doobie.implicits._
+import doobie.postgres.implicits._
 import db.domain._
 
 trait UserSQL {
@@ -36,4 +37,6 @@ trait UserSQL {
     delete from ct_auth.user
     where user_id = $id
   """.update
+
+  def insertGetId(u : User) : ConnectionIO[UserId] = insert(u).withUniqueGeneratedKeys("user_id")
 }

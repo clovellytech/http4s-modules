@@ -12,9 +12,15 @@ import db.sql._
 
 class UserRepositoryInterpreter[M[_] : Monad](xa : Transactor[M]) extends UserRepositoryAlgebra[M] {
 
-  def insert(a: User): M[Unit] = {
-    users.insert(a).run.as(()).exceptSomeSqlState{
-      case UNIQUE_VIOLATION => HC.rollback
+  def insert(a: User): M[Unit] = users.insert(a).run.as(()).exceptSomeSqlState{
+    case UNIQUE_VIOLATION => HC.rollback
+  }.transact(xa)
+
+
+  def insertGetId(a: User): OptionT[M, UserId] = OptionT {
+    val q : ConnectionIO[Option[UserId]] = users.insertGetId(a).map(_.some)
+    q.exceptSomeSqlState{
+      case UNIQUE_VIOLATION => HC.rollback.as(none[UserId])
     }.transact(xa)
   }
 

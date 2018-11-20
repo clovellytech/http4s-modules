@@ -7,10 +7,11 @@ trait Service[F[_], A]{
   type Alg <: Algebra[F, A]
 }
 
-trait CService[F[_], A] extends Service[F, A]{
-  type Alg <: CAlgebra[F, A]
+trait CService[F[_], I, A] extends Service[F, A]{
+  type Alg <: CAlgebra[F, I, A]
 
   def insert(a: A): F[Unit] = algebra.insert(a)
+  def insertGetId(a : A): OptionT[F, I] = algebra.insertGetId(a)
 }
 
 trait RService[F[_], I, A, AA] extends Service[F, A]{
@@ -20,7 +21,7 @@ trait RService[F[_], I, A, AA] extends Service[F, A]{
   def byId(id: I): OptionT[F, (A, I, AA)] = algebra.byId(id)
 }
 
-trait CRService[F[_], I, A, AA] extends CService[F, A] with RService[F, I, A, AA] {
+trait CRService[F[_], I, A, AA] extends CService[F, I, A] with RService[F, I, A, AA] {
   type Alg <: CRAlgebra[F, I, A, AA]
 }
 
