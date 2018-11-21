@@ -1,22 +1,23 @@
 package h4sm
 package dbtesting
 
-import cats.effect.Async
+import cats.effect.{Async, ContextShift}
 import cats.implicits._
 import doobie._
-import doobie.hikari.HikariTransactor
 import h4sm.db.config.DatabaseConfig
 
 
 object transactor {
-  def getTransactor[F[_] : Async] : F[HikariTransactor[F]] = for {
-    cfg <- pureconfig.loadConfigOrThrow[DatabaseConfig]("db").pure[F]
-    xa <- HikariTransactor.newHikariTransactor[F](cfg.driver, cfg.url, cfg.user, cfg.password)
-  } yield xa
+  def getTransactor[F[_] : Async : ContextShift] (cfg : DatabaseConfig) : Transactor[F] =
+    Transactor.fromDriverManager[F](
+      cfg.driver, // driver classname
+      cfg.url, // connect URL (driver-specific)
+      cfg.user,              // user
+      cfg.password           // password
+    )
 
-  def getTransactorInitialized[F[_] : Async](schemaNames : String*): F[Transactor[F]] = for {
-    xa <- getTransactor[F]
-    initializer = DatabaseConfig.initializeDb[F](xa.kernel) _
-    _ <- schemaNames.toList.traverse(initializer)
-  } yield xa
+  def getInitializedTransactor[F[_] : ContextShift](cfg : DatabaseConfig, schemaNames : String*)(implicit
+    F : Async[F]
+  ) : F[Transactor[F]] =
+    DatabaseConfig.initialize[F](cfg)(schemaNames : _*) *> F.delay(getTransactor[F](cfg))
 }

@@ -1,38 +1,51 @@
 package h4sm.featurerequests
 
-import scala.concurrent.ExecutionContext
 import cats.effect._
 import cats.implicits._
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import h4sm.db.config.DatabaseConfig
 import h4sm.featurerequests.config.FeatureRequestConfig
 import doobie.hikari.HikariTransactor
-import fs2.StreamApp.ExitCode
-import fs2.{Stream, StreamApp}
-import org.http4s.server.blaze.BlazeBuilder
+import doobie.util.transactor.Transactor
 import infrastructure.endpoint._
+import org.http4s.server.Router
+import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.implicits._
 import tsec.passwordhashers.jca.BCrypt
 
-class Server[F[_] : Effect] extends StreamApp[F] {
-  override def stream(args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
-    createStream(shutdown)(ExecutionContext.Implicits.global)
+import scala.concurrent.ExecutionContext
 
-  def createStream(shutdown: F[Unit])(implicit ec : ExecutionContext): Stream[F, ExitCode] = {
+class Server[F[_] : ConcurrentEffect : Timer : ContextShift] {
+  val E = implicitly[ConcurrentEffect[F]]
+
+  def app(xa : Transactor[F], port : Int, host : String) : F[ExitCode] = {
+    val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
+    val authService = authEndpoints.Auth
+    val requestEndpoints = RequestEndpoints.persistingEndpoints(xa)
+    val voteEndpoints = VoteEndpoints.persistingEndpoints(xa)
+    val requestApp = requestEndpoints.unAuthEndpoints <+> authService.liftService(requestEndpoints.authEndpoints)
+    val httpApp = Router(
+      "/auth" -> authEndpoints.endpoints,
+      "/" -> requestApp,
+      "/vote" -> authService.liftService(voteEndpoints.endpoints)
+    ).orNotFound
+    BlazeServerBuilder[F]
+      .bindHttp(port, host)
+      .withHttpApp(httpApp)
+      .serve
+      .compile
+      .drain
+      .as(ExitCode.Success)
+  }
+
+  def run(ec : ExecutionContext) : F[ExitCode] = {
     val FeatureRequestConfig(host, port, db) = pureconfig.loadConfigOrThrow[FeatureRequestConfig]
+
     for {
-      xa <- Stream.eval(HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password))
-      _ <- Stream.eval(DatabaseConfig.initializeFromTransactor(xa)("featurerequests"))
-      authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
-      authService = authEndpoints.Auth
-      requestEndpoints = RequestEndpoints.persistingEndpoints(xa)
-      voteEndpoints = VoteEndpoints.persistingEndpoints(xa)
-      exitCode <- BlazeBuilder[F]
-        .bindHttp(port, host)
-        .mountService(authEndpoints.endpoints, "/auth/")
-        .mountService(requestEndpoints.unAuthEndpoints <+> authService.liftService(requestEndpoints.authEndpoints), "/")
-        .mountService(authService.liftService(voteEndpoints.endpoints), "/")
-        .serve
-      _ <- Stream.eval(shutdown)
+      _ <- E.delay(DatabaseConfig.initialize(db)("ct_auth", "featurerequests"))
+      exitCode <- HikariTransactor
+                    .newHikariTransactor(db.driver, db.url, db.user, db.password, ec, ec)
+                    .use(app(_, port, host))
     } yield exitCode
   }
 }

@@ -1,26 +1,18 @@
 package h4sm.files
 
+import cats.Applicative
 import cats.effect._
-import cats.data.EitherT
 import h4sm.db.config.DatabaseConfig
-import h4sm.files.Mains.ServerEffect
 import h4sm.files.config._
-import fs2.{Stream, StreamApp}
-import fs2.StreamApp.ExitCode
+import scala.concurrent.ExecutionContext.Implicits.global
 
-object Mains{
-  type ServerEffect[A] = EitherT[IO, Throwable, A]
-
-  implicit val ca : ConfigAsk[ServerEffect] = config.getConfigAsk[ServerEffect, FileConfig]("files")
-  implicit val da : DBConfigAsk[ServerEffect] = config.getConfigAsk[ServerEffect, DatabaseConfig]("db")
-  implicit val sa : ServerConfigAsk[ServerEffect] = config.getConfigAsk[ServerEffect, ServerConfig]("server")
+trait Configs[F[_]]{
+  implicit def ca(implicit F : Applicative[F]) : ConfigAsk[F] = config.getConfigAsk[F, FileConfig]("files")
+  implicit def da(implicit F : Applicative[F]) : DBConfigAsk[F] = config.getConfigAsk[F, DatabaseConfig]("db")
+  implicit def sa(implicit F : Applicative[F]) : ServerConfigAsk[F] = config.getConfigAsk[F, ServerConfig]("server")
 }
 
-import Mains._
 
-object IOServer extends StreamApp[ServerEffect] with Server[ServerEffect]{
-  import concurrent.ExecutionContext.Implicits.global
-
-  def stream(args: List[String], shutdown: ServerEffect[Unit]): Stream[ServerEffect, ExitCode] =
-    createStream(shutdown)
+object IOServer extends IOApp with Configs[IO] {
+  def run(args: List[String]): IO[ExitCode] = new Server[IO].run
 }

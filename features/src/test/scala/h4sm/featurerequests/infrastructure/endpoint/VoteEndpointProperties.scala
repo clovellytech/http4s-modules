@@ -17,9 +17,9 @@ class VoteEndpointProperties extends Properties("VoteEndpoint") {
 
   property("vote can be submitted") = forAll { (feat : FeatureRequest, user : UserRequest) =>
     val test : IO[Boolean] = for {
-      register <- postUser(user)
+      _ <- postUser(user)
       login <- loginUser(user)
-      addRes <- addRequest(feat)(login)
+      _ <- addRequest(feat)(login)
       featuresResp <- getRequests
       allFeatures <- featuresResp.as[DefaultResult[List[VotedFeatures]]]
     } yield {

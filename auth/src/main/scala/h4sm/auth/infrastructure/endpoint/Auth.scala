@@ -54,14 +54,14 @@ extends Http4sDsl[F] {
 
   val Auth = SecuredRequestHandler(bearerTokenAuth)
 
-  val unauthService : HttpService[F] = HttpService {
+  val unauthService : HttpRoutes[F] = HttpRoutes.of {
     case req @ POST -> Root / "user" => for {
       userRequest <- req.as[UserRequest]
       foundUser <- userService.byUsername(userRequest.username).isDefined
       _ <- if(foundUser) F.raiseError(Error.Duplicate()) else ().pure[F]
       hash <- hasher.hashpw[F](userRequest.password)
       user = User(userRequest.username, hash.getBytes)
-      userId <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
+      _ <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
       result <- Ok()
     } yield result
 
@@ -92,7 +92,7 @@ extends Http4sDsl[F] {
     }
   }
 
-  def endpoints : HttpService[F] = unauthService <+> Auth.liftService(authService)
+  def endpoints : HttpRoutes[F] = unauthService <+> Auth.liftService(authService)
 }
 
 

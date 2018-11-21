@@ -1,13 +1,14 @@
-package h4sm.auth.db
+package h4sm.auth
+package db
 package sql
 
 import cats.effect.IO
-import h4sm.auth.infrastructure.testTransactor
 import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
 import org.scalatest.FunSuite
 import h4sm.dbtesting.arbitraries._
 import arbitraries._
+import infrastructure.testTransactor
 
 class TokenQueriesTestSpec extends FunSuite with IOChecker {
   val transactor: Transactor[IO] = testTransactor

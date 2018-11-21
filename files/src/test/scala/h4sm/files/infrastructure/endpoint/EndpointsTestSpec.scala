@@ -5,6 +5,7 @@ package endpoint
 import java.io.{ByteArrayOutputStream, File, PrintStream}
 
 import cats.effect.IO
+import cats.effect.internals.IOContextShift
 import h4sm.auth.client.AuthClient
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
 import org.scalatest._
@@ -21,8 +22,11 @@ import org.scalacheck.Arbitrary
 import doobie.implicits._
 import cats.implicits._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks {
   val xa = testTransactor
+  implicit val cs = IOContextShift(global)
   val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
   val authClient = AuthClient.fromTransactor(xa)
   implicit val c = config.getConfigAsk[IO, FileConfig]("files")

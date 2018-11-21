@@ -5,23 +5,25 @@ import java.io.File
 import java.util.UUID
 
 import cats.implicits._
-import cats.effect.Sync
+import cats.effect.{ContextShift, Sync}
 import h4sm.files.db.FileInfoId
 import fs2.Stream
 import h4sm.files.domain.FileInfo
 import org.http4s._
-import org.http4s.MediaType._
+import org.http4s.implicits._
 import org.http4s.headers._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 import org.http4s.multipart._
+
+import scala.concurrent.ExecutionContext
 
 
 sealed abstract class ClientError extends Throwable with Product with Serializable
 final case class UriError(message : String) extends ClientError
 final case class CommunicationError(status: Status, message : String) extends ClientError
 
-class FilesClient[F[_]](fileEndpoints : FileEndpoints[F])(implicit F : Sync[F]) extends Http4sDsl[F] with Http4sClientDsl[F]{
+class FilesClient[F[_] : ContextShift](fileEndpoints : FileEndpoints[F])(implicit F : Sync[F], ec : ExecutionContext) extends Http4sDsl[F] with Http4sClientDsl[F]{
   val codecs = new FileCodecs[F]
   import codecs._
 
@@ -36,11 +38,11 @@ class FilesClient[F[_]](fileEndpoints : FileEndpoints[F])(implicit F : Sync[F]) 
   def postFile(fileInfo : FileInfo, file: File)(implicit h : Headers) : F[SiteResult[List[FileInfoId]]] = {
     val mp : Multipart[F] = Multipart(
       Vector(
-        Part.fileData(fileInfo.name.getOrElse("file"), file, `Content-Type`(`text/plain`))
+        Part.fileData(fileInfo.name.getOrElse("file"), file, ec, `Content-Type`(MediaType.text.plain))
       )
     )
     for {
-      req <- POST.apply(uri("/"), mp, h.toSeq ++ mp.headers.toSeq : _*)
+      req <- POST.apply(mp, Uri.uri("/"), h.toSeq ++ mp.headers.toSeq : _*)
       resp <- files.run(req)
       _ <- passOk(resp)
       fileRes <- resp.as[SiteResult[List[FileInfoId]]]
@@ -55,7 +57,7 @@ class FilesClient[F[_]](fileEndpoints : FileEndpoints[F])(implicit F : Sync[F]) 
   } yield resp.body
 
   def listFiles()(implicit h : Headers) : F[SiteResult[List[(FileInfoId, FileInfo)]]] = for {
-    req <- GET(uri("/"))
+    req <- GET(Uri.uri("/"))
     hreq = req.withHeaders(h)
     resp <- files.run(hreq)
 //    _ <- passOk(resp)

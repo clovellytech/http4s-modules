@@ -16,9 +16,9 @@ object RequestEndpointProperties extends Properties("RequestEndpoint") {
 
   property("request can be stored") = forAll { (feat: FeatureRequest, u: UserRequest) =>
     val test : IO[Boolean] = for {
-      register <- postUser(u)
+      _ <- postUser(u)
       login <- loginUser(u)
-      addRes <- addRequest(feat)(login)
+      _ <- addRequest(feat)(login)
       all <- getRequests
       res <- all.as[DefaultResult[List[VotedFeatures]]]
       _ <- deleteUser(u.username)

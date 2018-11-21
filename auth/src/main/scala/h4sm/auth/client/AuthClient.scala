@@ -7,8 +7,10 @@ import cats.effect.Sync
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserDetail, UserRequest}
 import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import org.http4s._
+import org.http4s.implicits._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
+import org.http4s.Uri.uri
 import tsec.passwordhashers.jca.BCrypt
 import domain.tokens.TokenRepositoryAlgebra
 import domain.users.UserRepositoryAlgebra
@@ -41,9 +43,9 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
     _ <- OptionT.liftF(userService.delete(uid))
   } yield ()).getOrElse(())
 
-  def postUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(uri("/user"), userRequest))
+  def postUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(userRequest, uri("/user")))
 
-  def loginUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(uri("/login"), userRequest))
+  def loginUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(userRequest, uri("/login")))
 
   // For the client, simply thread the most recent response back into any request that needs
   // authorization. There should probably be a better way to do this, maybe state monad or something.
@@ -57,7 +59,7 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
   } yield userDetail
 
   def withUser[A](u : UserRequest)(f : Headers => F[A]) : F[A] = for {
-    register <- postUser(u)
+    _ <- postUser(u)
     login <- loginUser(u)
     result <- f(getAuthHeaders(login))
     _ <- deleteUser(u.username)

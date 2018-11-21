@@ -16,7 +16,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with PropertyChecks
   "A user" should "login" in {
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
-        post <- authClient.postUser(u)
+        _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
         _ <- authClient.deleteUser(u.username)
       } yield {
@@ -44,7 +44,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with PropertyChecks
   "A login" should "create usable session" in {
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
-        post <- authClient.postUser(u)
+        _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
         user <- authClient.getUser(u.username, login).getOrElse(fail)
         detail <- user.as[UserDetail]
@@ -61,7 +61,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with PropertyChecks
   "A bad password" should "return 400" in {
     forAll { (u : UserRequest) =>
       for {
-        post <- authClient.postUser(u)
+        _ <- authClient.postUser(u)
         login <- authClient.loginUser(u.copy(password = u.password ++ u.password))
         _ <- authClient.deleteUser(u.username)
       } yield {

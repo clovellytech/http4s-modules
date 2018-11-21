@@ -4,8 +4,14 @@ package auth
 import cats.effect.IO
 import doobie.util.transactor.Transactor
 
-import dbtesting.transactor.getTransactorInitialized
+import scala.concurrent.ExecutionContext
+import h4sm.db.config.DatabaseConfig
+import h4sm.dbtesting.transactor.getInitializedTransactor
 
 package object infrastructure {
-  lazy val testTransactor: Transactor[IO] = getTransactorInitialized[IO]("ct_auth").unsafeRunSync()
+  implicit lazy val cs = IO.contextShift(ExecutionContext.Implicits.global)
+
+  val cfg = pureconfig.loadConfigOrThrow[DatabaseConfig]("db")
+
+  lazy val testTransactor: Transactor[IO] = getInitializedTransactor(cfg, "ct_auth").unsafeRunSync()
 }
