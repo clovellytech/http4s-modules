@@ -55,27 +55,34 @@ extends Http4sDsl[F] {
   val Auth = SecuredRequestHandler(bearerTokenAuth)
 
   val unauthService : HttpRoutes[F] = HttpRoutes.of {
-    case req @ POST -> Root / "user" => for {
-      userRequest <- req.as[UserRequest]
-      foundUser <- userService.byUsername(userRequest.username).isDefined
-      _ <- if(foundUser) F.raiseError(Error.Duplicate()) else ().pure[F]
-      hash <- hasher.hashpw[F](userRequest.password)
-      user = User(userRequest.username, hash.getBytes)
-      _ <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
-      result <- Ok()
-    } yield result
+    case req @ POST -> Root / "user" => {
+      val res: F[Response[F]] = for {
+        userRequest <- req.as[UserRequest]
+        foundUser <- userService.byUsername(userRequest.username).isDefined
+        _ <- if(foundUser) F.raiseError(Error.Duplicate()) else ().pure[F]
+        hash <- hasher.hashpw[F](userRequest.password)
+        user = User(userRequest.username, hash.getBytes)
+        _ <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
+        result <- Ok()
+      } yield result
 
-    case req @ POST -> Root / "login" => for {
-      userRequest <- req.as[UserRequest]
-      u <- userService.byUsername(userRequest.username).toRight(Error.NotFound() : Throwable).value.flatMap(_.raiseOrPure[F])
-      (user, uuid, joinTime) = u
-      hash = PasswordHash[A](new String(user.hash))
-      status <- hasher.checkpw[F](userRequest.password, hash)
-      resp <- if(status == Verified) Ok() else F.raiseError(Error.BadLogin() : Throwable)
-      tok <- bearerTokenAuth.create(uuid)
-    } yield bearerTokenAuth.embed(resp, tok)
+      res.recoverWith{ case _ => BadRequest() }
+    }
+
+    case req @ POST -> Root / "login" => {
+      val res : F[Response[F]] = for {
+        userRequest <- req.as[UserRequest]
+        u <- userService.byUsername(userRequest.username).toRight(Error.NotFound() : Throwable).value.flatMap(_.raiseOrPure[F])
+        (user, uuid, joinTime) = u
+        hash = PasswordHash[A](new String(user.hash))
+        status <- hasher.checkpw[F](userRequest.password, hash)
+        resp <- if(status == Verified) Ok() else F.raiseError(Error.BadLogin() : Throwable)
+        tok <- bearerTokenAuth.create(uuid)
+      } yield bearerTokenAuth.embed(resp, tok)
+
+      res.recoverWith{ case _ => BadRequest() }
+    }
   }
-
 
   val authService: BearerAuthService[F] = {
     def respUser(ou : OptionT[F, (User, UUID, Instant)]) : F[Response[F]] = for {
