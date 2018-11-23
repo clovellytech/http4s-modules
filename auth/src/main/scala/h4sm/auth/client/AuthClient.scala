@@ -30,8 +30,6 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
   def injectAuthHeader(from: Response[F])(to: Request[F]): Request[F] =
     to.withHeaders(getAuthHeaders(from))
 
-  def lookupOrThrow(req: F[Request[F]]): F[Response[F]] = req.flatMap(authEndpoints.endpoints.orNotFound run _)
-
   def threadResponse(resp: Response[F])(req: Request[F]): F[Response[F]] = {
     val sessionReq = req.withHeaders(resp.headers.filter(_.name.toString.startsWith("Authorization")))
     auth.run(sessionReq)
@@ -43,9 +41,9 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
     _ <- OptionT.liftF(userService.delete(uid))
   } yield ()).getOrElse(())
 
-  def postUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(userRequest, uri("/user")))
+  def postUser(userRequest: UserRequest): F[Response[F]] = POST(userRequest, uri("/user")).flatMap(auth run _)
 
-  def loginUser(userRequest: UserRequest): F[Response[F]] = lookupOrThrow(POST(userRequest, uri("/login")))
+  def loginUser(userRequest: UserRequest): F[Response[F]] = POST(userRequest, uri("/login")).flatMap(auth run _)
 
   // For the client, simply thread the most recent response back into any request that needs
   // authorization. There should probably be a better way to do this, maybe state monad or something.
