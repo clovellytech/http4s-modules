@@ -36,12 +36,12 @@ final case class FileInfo(
   backend : Backend = Backend.LocalBackend
 )
 
-sealed abstract class Error(message : String) extends Throwable with Product with Serializable
+sealed abstract class Error(val message : String) extends Throwable with Product with Serializable
 
 object Error {
-  final case class InvalidUserInput(message : String) extends Error(message)
-  final case class FileNotExistError(message : String) extends Error(message)
-  final case class UnknownError(message : String) extends Error(message)
+  final case class InvalidUserInput(override val message : String) extends Error(message)
+  final case class FileNotExistError(override val message : String) extends Error(message)
+  final case class UnknownError(override val message : String) extends Error(message)
 
   def invalidUserInput(message: String) : Throwable = InvalidUserInput(message)
   def fileNotExistError(message: String) : Throwable = FileNotExistError(message)

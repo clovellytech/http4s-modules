@@ -35,7 +35,9 @@ object AuthEndpoints {
   }
 }
 
-class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra, A : PasswordHasher[F, ?]](hasher : JCAPasswordPlatform[A])
+class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra, A](hasher : JCAPasswordPlatform[A])(
+  implicit P : PasswordHasher[F, A]
+)
 extends Http4sDsl[F] {
   val userService = implicitly[UserRepositoryAlgebra[F]]
   val tokenService = implicitly[TokenRepositoryAlgebra[F]]
@@ -52,28 +54,35 @@ extends Http4sDsl[F] {
 
   val Auth = SecuredRequestHandler(bearerTokenAuth)
 
-  val unauthService : HttpService[F] = HttpService {
-    case req @ POST -> Root / "user" => for {
-      userRequest <- req.as[UserRequest]
-      foundUser <- userService.byUsername(userRequest.username).isDefined
-      _ <- if(foundUser) F.raiseError(Error.Duplicate()) else ().pure[F]
-      hash <- hasher.hashpw[F](userRequest.password)
-      user = User(userRequest.username, hash.getBytes)
-      userId <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
-      result <- Ok()
-    } yield result
+  val unauthService : HttpRoutes[F] = HttpRoutes.of {
+    case req @ POST -> Root / "user" => {
+      val res: F[Response[F]] = for {
+        userRequest <- req.as[UserRequest]
+        foundUser <- userService.byUsername(userRequest.username).isDefined
+        _ <- if(foundUser) F.raiseError(Error.Duplicate()) else ().pure[F]
+        hash <- hasher.hashpw[F](userRequest.password)
+        user = User(userRequest.username, hash.getBytes)
+        _ <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
+        result <- Ok()
+      } yield result
 
-    case req @ POST -> Root / "login" => for {
-      userRequest <- req.as[UserRequest]
-      u <- userService.byUsername(userRequest.username).toRight(Error.NotFound() : Throwable).value.flatMap(_.raiseOrPure[F])
-      (user, uuid, joinTime) = u
-      hash = PasswordHash[A](new String(user.hash))
-      status <- hasher.checkpw[F](userRequest.password, hash)
-      resp <- if(status == Verified) Ok() else F.raiseError(Error.BadLogin() : Throwable)
-      tok <- bearerTokenAuth.create(uuid)
-    } yield bearerTokenAuth.embed(resp, tok)
+      res.recoverWith{ case _ => BadRequest() }
+    }
+
+    case req @ POST -> Root / "login" => {
+      val res : F[Response[F]] = for {
+        userRequest <- req.as[UserRequest]
+        u <- userService.byUsername(userRequest.username).toRight(Error.NotFound() : Throwable).value.flatMap(_.raiseOrPure[F])
+        (user, uuid, joinTime) = u
+        hash = PasswordHash[A](new String(user.hash))
+        status <- hasher.checkpw[F](userRequest.password, hash)
+        resp <- if(status == Verified) Ok() else F.raiseError(Error.BadLogin() : Throwable)
+        tok <- bearerTokenAuth.create(uuid)
+      } yield bearerTokenAuth.embed(resp, tok)
+
+      res.recoverWith{ case _ => BadRequest() }
+    }
   }
-
 
   val authService: BearerAuthService[F] = {
     def respUser(ou : OptionT[F, (User, UUID, Instant)]) : F[Response[F]] = for {
@@ -90,7 +99,7 @@ extends Http4sDsl[F] {
     }
   }
 
-  def endpoints : HttpService[F] = unauthService <+> Auth.liftService(authService)
+  def endpoints : HttpRoutes[F] = unauthService <+> Auth.liftService(authService)
 }
 
 

@@ -5,6 +5,7 @@ import cats.effect.Sync
 import cats.implicits._
 import h4sm.auth.client.AuthClient
 import org.http4s._
+import org.http4s.implicits._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 import domain.requests._
@@ -23,22 +24,22 @@ class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http
   val rservice = new RequestService(rinterp)
   val re = new RequestEndpoints(rservice)
 
-  val requestEndpoints: HttpService[F] = re.unAuthEndpoints <+> Auth.liftService(re.authEndpoints)
+  val requestEndpoints: HttpRoutes[F] = re.unAuthEndpoints <+> Auth.liftService(re.authEndpoints)
 
   val vinterp = new VoteRepositoryInterpreter[F](xa)
   val service = new VoteService[F](vinterp)
-  val voteEndpoints: HttpService[F] = Auth.liftService(new VoteEndpoints[F](service).endpoints)
+  val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F](service).endpoints)
 
   def addRequest(req: FeatureRequest)(resp : Response[F]): F[Response[F]] = for {
-    addReq <- POST(uri("/request"), req)
+    addReq <- POST(req, Uri.uri("/request"))
     authReq = authTestEndpoints.injectAuthHeader(resp)(addReq)
     resp <- requestEndpoints.orNotFound.run(authReq)
   } yield resp
 
-  def addVote(vote : VoteRequest)(resp : Response[F]): F[Response[F]] = for {
-    voteReq <- POST(uri("/vite"), vote)
+  def addVote(vote : VoteRequest): F[Response[F]] = for {
+    voteReq <- POST(vote, Uri.uri("/vite"))
     resp <- voteEndpoints.orNotFound.run(voteReq)
   } yield resp
 
-  def getRequests: F[Response[F]] = GET(uri("/request")).flatMap(requestEndpoints.orNotFound run _)
+  def getRequests: F[Response[F]] = GET(Uri.uri("/request")).flatMap(requestEndpoints.orNotFound run _)
 }

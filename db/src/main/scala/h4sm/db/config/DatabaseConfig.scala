@@ -2,7 +2,7 @@ package h4sm.db.config
 
 import scala.util.Try
 import cats.effect.Sync
-import doobie.util.transactor.Transactor
+import cats.implicits._
 import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
@@ -48,8 +48,17 @@ object DatabaseConfig {
     }
   }
 
-  def initializeFromTransactor[M[_] : Sync, A <: DataSource](xa: Transactor.Aux[M, A])(
-    schemaName: String
-  ): M[Try[Unit]] = initializeDb(xa.kernel)(schemaName)
+  def getDataSource(cfg : DatabaseConfig) : DataSource = {
+    val ds = new org.postgresql.ds.PGSimpleDataSource()
+    ds.setURL(cfg.url)
+    ds.setUser(cfg.user)
+    ds.setPassword(cfg.password)
+    ds
+  }
 
+  def initialize[F[_]](cfg : DatabaseConfig)(schemaNames : String*)(implicit F : Sync[F]) : F[Unit] = for {
+    ds <- F.delay(getDataSource(cfg))
+    _ <- schemaNames.toList.traverse(name => initializeDb(ds)(name))
+    _ <- F.delay(ds.getConnection.close)
+  } yield ()
 }

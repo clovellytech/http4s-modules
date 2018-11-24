@@ -8,34 +8,45 @@ import h4sm.files.domain._
 import cats.implicits._
 import org.http4s._
 import org.http4s.multipart._
-import cats.effect.Sync
+import cats.effect.{ContextShift, Sync}
 import h4sm.auth.BearerAuthService
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import h4sm.files.domain.FileMetaAlgebra
 import org.http4s.dsl._
 import tsec.authentication._
 import config._
+import h4sm.files.db.FileInfoId
 import org.http4s.headers.Location
+import fs2.Stream
+
+import scala.concurrent.ExecutionContext
 
 class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
   S  : Sync[F],
   F  : FileMetaAlgebra[F],
   FS : FileStoreAlgebra[F],
-  C  : ConfigAsk[F]
+  CS : ContextShift[F],
+  C  : ConfigAsk[F],
+  ec : ExecutionContext
 ) extends Http4sDsl[F] {
 
   val fileNotExists : F[File] = Error.fileNotExistError("Requested file not found").raiseError[F, File]
 
-  def getFile(uuid: String, allowPred : FileInfo => Boolean) : F[File] = for {
+  def getFile(uuid: String, allowPred : FileInfo => Boolean) : F[(FileInfo, FileInfoId, Stream[F, Byte])] = for {
     uuid <- S.delay(UUID.fromString(uuid))
     conf <- C.ask
     baseFile = new File(conf.basePath)
     fileInfo <- F.retrieveMeta(uuid)
-    file <- if(allowPred(fileInfo)) (new File(baseFile, uuid.toString)).pure[F] else fileNotExists
-  } yield file
+    _ <- if(allowPred(fileInfo)) (new File(baseFile, uuid.toString)).pure[F] else fileNotExists
+  } yield (fileInfo, uuid, FS.retrieve(uuid))
 
-  def unAuthEndpoints: HttpService[F] = HttpService {
-    case GET -> Root / "request" / uuidstr => getFile(uuidstr, _.isPublic).flatMap(Ok apply _)
+  def unAuthEndpoints: HttpRoutes[F] = HttpRoutes.of[F] {
+    case GET -> Root / "request" / uuidstr => for {
+      fileInfo <- getFile(uuidstr, _.isPublic)
+      (meta, _, bytes) = fileInfo
+      // need to figure out content type and filename parts.
+      resp <- Ok(bytes)
+    } yield resp
 
     case GET -> Root / "config" => C.ask.flatMap(c => Ok(c.uploadMax.toString))
   }
@@ -43,7 +54,11 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
   def authEndpoints: BearerAuthService[F] = BearerAuthService {
     case req@GET -> Root / uuidstr asAuthed _ => {
       val pred = (i: FileInfo) => i.isPublic || (i.uploadedBy.compareTo(req.authenticator.identity) == 0)
-      getFile(uuidstr, pred).flatMap(Ok apply _)
+      for {
+        fileInfo <- getFile(uuidstr, pred)
+        (_, _, bytes) = fileInfo
+        resp <- Ok(bytes)
+      } yield resp
     }
 
     case req@GET -> Root asAuthed _ => for {
@@ -64,7 +79,7 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
             val finfo = FileInfo(part.name, none, part.filename, none, req.authenticator.identity, false)
             for {
               finfoId <- F.storeMeta(finfo)
-              fileSave <- FS.write(finfoId, finfo, part.body)
+              _ <- FS.write(finfoId, finfo, part.body)
             } yield finfoId
           }
           resp <- Ok(SiteResult(savedFileIds.toList))
@@ -81,11 +96,11 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
 
     case req@GET -> Root / uuid / _ asAuthed _ => for {
       uuid <- S.delay(UUID.fromString(uuid))
-      fileInfo <- F.retrieveMeta(uuid)
+      _ <- F.retrieveMeta(uuid)
       file <- FS.retrieveFile(uuid)
-      resp <- StaticFile.fromFile[F](file, req.request.some).getOrElseF(BadRequest())
+      resp <- StaticFile.fromFile[F](file, ec, req.request.some).getOrElseF(BadRequest())
     } yield resp
   }
 
-  def endpoints : HttpService[F] = unAuthEndpoints.combineK(auth.Auth.liftService(authEndpoints))
+  def endpoints : HttpRoutes[F] = unAuthEndpoints.combineK(auth.Auth.liftService(authEndpoints))
 }
