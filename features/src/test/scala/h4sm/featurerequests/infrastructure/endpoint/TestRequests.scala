@@ -20,15 +20,13 @@ class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http
   val authEndpoints = authTestEndpoints.authEndpoints
   val Auth = authEndpoints.Auth
 
-  val rinterp = new RequestRepositoryInterpreter(xa)
-  val rservice = new RequestService(rinterp)
-  val re = new RequestEndpoints(rservice)
+  implicit val rinterp = new RequestRepositoryInterpreter(xa)
+  val re = new RequestEndpoints[F]
 
   val requestEndpoints: HttpRoutes[F] = re.unAuthEndpoints <+> Auth.liftService(re.authEndpoints)
 
-  val vinterp = new VoteRepositoryInterpreter[F](xa)
-  val service = new VoteService[F](vinterp)
-  val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F](service).endpoints)
+  implicit val vinterp = new VoteRepositoryInterpreter[F](xa)
+  val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F].endpoints)
 
   def addRequest(req: FeatureRequest)(resp : Response[F]): F[Response[F]] = for {
     addReq <- POST(req, Uri.uri("/request"))

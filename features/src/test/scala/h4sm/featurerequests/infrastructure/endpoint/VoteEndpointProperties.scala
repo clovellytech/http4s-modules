@@ -8,6 +8,7 @@ import cats.effect.IO
 import h4sm.auth.infrastructure.endpoint.UserRequest
 import db.sql.testTransactor.testTransactor
 import domain.requests._
+import h4sm.featurerequests.db.domain.VotedFeature
 
 
 class VoteEndpointProperties extends Properties("VoteEndpoint") {
@@ -21,7 +22,7 @@ class VoteEndpointProperties extends Properties("VoteEndpoint") {
       login <- loginUser(user)
       _ <- addRequest(feat)(login)
       featuresResp <- getRequests
-      allFeatures <- featuresResp.as[DefaultResult[List[VotedFeatures]]]
+      allFeatures <- featuresResp.as[DefaultResult[List[VotedFeature]]]
     } yield {
       allFeatures.result.exists(_.feature.title == feat.title)
     }
