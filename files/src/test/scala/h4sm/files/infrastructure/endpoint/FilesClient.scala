@@ -42,7 +42,7 @@ class FilesClient[F[_] : ContextShift](fileEndpoints : FileEndpoints[F])(implici
       )
     )
     for {
-      req <- POST.apply(mp, Uri.uri("/"), h.toSeq ++ mp.headers.toSeq : _*)
+      req <- POST(mp, Uri.uri("/"), h.toSeq ++ mp.headers.toSeq : _*)
       resp <- files.run(req)
       _ <- passOk(resp)
       fileRes <- resp.as[SiteResult[List[FileInfoId]]]
