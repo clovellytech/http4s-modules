@@ -8,3 +8,10 @@ final case class Vote(
   vote : Option[Short],
   comment: Option[String]
 )
+
+final case class VotedFeature(
+  featureId : FeatureId,
+  feature : Feature,
+  downvoteCount : Long,
+  upvoteCount : Long
+)

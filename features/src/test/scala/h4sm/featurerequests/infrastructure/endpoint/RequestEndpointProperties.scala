@@ -8,6 +8,7 @@ import h4sm.auth.infrastructure.endpoint.UserRequest
 import db.sql.testTransactor.testTransactor
 import domain.requests._
 import arbitraries._
+import h4sm.featurerequests.db.domain.VotedFeature
 
 object RequestEndpointProperties extends Properties("RequestEndpoint") {
   val eps = new TestRequests[IO](testTransactor)
@@ -20,7 +21,7 @@ object RequestEndpointProperties extends Properties("RequestEndpoint") {
       login <- loginUser(u)
       _ <- addRequest(feat)(login)
       all <- getRequests
-      res <- all.as[DefaultResult[List[VotedFeatures]]]
+      res <- all.as[DefaultResult[List[VotedFeature]]]
       _ <- deleteUser(u.username)
     } yield {
       res.result.exists(_.feature.title == feat.title)

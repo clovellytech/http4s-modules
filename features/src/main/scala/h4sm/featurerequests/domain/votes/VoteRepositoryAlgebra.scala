@@ -3,7 +3,6 @@ package domain
 package votes
 
 import db.domain._
+import h4sm.db.CAlgebra
 
-trait VoteRepositoryAlgebra[F[_]]{
-  def put(v: Vote) : F[Unit]
-}
+trait VoteRepositoryAlgebra[F[_]] extends CAlgebra[F, VoteId, Vote]

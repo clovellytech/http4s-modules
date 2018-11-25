@@ -3,10 +3,11 @@ package requests
 
 import java.time.Instant
 
+import h4sm.db.CRAlgebra
 import h4sm.featurerequests.db.domain._
 
-trait RequestRepositoryAlgebra[F[_]]{
-  def create(r : Feature) : F[Unit]
+trait RequestRepositoryAlgebra[F[_]] extends CRAlgebra[F, FeatureId, Feature, Instant]{
+  def insert(r : Feature) : F[Unit]
 
-  def show : F[List[(FeatureId, Feature, Instant, Long, Long)]]
+  def selectWithVoteCounts : F[List[VotedFeature]]
 }

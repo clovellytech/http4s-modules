@@ -8,7 +8,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe._
-import h4sm.featurerequests.db.domain.Feature
+import h4sm.featurerequests.db.domain._
 import h4sm.featurerequests.domain.requests.FeatureRequest
 import h4sm.featurerequests.domain.votes.VoteRequest
 
@@ -32,11 +32,11 @@ package object endpoint {
   implicit val featureDecoder : Decoder[Feature] = deriveDecoder
   implicit def featureEntityDecoder[F[_] : Sync] : EntityDecoder[F, Feature] = jsonOf
 
-  implicit val votedFeatEncoder : Encoder[VotedFeatures] = deriveEncoder
-  implicit def votedFeatEntityEncoder[F[_]: Sync] : EntityEncoder[F, VotedFeatures] = jsonEncoderOf
+  implicit val votedFeatEncoder : Encoder[VotedFeature] = deriveEncoder
+  implicit def votedFeatEntityEncoder[F[_]: Sync] : EntityEncoder[F, VotedFeature] = jsonEncoderOf
 
-  implicit val votedFeatDecoder : Decoder[VotedFeatures] = deriveDecoder[VotedFeatures]
-  implicit def votedFeatEntityDecoder[F[_]: Sync] : EntityDecoder[F, VotedFeatures] = jsonOf
+  implicit val votedFeatDecoder : Decoder[VotedFeature] = deriveDecoder[VotedFeature]
+  implicit def votedFeatEntityDecoder[F[_]: Sync] : EntityDecoder[F, VotedFeature] = jsonOf
 
   implicit def defaultResultEncoder[A: Encoder] : Encoder[DefaultResult[A]] = deriveEncoder
   implicit def defaultResultEntityEncoder[F[_]: Sync, A: Encoder] : EntityEncoder[F, DefaultResult[A]] = jsonEncoderOf[F, DefaultResult[A]]

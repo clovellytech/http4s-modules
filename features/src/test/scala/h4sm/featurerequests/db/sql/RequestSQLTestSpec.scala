@@ -17,7 +17,8 @@ class RequestSQLTestSpec extends FlatSpec with Matchers with IOChecker {
 
   "Request queries" should "typecheck" in {
     check(applyArb(insert _))
-    check(selectAll)
+    check(select)
     check(selectAllWithVoteCounts)
+    check(applyArb(selectById _))
   }
 }
