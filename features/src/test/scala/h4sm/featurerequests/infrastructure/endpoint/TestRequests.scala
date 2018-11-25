@@ -35,7 +35,7 @@ class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http
   } yield resp
 
   def addVote(vote : VoteRequest): F[Response[F]] = for {
-    voteReq <- POST(vote, Uri.uri("/vite"))
+    voteReq <- POST(vote, Uri.uri("/vote"))
     resp <- voteEndpoints.orNotFound.run(voteReq)
   } yield resp
 
