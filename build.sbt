@@ -53,6 +53,14 @@ lazy val features = (project in file("./features"))
   )
   .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
+lazy val permissions = (project in file("./permissions"))
+  .settings(commonSettings)
+  .settings(
+    name := "h4sm-permissions",
+    libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
+  )
+  .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
+
 lazy val docs = (project in file("./docs"))
   .settings(name := "h4sm-docs")
   .enablePlugins(TutPlugin)
@@ -67,6 +75,6 @@ lazy val h4sm = (project in file("."))
   .settings(name := "h4sm")
   .settings(commonSettings)
   .settings(skip in publish := true)
-  .dependsOn(auth, db, files, features)
+  .dependsOn(auth, db, files, features, permissions, dbtesting)
   .dependsOn(dbtesting % "test->test")
-  .aggregate(auth, db, files, features, dbtesting)
+  .aggregate(auth, db, files, features, permissions, dbtesting)
