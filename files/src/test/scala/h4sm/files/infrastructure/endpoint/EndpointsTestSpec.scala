@@ -6,44 +6,33 @@ import java.io.{ByteArrayOutputStream, File, PrintStream}
 
 import cats.effect.IO
 import cats.effect.internals.IOContextShift
-import h4sm.auth.client.AuthClient
+import h4sm.auth.client.{AuthClient, IOTestAuthClient}
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 import tsec.passwordhashers.jca.BCrypt
-import h4sm.auth.infrastructure.endpoint.arbitraries._
 import h4sm.files.config.FileConfig
 import h4sm.files.domain.FileInfo
 import h4sm.files.infrastructure.backends._
 import h4sm.files.db.sql.{files => filesSql}
 import h4sm.files.db.sql.arbitraries._
-import org.http4s.Headers
-import org.scalacheck.Arbitrary
 import doobie.implicits._
 import cats.implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks {
+class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with IOTestAuthClient {
   val xa = testTransactor
   implicit val cs = IOContextShift(global)
   val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
   val authClient = AuthClient.fromTransactor(xa)
+
   implicit val c = config.getConfigAsk[IO, FileConfig]("files")
   implicit val fileMetaBackend = new FileMetaService[IO](xa)
   implicit val fileStoreBackend = new LocalFileStoreService[IO]
   val fileEndpoints = new FileEndpoints[IO](authEndpoints)
   val fileClient = new FilesClient[IO](fileEndpoints)
-
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)
-
-  def forAnyUser(f : Headers => UserRequest => IO[Assertion]) : Assertion = forAll {
-    (u : UserRequest) => authClient.withUser(u)(headers => f(headers)(u)).unsafeRunSync()
-  }
-
-  def forAnyUser2[A : Arbitrary](f : Headers => (UserRequest, A) => IO[Assertion]) : Assertion = forAll {
-    (u: UserRequest, a : A) => authClient.withUser(u)(headers => f(headers)(u, a)).unsafeRunSync()
-  }
 
   "A user with no files" should "be able to retrieve empty list of files" in forAnyUser { implicit headers => _ =>
     fileClient.listFiles().map(_.result should be (empty))

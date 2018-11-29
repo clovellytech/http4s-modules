@@ -55,13 +55,6 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
     res <- auth.run(req.withHeaders(headers))
     userDetail <- res.as[UserDetail]
   } yield userDetail
-
-  def withUser[A](u : UserRequest)(f : Headers => F[A]) : F[A] = for {
-    _ <- postUser(u)
-    login <- loginUser(u)
-    result <- f(getAuthHeaders(login))
-    _ <- deleteUser(u.username)
-  } yield result
 }
 
 object AuthClient {
