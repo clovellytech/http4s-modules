@@ -23,7 +23,7 @@ lazy val dbtesting = (project in file("./dbtesting"))
   .settings(commonSettings)
   .settings(
     name := "h4sm-dbtesting",
-    libraryDependencies ++= commonDeps ++ dbDeps ++ testDeps
+    libraryDependencies ++= commonDeps ++ httpDeps ++ dbDeps ++ testDeps
   )
   .dependsOn(db)
 

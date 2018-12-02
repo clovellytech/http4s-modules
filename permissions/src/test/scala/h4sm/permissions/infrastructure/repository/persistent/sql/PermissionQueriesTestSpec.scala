@@ -19,8 +19,8 @@ class PermissionQueriesTestSpec extends FunSuite with IOChecker {
   test("select should typecheck")(check(permissions.select))
   test("select by id should typecheck")(check(applyArb(permissions.byId _)))
   test("select by app name should typecheck")(check(applyArb(permissions.byAppName _)))
-  test("select by atttributes should typecheck")(check(applyArb(permissions.byAttributes _)))
+  test("select by atttributes should typecheck")(check(applyArb((permissions.byAttributes _).tupled)))
   test("insert should typecheck")(check(applyArb(permissions.insert _)))
-  test("safe update should typecheck")(check(applyArb(permissions.safeUpdate _)))
+  test("safe update should typecheck")(check(applyArb((permissions.safeUpdate _).tupled)))
   test("delete should typecheck")(check(applyArb(permissions.delete _)))
 }

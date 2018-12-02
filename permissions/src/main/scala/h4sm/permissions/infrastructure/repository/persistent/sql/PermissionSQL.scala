@@ -3,7 +3,6 @@ package h4sm.permissions.infrastructure.repository.persistent.sql
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import h4sm.auth.UserId
 import h4sm.permissions.domain.{Permission, PermissionId}
 
 trait PermissionSQL {
@@ -41,12 +40,6 @@ trait PermissionSQL {
     from ct_permissions.permission
     where permission_id = $pid
   """.update
-
-  def userPermission(userId: UserId, appName : String, name : String) : Query0[(Permission, PermissionId)] = (
-    byAttributes(appName, name).toFragment ++ fr"""
-      and user_id = $userId
-    """
-  ).query
 
   def insertGetId(p : Permission) : ConnectionIO[PermissionId] = insert(p).withUniqueGeneratedKeys("permission_id")
 }

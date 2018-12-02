@@ -1,10 +1,12 @@
 package h4sm.permissions
 package domain
 
+import java.time.Instant
+
 import h4sm.auth.UserId
-import h4sm.db.CRAlgebra
+import h4sm.db.CRDAlgebra
 
 
-trait UserPermissionAlgebra[F[_]] extends CRAlgebra[F, UserPermissionId, UserPermission, Unit] {
+trait UserPermissionAlgebra[F[_]] extends CRDAlgebra[F, UserPermissionId, UserPermission[PermissionId], Instant] {
   def hasPermission(uid : UserId, appName : String, name : String) : F[Boolean]
 }

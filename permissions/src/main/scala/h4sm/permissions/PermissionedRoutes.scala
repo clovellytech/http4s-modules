@@ -8,7 +8,15 @@ import org.http4s._
 import tsec.authentication.{SecuredRequest, TSecAuthService}
 
 
-
+/**
+  * Route creator for routes blocked by user permissions for authenticated users.
+  *
+  * Example:
+  *
+  * PermissionedRoutes ("appname" -> "permissionName") {
+  *   case req@GET@Root asAuthed user => ...
+  * }
+  */
 object PermissionedRoutes {
 
   type PermissionedRoutes[F[_], I, A] = Kleisli[OptionT[F, ?], SecuredRequest[F, I, A], Response[F]]
@@ -22,12 +30,10 @@ object PermissionedRoutes {
       (P.selectByAttributes _).tupled(perm).isDefined
     }
 
-    val next1: PartialFunction[SecuredRequest[F, I, A], OptionT[F, Response[F]]] = pf.andThen(resp => OptionT.liftF(resp))
-    val next2: SecuredRequest[F, I, A] => OptionT[F, Response[F]] = (req : SecuredRequest[F, I, A]) => next1.applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
-
-    Kleisli((req : SecuredRequest[F, I, A]) =>
-      OptionT.liftF(hasPermission).filter(identity) *> next2(req)
-    )
+    Kleisli { (req: SecuredRequest[F, I, A]) =>
+      val guardedPf = pf.andThen(resp => OptionT.liftF(hasPermission).filter(identity) *> OptionT.liftF(resp))
+      guardedPf.applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
+    }
   }
 
   def apply[I, A, F[_]](

@@ -1,4 +1,5 @@
-package h4sm.files
+package h4sm
+package files
 package infrastructure.endpoint
 
 import java.io.File
@@ -18,22 +19,13 @@ import org.http4s.multipart._
 
 import scala.concurrent.ExecutionContext
 
-
-sealed abstract class ClientError extends Throwable with Product with Serializable
-final case class UriError(message : String) extends ClientError
-final case class CommunicationError(status: Status, message : String) extends ClientError
+import dbtesting.endpoints.ClientError._
 
 class FilesClient[F[_] : ContextShift](fileEndpoints : FileEndpoints[F])(implicit F : Sync[F], ec : ExecutionContext) extends Http4sDsl[F] with Http4sClientDsl[F]{
   val codecs = new FileCodecs[F]
   import codecs._
 
   val files = fileEndpoints.endpoints.orNotFound
-  def commError[A](status : Status) : Throwable = CommunicationError(status, "Error, status was not Ok")
-
-  def passOk[A](response : Response[F]) : F[Response[F]] = response.status match {
-    case Status.Ok => response.pure[F]
-    case _ => commError(response.status).raiseError[F, Response[F]]
-  }
 
   def postFile(fileInfo : FileInfo, file: File)(implicit h : Headers) : F[SiteResult[List[FileInfoId]]] = {
     val mp : Multipart[F] = Multipart(
