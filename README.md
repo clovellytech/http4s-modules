@@ -10,6 +10,7 @@ To provide a library of production ready modules, complete with database schema,
 * auth - A complete user authentication implementation using `tsec`. Only uses Bearer tokens for now.
 * features - An example library that allows users to submit feature requests and vote on features.
 * files - A complete file upload and retrieval module. Only local file storage is implemented so far. AWS or other backends can be added by providing a typeclass instance.
+* permissions - Built on top of tsec-http4s, an easy way to create routes that are guarded by a user having certain permissions.
 * more to come! Something you would like to see here? Submit an issue! 
 
 Create your server!
@@ -28,9 +29,12 @@ Get Started
 Releases coming soon... For now, just clone and publishLocal. Then add:
 
 ```
-"com.clovellytech" % "h4sm-auth" % "0.0.7",
-"com.clovellytech" % "h4sm-features" % "0.0.7",
-"com.clovellytech" % "h4sm-files" % "0.0.7"
+libraryDependencies ++= Seq(
+	"h4sm-auth",
+	"h4sm-features",
+	"h4sm-files", 
+	"h4sm-permissions"
+).map("com.clovellytech" %% _ % "0.0.8")
 ```
 
 Setup

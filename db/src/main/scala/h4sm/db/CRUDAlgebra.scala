@@ -25,7 +25,6 @@ trait DAlgebra[F[_], I, A] extends Algebra[F, A] {
 }
 
 trait CRAlgebra[F[_], I, A, AA] extends CAlgebra[F, I, A] with RAlgebra[F, I, A, AA]
-
 trait CRUAlgebra[F[_], I, A, AA] extends CRAlgebra[F, I, A, AA] with UAlgebra[F, I, A]
-
+trait CRDAlgebra[F[_], I, A, AA] extends CRAlgebra[F, I, A, AA] with DAlgebra[F, I, A]
 trait CRUDAlgebra[F[_], I, A, AA] extends CRUAlgebra[F, I, A, AA] with DAlgebra[F, I, A]
