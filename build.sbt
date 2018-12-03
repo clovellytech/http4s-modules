@@ -74,7 +74,10 @@ lazy val docs = (project in file("./docs"))
 lazy val h4sm = (project in file("."))
   .settings(name := "h4sm")
   .settings(commonSettings)
-  .settings(skip in publish := true)
+  .settings(
+    skip in publish := true,
+    aggregate in reStart := false
+  )
   .dependsOn(auth, db, files, features, permissions, dbtesting)
   .dependsOn(dbtesting % "test->test")
   .aggregate(auth, db, files, features, permissions, dbtesting)
