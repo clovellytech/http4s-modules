@@ -4,7 +4,7 @@ import java.time.Instant
 
 final case class UserRequest(
   username: String,
-  password: Array[Byte]
+  password: String
 )
 
 final case class UserDetail(

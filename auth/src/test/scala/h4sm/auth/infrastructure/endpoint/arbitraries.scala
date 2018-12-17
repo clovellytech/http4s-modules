@@ -10,6 +10,6 @@ object arbitraries {
     for {
       username <- nonEmptyString
       password <- nonEmptyString
-    } yield UserRequest(username, password.getBytes)
+    } yield UserRequest(username, password)
   }
 }

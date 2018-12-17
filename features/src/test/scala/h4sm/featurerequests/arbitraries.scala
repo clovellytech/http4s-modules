@@ -17,7 +17,7 @@ object arbitraries {
   implicit val userRequest : Arbitrary[UserRequest] = Arbitrary {
     for {
       s <- nonEmptyString
-      s2 <- nonEmptyString.map(_.getBytes)
+      s2 <- nonEmptyString
     } yield UserRequest(s, s2)
   }
 }

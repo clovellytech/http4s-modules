@@ -11,7 +11,7 @@ class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
   val endpoints = AuthClient.fromTransactor(testTransactor)
   import endpoints._
 
-  val user = UserRequest("zak", "password".getBytes)
+  val user = UserRequest("zak", "password")
 
   testIO("a signup request should return 200 status"){
     for {

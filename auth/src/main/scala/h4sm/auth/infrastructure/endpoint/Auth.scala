@@ -60,7 +60,7 @@ extends Http4sDsl[F] {
         userRequest <- req.as[UserRequest]
         foundUser <- userService.byUsername(userRequest.username).isDefined
         _ <- if(foundUser) F.raiseError(Error.Duplicate()) else ().pure[F]
-        hash <- hasher.hashpw[F](userRequest.password)
+        hash <- hasher.hashpw[F](userRequest.password.getBytes())
         user = User(userRequest.username, hash.getBytes)
         _ <- userService.insertGetId(user).getOrElseF(F.raiseError(Error.Duplicate()))
         result <- Ok()
@@ -75,7 +75,7 @@ extends Http4sDsl[F] {
         u <- userService.byUsername(userRequest.username).toRight(Error.NotFound() : Throwable).value.flatMap(_.raiseOrPure[F])
         (user, uuid, joinTime) = u
         hash = PasswordHash[A](new String(user.hash))
-        status <- hasher.checkpw[F](userRequest.password, hash)
+        status <- hasher.checkpw[F](userRequest.password.getBytes, hash)
         resp <- if(status == Verified) Ok() else F.raiseError(Error.BadLogin() : Throwable)
         tok <- bearerTokenAuth.create(uuid)
       } yield bearerTokenAuth.embed(resp, tok)
