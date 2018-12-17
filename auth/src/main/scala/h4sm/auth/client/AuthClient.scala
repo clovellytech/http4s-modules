@@ -25,13 +25,13 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
   val auth = authEndpoints.endpoints.orNotFound
 
   def getAuthHeaders(from: Response[F]) : Headers =
-    from.headers.filter(_.name.toString startsWith "Authorization")
+    from.headers.filter(_.name.toString.toLowerCase startsWith "authorization")
 
   def injectAuthHeader(from: Response[F])(to: Request[F]): Request[F] =
     to.withHeaders(getAuthHeaders(from))
 
   def threadResponse(resp: Response[F])(req: Request[F]): F[Response[F]] = {
-    val sessionReq = req.withHeaders(resp.headers.filter(_.name.toString.startsWith("Authorization")))
+    val sessionReq = req.withHeaders(resp.headers.filter(_.name.toString.toLowerCase.startsWith("authorization")))
     auth.run(sessionReq)
   }
 
