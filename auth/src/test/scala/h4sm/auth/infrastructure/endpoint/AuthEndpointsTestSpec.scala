@@ -22,6 +22,18 @@ class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
     }
   }
 
+  testIO("a user exists request should return false for no user"){
+    userExists(user.username).map(_ should equal (false))
+  }
+
+  testIO("a signed up user should show user exists"){
+    for {
+      _ <- postUser(user)
+      exists <- userExists(user.username)
+      _ <- deleteUser(user.username)
+    } yield exists should equal (true)
+  }
+
   testIO("a login request should return 200"){
     for {
       _ <- postUser(user)

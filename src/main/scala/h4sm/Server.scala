@@ -18,12 +18,13 @@ import scala.concurrent.ExecutionContext
 /*
  * Build a server that uses every module in this project...
  */
-class Server[F[_] : ContextShift : ConcurrentEffect : Timer](implicit
+class Server[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.ConfigAsk](implicit
   C : ConfigAsk[F]
 ) {
   def createServer : Resource[F, ExitCode] = for {
     cfg <- Resource.liftF(C.ask)
-    MainConfig(db, fc, ServerConfig(host, port, numThreads)) = cfg
+    MainConfig(db, fc, ServerConfig(host, port, numThreads), test) = cfg
+    _ = if (test) println("DANGER, RUNNING IN TEST MODE!!")
     connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
     tranec <- ExecutionContexts.cachedThreadPool[F]
     xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
@@ -36,8 +37,11 @@ class Server[F[_] : ContextShift : ConcurrentEffect : Timer](implicit
         .bindHttp(port, host)
         .withHttpApp(
           Router(
-            "users" -> auth.endpoints,
-            "files" -> files.endpoints
+            "/users" -> {
+              if (test) auth.testService <+> auth.endpoints
+              else auth.endpoints
+            },
+            "/files" -> files.endpoints
           ).orNotFound
         )
         .serve
@@ -49,7 +53,17 @@ class Server[F[_] : ContextShift : ConcurrentEffect : Timer](implicit
 }
 
 object ServerMain extends IOApp {
-  val server = new Server[IO]
+  def run(args: List[String]): IO[ExitCode] = {
+    implicit val cfg : ConfigAsk[IO] = getConfigAsk[IO].map { (c : MainConfig) =>
+      args match {
+        case "test" :: _ => c.copy(test = true)
+        case _ => c
+      }
+    }
+    implicit val fcfg : files.config.ConfigAsk[IO] = cfg.map(_.files)
 
-  def run(args: List[String]): IO[ExitCode] = server.createServer.use(IO.pure)
+    val server = new Server[IO]
+
+    server.createServer.use(IO.pure)
+  }
 }

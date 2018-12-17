@@ -7,6 +7,7 @@ import cats.effect.Sync
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserDetail, UserRequest}
 import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import org.http4s._
+import org.http4s.circe._
 import org.http4s.implicits._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
@@ -20,6 +21,8 @@ class AuthClient[F[_]: Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra]
 extends Http4sDsl[F] with Http4sClientDsl[F] {
   val userService = implicitly[UserRepositoryAlgebra[F]]
   val tokenService = implicitly[TokenRepositoryAlgebra[F]]
+
+  implicit val booldecoder : EntityDecoder[F, Boolean] = jsonOf
 
   val authEndpoints: AuthEndpoints[F, BCrypt] = new AuthEndpoints[F, BCrypt](BCrypt)
   val auth = authEndpoints.endpoints.orNotFound
@@ -47,8 +50,18 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
 
   // For the client, simply thread the most recent response back into any request that needs
   // authorization. There should probably be a better way to do this, maybe state monad or something.
-  def getUser(userName: String, continue: Response[F]): Either[ParseFailure, F[Response[F]]] =
-    Uri.fromString(s"/user/$userName").map(uri => GET(uri).flatMap(threadResponse(continue)(_)))
+  def getUser(username: String, continue: Response[F]): Either[ParseFailure, F[Response[F]]] =
+    Uri.fromString(s"/user/$username").map(uri => GET(uri).flatMap(threadResponse(continue)(_)))
+
+  def userExists(username : String) : F[Boolean] = 
+    Uri.fromString(s"/exists/$username").fold(
+      _ => false.pure[F],
+      uri => for {
+        req <- GET(uri)
+        resp <- auth.run(req)
+        result <- resp.as[Boolean]
+      } yield result
+    )
 
   def getUser(headers : Headers) : F[UserDetail] = for {
     req <- GET(uri("/user"))

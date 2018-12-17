@@ -43,6 +43,8 @@ extends Http4sDsl[F] {
   val tokenService = implicitly[TokenRepositoryAlgebra[F]]
   val F = implicitly[Sync[F]]
 
+  implicit val boolEncoder : EntityEncoder[F, Boolean] = jsonEncoderOf
+
   val bearerTokenAuth = BearerTokenAuthenticator(
     tokenTrans(tokenService),
     userTrans(userService),
@@ -82,6 +84,8 @@ extends Http4sDsl[F] {
 
       res.recoverWith{ case _ => BadRequest() }
     }
+
+    case GET -> Root / "exists" / username => userService.byUsername(username).isDefined.flatMap(Ok apply _)
   }
 
   val authService: BearerAuthService[F] = {
@@ -97,6 +101,15 @@ extends Http4sDsl[F] {
 
       case GET -> Root / "user" / name asAuthed _ => respUser(userService.byUsername(name))
     }
+  }
+
+  def testService : HttpRoutes[F] = HttpRoutes.of {
+    case GET -> Root / "istest" => Ok("true")
+    case DELETE -> Root / username => (for {
+      u <- userService.byUsername(username)
+      _ <- OptionT.liftF(userService.delete(u._2))
+      resp <- OptionT.liftF(Ok())
+    } yield resp).getOrElseF(BadRequest())
   }
 
   def endpoints : HttpRoutes[F] = unauthService <+> Auth.liftService(authService)
