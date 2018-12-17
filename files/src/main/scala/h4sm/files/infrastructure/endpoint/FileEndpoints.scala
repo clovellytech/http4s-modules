@@ -15,9 +15,11 @@ import h4sm.files.domain.FileMetaAlgebra
 import org.http4s.dsl._
 import tsec.authentication._
 import config._
+import doobie.util.transactor.Transactor
 import h4sm.files.db.FileInfoId
 import org.http4s.headers.Location
 import fs2.Stream
+import h4sm.files.infrastructure.backends.{FileMetaService, LocalFileStoreService}
 
 import scala.concurrent.ExecutionContext
 
@@ -103,4 +105,17 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
   }
 
   def endpoints : HttpRoutes[F] = unAuthEndpoints.combineK(auth.Auth.liftService(authEndpoints))
+}
+
+object FileEndpoints {
+  def persistingEndpoints[F[_] : Sync : ContextShift : ConfigAsk](
+    xa : Transactor[F],
+    authEndpoints: AuthEndpoints[F, _],
+    ec : ExecutionContext
+  ) : FileEndpoints[F] = {
+    implicit val fileMeta = new FileMetaService[F](xa)
+    implicit val ex = ec
+    implicit val fileStore = new LocalFileStoreService[F]()
+    new FileEndpoints[F](authEndpoints)
+  }
 }
