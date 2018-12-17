@@ -81,3 +81,7 @@ GitHub.sublime-settings
 /.ensime
 
 /.ensime_cache/
+
+/.bloop/
+/project/.bloop/
+/.metals/
