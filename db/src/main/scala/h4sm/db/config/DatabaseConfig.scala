@@ -23,10 +23,13 @@ object DatabaseConfig {
     * Runs the flyway migrations against the target database
     */
   def initializeDb[M[_] : Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] = Sync[M].delay {
-    val fw = new Flyway()
-    fw.setDataSource(ds)
-    fw.setSchemas(schemaName)
-    fw.setLocations(s"db/$schemaName/migration")
+    val fw = {
+      Flyway.configure()
+            .dataSource(ds)
+            .schemas(schemaName)
+            .locations(s"db/$schemaName/migration")
+            .load()
+    }
     Try{
       fw.migrate()
       ()
