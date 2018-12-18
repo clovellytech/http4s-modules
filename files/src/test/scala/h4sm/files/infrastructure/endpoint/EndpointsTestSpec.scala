@@ -5,7 +5,6 @@ package endpoint
 import java.io.{ByteArrayOutputStream, File, PrintStream}
 
 import cats.effect.IO
-import cats.effect.internals.IOContextShift
 import h4sm.auth.client.{AuthClient, IOTestAuthClient}
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
 import org.scalatest._
@@ -23,7 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with IOTestAuthClient {
   val xa = testTransactor
-  implicit val cs = IOContextShift(global)
+  implicit val cs = IO.contextShift(global)
   val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
   val authClient = AuthClient.fromTransactor(xa)
 
