@@ -29,20 +29,17 @@ object dependencies {
   val simulacrum = "0.14.0"
   val tsec = "0.1.0-M1-SNAPSHOT"
 
-  def orgVer(org : String, ver : String)(deps : String*) : Seq[ModuleID] = deps.map(org %% _ % ver)
-  def org(org : String)(as : (String, String)*) : Seq[ModuleID] = as.map{ case (p, v) => org %% p % v }
-
-  val httpDeps = orgVer("org.http4s", dependencies.http4s)(
+  val httpDeps = Seq(
     "http4s-blaze-server",
     "http4s-blaze-client",
     "http4s-circe",
     "http4s-dsl"
-  ) ++ orgVer("io.circe", dependencies.circe)(
+  ).map("org.http4s" %% _ % http4s) ++ Seq(
     "circe-core",
     "circe-generic",
     "circe-parser",
     "circe-java8"
-  )
+  ).map("io.circe" %% _ % circe)
 
   val testDeps = Seq(
     "org.scalatest" %% "scalatest" % scalaTest,
@@ -54,23 +51,23 @@ object dependencies {
 
   val dbDeps = Seq(
     "org.flywaydb" % "flyway-core" % flyway,
-  ) ++ orgVer("org.tpolecat", doobie)(
+  ) ++ Seq(
     "doobie-core",
     "doobie-postgres",
     "doobie-hikari"
-  )
+  ).map("org.tpolecat" %% _ % doobie)
 
-  val commonDeps = org("org.typelevel")(
+  val commonDeps = Seq(
     "cats-core" -> cats,
     "cats-effect" -> catsEffect,
     "cats-mtl-core" -> catsMtl
-  ) ++ Seq(
+  ).map(("org.typelevel" %% (_ : String) % (_: String)).tupled) ++ Seq(
     "com.github.pureconfig" %% "pureconfig" % pureConfig,
     "ch.qos.logback" %  "logback-classic" % logback,
     "com.github.mpilquist" %% "simulacrum" % simulacrum
   ) 
 
-  val authDeps = orgVer("io.github.jmcardon", tsec)(
+  val authDeps = Seq(
     "tsec-common",
     "tsec-password",
     "tsec-cipher-jca",
@@ -80,5 +77,5 @@ object dependencies {
     "tsec-jwt-mac",
     "tsec-jwt-sig",
     "tsec-http4s"
-  )
+  ).map("io.github.jmcardon" %% _ % tsec)
 }
