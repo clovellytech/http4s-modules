@@ -23,11 +23,12 @@ object dependencies {
   val flyway = "5.2.4"
   val http4s = "0.20.0-M4"
   val logback = "1.2.3"
+  val postgres = "42.2.5"
   val pureConfig = "0.9.2"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
   val simulacrum = "0.14.0"
-  val tsec = "0.1.0-M1-SNAPSHOT"
+  val tsec = "0.1.0-ct"
 
   val httpDeps = Seq(
     "http4s-blaze-server",
@@ -51,6 +52,7 @@ object dependencies {
 
   val dbDeps = Seq(
     "org.flywaydb" % "flyway-core" % flyway,
+    "org.postgresql" % "postgresql" % postgres
   ) ++ Seq(
     "doobie-core",
     "doobie-postgres",
