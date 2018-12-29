@@ -26,7 +26,7 @@ The feature requests module has a dependency on the `auth` module. This line cau
 
 Get Started
 ---
-Releases coming soon... For now, just clone and publishLocal. Then add:
+Add any of the following dependencies to your build.sbt:
 
 ```
 libraryDependencies ++= Seq(
@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
 	"h4sm-features",
 	"h4sm-files", 
 	"h4sm-permissions"
-).map("com.clovellytech" %% _ % "0.0.8")
+).map("com.clovellytech" %% _ % "0.0.13")
 ```
 
 Setup

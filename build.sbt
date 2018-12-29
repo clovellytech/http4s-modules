@@ -1,4 +1,5 @@
 import dependencies._
+import xerial.sbt.Sonatype._
 
 val commonSettings = Seq(
   organization := "com.clovellytech",
@@ -9,11 +10,28 @@ val commonSettings = Seq(
   scalacOptions in (Compile, console) ~= (_.filterNot(options.badScalacConsoleFlags.contains(_)))
 ) ++ compilerPlugins
 
+lazy val publishSettings = Seq(
+  useGpg := true,
+  publishMavenStyle := true,
+  publishTo := sonatypePublishTo.value,
+  publishArtifact in Test := false,
+  homepage := Some(url("https://github.com/clovellytech/http4s-modules")),
+  pomIncludeRepository := Function.const(false),
+  sonatypeProfileName := "com.clovellytech",
+
+  // License of your choice
+  licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+
+  // Where is the source code hosted
+  sonatypeProjectHosting := Some(GitHubHosting("clovellytech", "http4s-modules", "pattersonzak@gmail.com"))
+)
+
 val withTests : String = "compile->compile;test->test"
 val testOnly : String = "test->test"
 
 lazy val db = (project in file("./db"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "h4sm-db",
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDepsInTestOnly
@@ -21,6 +39,7 @@ lazy val db = (project in file("./db"))
 
 lazy val dbtesting = (project in file("./dbtesting"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "h4sm-dbtesting",
     libraryDependencies ++= commonDeps ++ httpDeps ++ dbDeps ++ testDeps
@@ -29,6 +48,7 @@ lazy val dbtesting = (project in file("./dbtesting"))
 
 lazy val auth = (project in file("./auth"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "h4sm-auth",
     libraryDependencies ++= commonDeps ++ authDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
@@ -38,6 +58,7 @@ lazy val auth = (project in file("./auth"))
 
 lazy val files = (project in file("./files"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "h4sm-files",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
@@ -46,6 +67,7 @@ lazy val files = (project in file("./files"))
 
 lazy val features = (project in file("./features"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "h4sm-features",
     mainClass in reStart := Some("h4sm.featurerequests.Server"),
@@ -55,6 +77,7 @@ lazy val features = (project in file("./features"))
 
 lazy val permissions = (project in file("./permissions"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "h4sm-permissions",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
@@ -64,6 +87,7 @@ lazy val permissions = (project in file("./permissions"))
 lazy val docs = (project in file("./docs"))
   .settings(name := "h4sm-docs")
   .enablePlugins(TutPlugin)
+  .settings(publishSettings)
   .settings(commonSettings)
   .settings(
     name := "docs"
