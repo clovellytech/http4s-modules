@@ -13,6 +13,13 @@ To provide a library of production ready modules, complete with database schema,
 * permissions - Built on top of tsec-http4s, an easy way to create routes that are guarded by a user having certain permissions.
 * more to come! Something you would like to see here? Submit an issue! 
 
+Contributors and Recognition
+---
+PRs and issues are so welcome on this project. Generally contributors don't have to be people that commit code or even write issues. Thanks especially to:
+
+* [@pauljamescleary](https://github.com/pauljamescleary) for the [scala-pet-store](https://github.com/pauljamescleary/scala-pet-store) teaching project.
+* [@estsauver](https://github.com/estsauver) for a pair coding session on this project when it was just starting.
+
 Create your server!
 ---
 
