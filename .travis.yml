@@ -1,0 +1,19 @@
+dist: xenial
+
+services:
+  - postgresql
+
+language: scala
+
+scala:
+   - 2.12.8
+
+before_script:
+  ./script/travis_init.sh
+
+jobs:
+  include:
+    - stage: verify
+
+      script:
+        - sbt test
