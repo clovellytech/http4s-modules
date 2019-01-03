@@ -24,7 +24,7 @@ object dependencies {
   val http4s = "0.20.0-M4"
   val logback = "1.2.3"
   val postgres = "42.2.5"
-  val pureConfig = "0.9.2"
+  val pureConfig = "0.10.1"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
   val simulacrum = "0.14.0"
