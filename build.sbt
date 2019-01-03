@@ -84,16 +84,18 @@ lazy val permissions = (project in file("./permissions"))
   )
   .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
-lazy val docs = (project in file("./docs"))
-  .settings(name := "h4sm-docs")
-  .enablePlugins(TutPlugin)
+lazy val docs = (project in file("./h4sm-docs"))
+  .settings(
+    name := "h4sm-docs",
+    mdocVariables := Map(
+      "VERSION" -> version.value
+    ),
+    cancelable in Global := true
+  )
   .settings(publishSettings)
   .settings(commonSettings)
-  .settings(
-    name := "docs"
-  )
-  .dependsOn(auth, db, features, files)
-  .dependsOn(dbtesting % "test->test")
+  .enablePlugins(MdocPlugin)
+  .dependsOn(auth, db, dbtesting, features, files)
 
 lazy val h4sm = (project in file("."))
   .settings(name := "h4sm")
@@ -103,5 +105,4 @@ lazy val h4sm = (project in file("."))
     aggregate in reStart := false
   )
   .dependsOn(auth, db, files, features, permissions, dbtesting)
-  .dependsOn(dbtesting % "test->test")
   .aggregate(auth, db, files, features, permissions, dbtesting)
