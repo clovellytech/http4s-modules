@@ -5,13 +5,13 @@ This project aims to supply a basket of modules that you can pull from and confi
 
 Let's create a server that allows users to log in and submit feature requests for our new site.
 
-```tut:silent
+```scala mdoc
 import cats._
 import cats.implicits._
 import cats.effect.IO
 import h4sm._
-import doobie.hikari.HikariTransactor
-import db.config.DatabaseConfig
+import doobie._
+import h4sm.db.config.DatabaseConfig
 ```
 
 Initializing Databases
@@ -21,15 +21,11 @@ Database schemas come pre-packaged with each module. Here we will import the nee
 
 The below will initialize our database schema and create a transactor that we can use for the rest of this documentation. A proper main function that would launch a server is provided as an example in `h4sm.featurerequests.Server`
 
-```tut
+```scala mdoc
+import scala.concurrent.ExecutionContext.Implicits.global
+implicit val cs = IO.contextShift(global)
 val db = pureconfig.loadConfigOrThrow[DatabaseConfig]("db")
-val transactor : IO[HikariTransactor[IO]] = for {
-	xa <- HikariTransactor.newHikariTransactor[IO](db.driver, db.url, db.user, db.password)
-	initSchema = DatabaseConfig.initializeFromTransactor(xa) _
-	_ <- initSchema("ct_auth")
-	_ <- initSchema("ct_feature_requests")
-} yield xa 
-
+val transactor : IO[Transactor[IO]] = dbtesting.transactor.getInitializedTransactor(db, "ct_auth", "ct_feature_requests") 
 val xa = transactor.unsafeRunSync()
 ```
 
@@ -38,7 +34,7 @@ The `ct_auth` and `ct_featurerequests` schemas are defined in Flyway migrations 
 Building endpoints
 --
 
-```tut
+```scala mdoc
 import tsec.passwordhashers.jca.BCrypt
 import auth.infrastructure.endpoint._
 import featurerequests.infrastructure.endpoint._
@@ -55,8 +51,9 @@ val voteEndpoints = authService.liftService(votes.endpoints)
 
 Now we can start sending some requests to our endpoints. Let's create a user by registering, then logging in and fetching user details.
 
-```tut
-import org.http4s._
+```scala mdoc
+import org.http4s.implicits._
+import org.http4s.Uri.uri
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 
@@ -67,39 +64,16 @@ import ioClient._
 
 val authClient = authEndpoints.endpoints.orNotFound
 
-val userReq = UserRequest("email", "pass".getBytes)
+val userReq = UserRequest("email", "pass")
 val user : IO[UserDetail] = for {
-	registerReq <- POST(uri("/user"), userReq)
-	loginReq <- POST(uri("/login"), userReq)
-	registerRes <- authClient.run(registerReq)
+	registerReq <- POST(userReq, uri("/user"))
+	loginReq <- POST(userReq, uri("/login"))
+	_ <- authClient.run(registerReq)
 	loginRes <- authClient.run(loginReq)
-	headers = loginRes.headers.filter(_.name.toString.startsWith("Authorization"))
+	headers = loginRes.headers.filter(_.name.toString.toLowerCase.startsWith("authorization"))
 	userReq <- GET(uri("/user"))
 	userRes <- authClient.run(userReq.withHeaders(headers))
 	_ = println(userRes.status)
 	u <- userRes.as[UserDetail]
 } yield u
-
-user.unsafeRunSync()
-```
-
-And we can see what would happen if the login request were invalid:
-
-```tut
-import cats.data.OptionT
-
-val user2 : OptionT[IO, UserDetail] = for {
-	loginReq <- OptionT.liftF(POST(uri("/login"), userReq.copy(password="wrong".getBytes)))
-	loginRes <- OptionT.liftF(authClient.run(loginReq))
-	headers = loginRes.headers.filter(_.name.toString startsWith "Authorization")
-	userReq <- OptionT.liftF(GET(uri("/user")))
-	userRes <- OptionT.liftF(authClient.run(userReq withHeaders headers))
-	_ = println(userRes.status)
-	user <- {
-		if(userRes.status == Status.Ok) OptionT.liftF(userRes.as[UserDetail]) 
-		else OptionT.none[IO, UserDetail]
-	}
-} yield user
-
-println("User is " + user2.value.unsafeRunSync())
 ```
