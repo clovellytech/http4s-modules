@@ -9,7 +9,7 @@ import org.flywaydb.core.api.FlywayException
 
 final case class DatabaseConfig(
   host: String,
-  port: String,
+  port: Int,
   user: String,
   password: String,
   databaseName: String

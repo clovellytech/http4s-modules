@@ -5,18 +5,20 @@ package endpoint
 import java.io.{ByteArrayOutputStream, File, PrintStream}
 
 import cats.effect.IO
+import cats.implicits._
+import doobie.implicits._
 import h4sm.auth.client.{AuthClient, IOTestAuthClient}
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
-import org.scalatest._
-import org.scalatest.prop.PropertyChecks
-import tsec.passwordhashers.jca.BCrypt
 import h4sm.files.config.FileConfig
 import h4sm.files.domain.FileInfo
 import h4sm.files.infrastructure.backends._
 import h4sm.files.db.sql.{files => filesSql}
 import h4sm.files.db.sql.arbitraries._
-import doobie.implicits._
-import cats.implicits._
+import io.circe.generic.auto._
+import org.scalatest._
+import org.scalatest.prop.PropertyChecks
+import tsec.passwordhashers.jca.BCrypt
+
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

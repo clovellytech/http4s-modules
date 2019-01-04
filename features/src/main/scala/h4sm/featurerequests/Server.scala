@@ -2,18 +2,21 @@ package h4sm.featurerequests
 
 import cats.effect._
 import cats.implicits._
+import com.typesafe.config.ConfigFactory
+import doobie.hikari.HikariTransactor
+import doobie.util.transactor.Transactor
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import h4sm.db.config.DatabaseConfig
 import h4sm.featurerequests.config.FeatureRequestConfig
-import doobie.hikari.HikariTransactor
-import doobie.util.transactor.Transactor
+import io.circe.generic.auto._
+import io.circe.config.syntax._
 import infrastructure.endpoint._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
-import tsec.passwordhashers.jca.BCrypt
 
 import scala.concurrent.ExecutionContext
+import tsec.passwordhashers.jca.BCrypt
 
 class Server[F[_] : ConcurrentEffect : Timer : ContextShift] {
   val E = implicitly[ConcurrentEffect[F]]
@@ -38,14 +41,12 @@ class Server[F[_] : ConcurrentEffect : Timer : ContextShift] {
       .as(ExitCode.Success)
   }
 
-  def run(ec : ExecutionContext) : F[ExitCode] = {
-    val FeatureRequestConfig(host, port, db) = pureconfig.loadConfigOrThrow[FeatureRequestConfig]
-
-    for {
-      _ <- E.delay(DatabaseConfig.initialize(db)("ct_auth", "featurerequests"))
-      exitCode <- HikariTransactor
-                    .newHikariTransactor(db.driver, db.url, db.user, db.password, ec, ec)
-                    .use(app(_, port, host))
-    } yield exitCode
-  }
+  def run(ec : ExecutionContext) : F[ExitCode] = for {
+    cfg <- ConfigFactory.load().as[FeatureRequestConfig].leftMap(_.asInstanceOf[Throwable]).raiseOrPure[F]
+    FeatureRequestConfig(host, port, db) = cfg
+    _ <- E.delay(DatabaseConfig.initialize(db)("ct_auth", "featurerequests"))
+    exitCode <- HikariTransactor
+                  .newHikariTransactor(db.driver, db.url, db.user, db.password, ec, ec)
+                  .use(app(_, port, host))
+  } yield exitCode
 }

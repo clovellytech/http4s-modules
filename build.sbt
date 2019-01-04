@@ -10,6 +10,7 @@ val commonSettings = Seq(
   scalacOptions in (Compile, console) ~= (_.filterNot(options.badScalacConsoleFlags.contains(_)))
 ) ++ compilerPlugins
 
+
 lazy val publishSettings = Seq(
   useGpg := true,
   publishMavenStyle := true,
