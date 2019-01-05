@@ -2,19 +2,20 @@ import cats._
 import cats.mtl.{ApplicativeAsk, DefaultApplicativeAsk}
 import cats.effect.Sync
 import cats.implicits._
-import pureconfig.ConfigReader
+import com.typesafe.config.ConfigFactory
 import h4sm.files.config.FileConfig
-
-import scala.reflect.ClassTag
+import io.circe.Decoder
+import io.circe.config.syntax._
+import io.circe.generic.auto._
 
 package object h4sm {
   type ConfigAsk[F[_]] = MainConfig.ConfigAsk[F]
 
-  def getPureConfigAsk[F[_] : Sync, C : ClassTag : ConfigReader] : ApplicativeAsk[F, C] =
+  def getPureConfigAsk[F[_]: Sync, C: Decoder] : ApplicativeAsk[F, C] =
     new DefaultApplicativeAsk[F, C] {
-      val cfg: Eval[C] = Eval.later(pureconfig.loadConfigOrThrow[C])
+      val c : F[C] = ConfigFactory.load().as[C].leftMap(_.asInstanceOf[Throwable]).raiseOrPure[F]
       val applicative: Applicative[F] = implicitly
-      def ask: F[C] = cfg.value.pure[F]
+      def ask: F[C] = c
     }
 
   implicit def ConfigAskFunctor[F[_] : Functor] = new Functor[ApplicativeAsk[F, ?]]{

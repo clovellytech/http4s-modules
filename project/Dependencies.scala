@@ -18,13 +18,13 @@ object dependencies {
   val catsMtl = "0.4.0"
   val catsEffect = "1.1.0"
   val circe = "0.11.0"
+  val circeConfig = "0.6.0"
   val cryptobits = "1.1"
   val doobie = "0.6.0"
   val flyway = "5.2.4"
   val http4s = "0.20.0-M4"
   val logback = "1.2.3"
   val postgres = "42.2.5"
-  val pureConfig = "0.9.2"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
   val simulacrum = "0.14.0"
@@ -40,7 +40,9 @@ object dependencies {
     "circe-generic",
     "circe-parser",
     "circe-java8"
-  ).map("io.circe" %% _ % circe)
+  ).map("io.circe" %% _ % circe) ++ Seq(
+    "io.circe" %% "circe-config" % circeConfig
+  )
 
   val testDeps = Seq(
     "org.scalatest" %% "scalatest" % scalaTest,
@@ -64,7 +66,6 @@ object dependencies {
     "cats-effect" -> catsEffect,
     "cats-mtl-core" -> catsMtl
   ).map(("org.typelevel" %% (_ : String) % (_: String)).tupled) ++ Seq(
-    "com.github.pureconfig" %% "pureconfig" % pureConfig,
     "ch.qos.logback" %  "logback-classic" % logback,
     "com.github.mpilquist" %% "simulacrum" % simulacrum
   ) 
