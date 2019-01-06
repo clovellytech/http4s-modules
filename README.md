@@ -1,6 +1,8 @@
 h4sm - Scala Http4s Modules
 ============
 
+[![Join the chat at https://gitter.im/clovellytech/http4s-modules](https://badges.gitter.im/clovellytech/http4s-modules.svg)](https://gitter.im/clovellytech/http4s-modules?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Create composable microservices or standalone servers with ease using Http4s, cats, Flyway, and PostgreSQL.
 
 Basic Idea
