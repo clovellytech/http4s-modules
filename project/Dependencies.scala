@@ -17,20 +17,21 @@ object dependencies {
   val cats = "1.5.0"
   val catsMtl = "0.4.0"
   val catsEffect = "1.1.0"
-  val circe = "0.10.1"
+  val circe = "0.11.0"
   val circeConfig = "0.6.0"
   val cryptobits = "1.1"
   val doobie = "0.6.0"
   val flyway = "5.2.4"
-  val http4s = "0.20.0-M4"
+  val http4s = "0.20.0-M5-ct"
   val logback = "1.2.3"
   val postgres = "42.2.5"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
   val simulacrum = "0.14.0"
-  val tsec = "0.1.0-ct"
+  val tsec = "0.1.1-ct"
 
   val httpDeps = Seq(
+    "http4s-server",
     "http4s-blaze-server",
     "http4s-blaze-client",
     "http4s-circe",

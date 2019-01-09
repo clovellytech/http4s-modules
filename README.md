@@ -49,7 +49,8 @@ libraryDependencies ++= Seq(
 Setup
 ---
 * We're assuming postgres, and the default connection settings are the same as postgres's defaults. Check `reference.conf`. These settings can be overridden by a file named `application.conf` on your classpath.
-
+* We're depending on tsec with some version updates. Check script/travis_init.sh for some additional steps to clone a fork of tsec.
+* We're depending on a fork of http4s with some version updates. Check script/travis_init.sh for some additional steps to clone a fork of http4s.
 
 Migrations
 ---
