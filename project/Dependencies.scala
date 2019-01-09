@@ -22,7 +22,7 @@ object dependencies {
   val cryptobits = "1.1"
   val doobie = "0.6.0"
   val flyway = "5.2.4"
-  val http4s = "0.20.0-M4"
+  val http4s = "0.20.0-M5-ct"
   val logback = "1.2.3"
   val postgres = "42.2.5"
   val scalaCheck = "1.14.0"
@@ -31,6 +31,7 @@ object dependencies {
   val tsec = "0.1.1-ct"
 
   val httpDeps = Seq(
+    "http4s-server",
     "http4s-blaze-server",
     "http4s-blaze-client",
     "http4s-circe",
