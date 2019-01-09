@@ -1,7 +1,7 @@
 package h4sm.files
 
 import cats.effect.IO
-import cats.syntax.either._
+import cats.implicits._
 import com.typesafe.config.ConfigFactory
 import doobie.util.transactor.Transactor
 import h4sm.db.config.DatabaseConfig
@@ -22,7 +22,7 @@ package object infrastructure {
     ConfigFactory
       .load()
       .as[DatabaseConfig]("db")
-      .leftMap(_.asInstanceOf[Throwable])
+      .leftWiden[Throwable]
       .raiseOrPure[IO]
       .flatMap(getInitializedTransactor(_, schemaNames : _*))
       .unsafeRunSync()

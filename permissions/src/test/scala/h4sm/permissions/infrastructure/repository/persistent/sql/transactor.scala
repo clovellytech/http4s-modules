@@ -16,7 +16,7 @@ object transactor {
     ConfigFactory
       .load()
       .as[DatabaseConfig]("db")
-      .leftMap(_.asInstanceOf[Throwable])
+      .leftWiden[Throwable]
       .raiseOrPure[F]
       .flatMap(getInitializedTransactor[F](_, "ct_auth", "ct_permissions"))
 
