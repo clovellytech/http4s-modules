@@ -36,14 +36,7 @@ object dependencies {
     "http4s-blaze-client",
     "http4s-circe",
     "http4s-dsl"
-  ).map("org.http4s" %% _ % http4s) ++ Seq(
-    "circe-core",
-    "circe-generic",
-    "circe-parser",
-    "circe-java8"
-  ).map("io.circe" %% _ % circe) ++ Seq(
-    "io.circe" %% "circe-config" % circeConfig
-  )
+  ).map("org.http4s" %% _ % http4s)
 
   val testDeps = Seq(
     "org.scalatest" %% "scalatest" % scalaTest,
@@ -69,7 +62,14 @@ object dependencies {
   ).map(("org.typelevel" %% (_ : String) % (_: String)).tupled) ++ Seq(
     "ch.qos.logback" %  "logback-classic" % logback,
     "com.github.mpilquist" %% "simulacrum" % simulacrum
-  ) 
+  ) ++ Seq(
+    "circe-core",
+    "circe-generic",
+    "circe-parser",
+    "circe-java8"
+  ).map("io.circe" %% _ % circe) ++ Seq(
+    "io.circe" %% "circe-config" % circeConfig
+  )
 
   val authDeps = Seq(
     "tsec-common",
