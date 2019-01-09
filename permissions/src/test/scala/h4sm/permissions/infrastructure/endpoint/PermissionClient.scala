@@ -28,7 +28,7 @@ class PermissionClient[F[_] : Sync, Alg](es : PermissionEndpoints[F, Alg]) exten
   } yield ()
 
   def getPermissions(appName : String): F[List[(Permission, PermissionId)]] = for {
-    u <- Uri.fromString(s"/$appName").leftMap(_.asInstanceOf[Throwable]).raiseOrPure[F]
+    u <- Uri.fromString(s"/$appName").leftWiden[Throwable].raiseOrPure[F]
     req <- GET(u)
     res <- endpoints.run(req)
     perms <- res.as[SiteResult[List[(Permission, PermissionId)]]]

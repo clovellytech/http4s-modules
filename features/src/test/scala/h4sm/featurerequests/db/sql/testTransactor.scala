@@ -1,8 +1,8 @@
 package h4sm.featurerequests.db
 package sql
 
-import cats.syntax.either._
 import cats.effect.IO
+import cats.implicits._
 import com.typesafe.config.ConfigFactory
 import doobie.util.transactor.Transactor
 import h4sm.db.config.DatabaseConfig
@@ -18,7 +18,7 @@ object testTransactor {
     ConfigFactory
       .load()
       .as[DatabaseConfig]("db")
-      .leftMap(_.asInstanceOf[Throwable])
+      .leftWiden[Throwable]
       .raiseOrPure[IO]
       .flatMap(getInitializedTransactor(_, "ct_auth", "featurerequests"))
 

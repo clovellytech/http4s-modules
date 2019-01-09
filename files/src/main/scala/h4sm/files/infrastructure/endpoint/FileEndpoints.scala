@@ -92,7 +92,7 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
     case POST -> Root / uuid asAuthed _ => for {
       uuid <- S.delay(UUID.fromString(uuid))
       fileInfo <- F.retrieveMeta(uuid)
-      url <- Uri.fromString(s"/$uuid/${fileInfo.filename.getOrElse("download")}").leftMap(_.asInstanceOf[Throwable]).raiseOrPure[F]
+      url <- Uri.fromString(s"/$uuid/${fileInfo.filename.getOrElse("download")}").leftWiden[Throwable].raiseOrPure[F]
       resp <- TemporaryRedirect(Location(url))
     } yield resp
 

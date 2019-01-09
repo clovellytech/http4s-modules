@@ -13,7 +13,7 @@ package object h4sm {
 
   def getPureConfigAsk[F[_]: Sync, C: Decoder] : ApplicativeAsk[F, C] =
     new DefaultApplicativeAsk[F, C] {
-      val c : F[C] = ConfigFactory.load().as[C].leftMap(_.asInstanceOf[Throwable]).raiseOrPure[F]
+      val c : F[C] = ConfigFactory.load().as[C].leftWiden[Throwable].raiseOrPure[F]
       val applicative: Applicative[F] = implicitly
       def ask: F[C] = c
     }
