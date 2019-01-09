@@ -9,6 +9,7 @@ import cats.implicits._
 import doobie.implicits._
 import h4sm.auth.client.{AuthClient, IOTestAuthClient}
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
+import h4sm.db.config._
 import h4sm.files.config.FileConfig
 import h4sm.files.domain.FileInfo
 import h4sm.files.infrastructure.backends._
@@ -28,7 +29,7 @@ class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with 
   val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
   val authClient = AuthClient.fromTransactor(xa)
 
-  implicit val c = config.getConfigAsk[IO, FileConfig]("files")
+  implicit val c = getPureConfigAsk[IO, FileConfig]("files")
   implicit val fileMetaBackend = new FileMetaService[IO](xa)
   implicit val fileStoreBackend = new LocalFileStoreService[IO]
   val fileEndpoints = new FileEndpoints[IO](authEndpoints)

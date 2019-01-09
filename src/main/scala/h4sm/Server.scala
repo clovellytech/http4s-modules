@@ -5,7 +5,7 @@ import cats.implicits._
 import doobie._
 import auth.infrastructure.endpoint.AuthEndpoints
 import doobie.hikari.HikariTransactor
-import h4sm.db.config.DatabaseConfig
+import h4sm.db.config._
 import h4sm.files.infrastructure.endpoint.FileEndpoints
 import org.http4s.HttpRoutes
 import org.http4s.server.{Router, Server}
@@ -61,7 +61,7 @@ object ServerMain extends IOApp {
       }
     }
 
-    implicit val fcfg : files.config.ConfigAsk[IO] = cfg.map(_.files)
+    implicit val fcfg : files.config.ConfigAsk[IO] = getFileConfigAsk
 
     val server = new H4SMServer[IO]
 
