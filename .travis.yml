@@ -17,3 +17,4 @@ jobs:
 
       script:
         - sbt test
+        - sbt docs/mdoc

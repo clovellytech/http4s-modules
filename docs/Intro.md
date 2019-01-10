@@ -10,6 +10,7 @@ import cats._
 import cats.implicits._
 import cats.effect.IO
 import h4sm._
+import h4sm.db.config._
 import doobie._
 import h4sm.db.config.DatabaseConfig
 ```
@@ -23,9 +24,11 @@ The below will initialize our database schema and create a transactor that we ca
 
 ```scala mdoc
 import scala.concurrent.ExecutionContext.Implicits.global
+import io.circe.generic.auto._
+
 implicit val cs = IO.contextShift(global)
-val db = pureconfig.loadConfigOrThrow[DatabaseConfig]("db")
-val transactor : IO[Transactor[IO]] = dbtesting.transactor.getInitializedTransactor(db, "ct_auth", "ct_feature_requests") 
+val db = loadConfigF[IO, DatabaseConfig]("db")
+val transactor : IO[Transactor[IO]] = db.flatMap(dbtesting.transactor.getInitializedTransactor(_, "ct_auth", "ct_feature_requests"))
 val xa = transactor.unsafeRunSync()
 ```
 

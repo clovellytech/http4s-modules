@@ -40,7 +40,7 @@ class Server[F[_] : ConcurrentEffect : Timer : ContextShift] {
   }
 
   def run(ec : ExecutionContext) : F[ExitCode] = for {
-    cfg <- loadConfigF[F, FeatureRequestConfig]()
+    cfg <- loadConfigF[F, FeatureRequestConfig]
     FeatureRequestConfig(host, port, db) = cfg
     _ <- E.delay(DatabaseConfig.initialize(db)("ct_auth", "featurerequests"))
     exitCode <- HikariTransactor

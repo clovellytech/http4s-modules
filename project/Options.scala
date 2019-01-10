@@ -53,4 +53,6 @@ object options {
   )
 
   val badScalacConsoleFlags = Seq("-Xfatal-warnings", "-Ywarn-unused:imports")
+
+  val consoleFlags = scalac.filterNot(badScalacConsoleFlags contains _)
 }

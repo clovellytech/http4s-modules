@@ -95,6 +95,9 @@ lazy val docs = (project in file("./h4sm-docs"))
   )
   .settings(publishSettings)
   .settings(commonSettings)
+  .settings(
+    scalacOptions := options.consoleFlags
+  )
   .enablePlugins(MdocPlugin)
   .dependsOn(auth, db, dbtesting, features, files)
 
