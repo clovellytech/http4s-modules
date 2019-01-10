@@ -1,6 +1,6 @@
 create schema if not exists ct_feature_requests;
 
-create table if not exists ct_feature_requests.feature_requests (
+create table if not exists ct_feature_requests.feature_request (
   feature_request_id bigserial primary key,
   requesting_user_id uuid,
   create_date timestamp with time zone not null default now(),
