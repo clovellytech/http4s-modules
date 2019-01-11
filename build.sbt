@@ -7,7 +7,8 @@ val commonSettings = Seq(
   scalaVersion := Version.scalaVersion,
   resolvers ++= addResolvers,
   scalacOptions ++= options.scalac,
-  scalacOptions in (Compile, console) ~= (_.filterNot(options.badScalacConsoleFlags.contains(_)))
+  scalacOptions in (Compile, console) ~= (_.filterNot(options.badScalacConsoleFlags.contains(_))),
+  updateOptions := updateOptions.value.withLatestSnapshots(false)
 ) ++ compilerPlugins
 
 
