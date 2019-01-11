@@ -1,7 +1,6 @@
-h4sm - Scala Http4s Modules
+h4sm - Scala Http4s Modules [![Join the chat][gitter-badge]][gitter-url] [![Build Status][travis-badge]][travis-url]
 ============
 
-[![Join the chat at https://gitter.im/clovellytech/http4s-modules](https://badges.gitter.im/clovellytech/http4s-modules.svg)](https://gitter.im/clovellytech/http4s-modules?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Create composable microservices or standalone servers with ease using Http4s, cats, Flyway, and PostgreSQL.
 
@@ -55,3 +54,9 @@ Setup
 Migrations
 ---
 * To start a new database migration, run `./new_migration.sh [project name] [schema name] [migration name]`. This will timestamp a new migration into the correct module directory, such as `./[project name]/src/main/resources/db/[schema name]/migration/<timestamp>__[migration name]` The migration name should not contain whitespace or `.sql`. That script will create the migration file and put you into an editor to complete it.
+
+
+[gitter-badge]: https://badges.gitter.im/clovellytech/http4s-modules.svg
+[gitter-url]: https://gitter.im/clovellytech/http4s-modules?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[travis-badge]: https://travis-ci.com/clovellytech/http4s-modules.svg?branch=master
+[travis-url]: https://travis-ci.com/clovellytech/http4s-modules
