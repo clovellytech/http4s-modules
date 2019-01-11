@@ -6,13 +6,16 @@ import cats.effect.Sync
 import cats.implicits._
 import h4sm.auth.BearerAuthService
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
-import h4sm.permissions.domain.{Permission, PermissionAlgebra}
+import h4sm.permissions.domain.{Permission, PermissionAlgebra, UserPermissionAlgebra}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import tsec.authentication._
 
 
-class PermissionEndpoints[F[_] : Sync : PermissionAlgebra, A](ae : AuthEndpoints[F, A]) extends Http4sDsl[F] {
+class PermissionEndpoints[
+  F[_] : Sync : UserPermissionAlgebra : PermissionAlgebra, A
+](ae : AuthEndpoints[F, A]) extends Http4sDsl[F] {
+
   val F = implicitly[PermissionAlgebra[F]]
   val codecs = new Codecs[F]
   import codecs._

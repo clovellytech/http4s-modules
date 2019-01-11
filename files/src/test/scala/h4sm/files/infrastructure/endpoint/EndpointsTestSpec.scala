@@ -7,7 +7,7 @@ import java.io.{ByteArrayOutputStream, File, PrintStream}
 import cats.effect.IO
 import cats.implicits._
 import doobie.implicits._
-import h4sm.auth.client.{AuthClient, IOTestAuthClient}
+import h4sm.auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserRequest}
 import h4sm.db.config._
 import h4sm.files.config.FileConfig
@@ -19,15 +19,17 @@ import io.circe.generic.auto._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 import tsec.passwordhashers.jca.BCrypt
-
+import h4sm.auth.infrastructure.endpoint.arbitraries._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with IOTestAuthClient {
+class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with IOTestAuthClientChecks {
   val xa = testTransactor
   implicit val cs = IO.contextShift(global)
   val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
   val authClient = AuthClient.fromTransactor(xa)
+
+  val testAuth = new TestAuthClient[IO](authClient)
 
   implicit val c = getPureConfigAsk[IO, FileConfig]("files")
   implicit val fileMetaBackend = new FileMetaService[IO](xa)
@@ -36,11 +38,11 @@ class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with 
   val fileClient = new FilesClient[IO](fileEndpoints)
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)
 
-  "A user with no files" should "be able to retrieve empty list of files" in forAnyUser { implicit headers => _ =>
+  "A user with no files" should "be able to retrieve empty list of files" in forAnyUser(testAuth) { implicit headers => _ =>
     fileClient.listFiles().map(_.result should be (empty))
   }
 
-  "A user" should "be able to upload a file" in forAnyUser2 { implicit headers => (_: UserRequest, fi: FileInfo) =>
+  "A user" should "be able to upload a file" in forAnyUser2(testAuth) { implicit headers => (_: UserRequest, fi: FileInfo) =>
     for {
       upload <- fileClient.postFile(fi, textFile)
       _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(xa)
@@ -49,7 +51,7 @@ class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with 
     }
   }
 
-  "A user with files" should "get a list of files" in forAnyUser2 { implicit headers => (_ : UserRequest, fi: FileInfo) =>
+  "A user with files" should "get a list of files" in forAnyUser2(testAuth) { implicit headers => (_ : UserRequest, fi: FileInfo) =>
     for {
       upload <- fileClient.postFile(fi, textFile)
       fs <- fileClient.listFiles()
@@ -59,7 +61,7 @@ class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with 
     }
   }
 
-  "A user" should "get a specific file" in forAnyUser2 { implicit headers => (_: UserRequest, fi : FileInfo) =>
+  "A user" should "get a specific file" in forAnyUser2(testAuth) { implicit headers => (_: UserRequest, fi : FileInfo) =>
     for {
       upload <- fileClient.postFile(fi, textFile)
       fs <- fileClient.listFiles()

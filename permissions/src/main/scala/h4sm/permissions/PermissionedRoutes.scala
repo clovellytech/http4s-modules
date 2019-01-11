@@ -2,11 +2,9 @@ package h4sm.permissions
 
 import cats.Monad
 import cats.data.{Kleisli, OptionT}
-import cats.implicits._
-import h4sm.permissions.domain.PermissionAlgebra
+import h4sm.auth._
+import h4sm.permissions.domain.UserPermissionAlgebra
 import org.http4s._
-import tsec.authentication.{SecuredRequest, TSecAuthService}
-
 
 /**
   * Route creator for routes blocked by user permissions for authenticated users.
@@ -19,25 +17,23 @@ import tsec.authentication.{SecuredRequest, TSecAuthService}
   */
 object PermissionedRoutes {
 
-  type PermissionedRoutes[F[_], I, A] = Kleisli[OptionT[F, ?], SecuredRequest[F, I, A], Response[F]]
+  def apply[F[_] : UserPermissionAlgebra : Monad](perm : (String, String))(
+    pf : PartialFunction[BearerSecuredRequest[F], F[Response[F]]]
+  ) : BearerAuthService[F] = {
+    val P = implicitly[UserPermissionAlgebra[F]]
 
-  def apply[F[_] : PermissionAlgebra : Monad, I, A](perm : (String, String))(
-    pf : PartialFunction[SecuredRequest[F, I, A], F[Response[F]]]
-  ) : TSecAuthService[I, A, F] = {
-    val P = implicitly[PermissionAlgebra[F]]
+    def hasPermission(id : UserId) : F[Boolean] = P.hasPermission(id, perm._1, perm._2)
 
-    def hasPermission : F[Boolean] = {
-      (P.selectByAttributes _).tupled(perm).isDefined
-    }
-
-    Kleisli { (req: SecuredRequest[F, I, A]) =>
-      val guardedPf = pf.andThen(resp => OptionT.liftF(hasPermission).filter(identity) *> OptionT.liftF(resp))
-      guardedPf.applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
+    Kleisli { (req: BearerSecuredRequest[F]) =>
+      for {
+        _ <- OptionT.liftF(hasPermission(req.authenticator.identity)).filter(identity)
+        resp <- pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
+      } yield resp
     }
   }
 
-  def apply[I, A, F[_]](
-    pf: PartialFunction[SecuredRequest[F, I, A], F[Response[F]]]
-  )(implicit F: Monad[F]): TSecAuthService[I, A, F] =
+  def apply[F[_]](
+    pf: PartialFunction[BearerSecuredRequest[F], F[Response[F]]]
+  )(implicit F: Monad[F]): BearerAuthService[F] =
     Kleisli(req => pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none)))
 }

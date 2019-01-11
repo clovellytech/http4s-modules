@@ -14,12 +14,14 @@ package object auth {
 
   type SecureRandomId = tsec.common.SecureRandomId
 
+  type BearerSecuredRequest[F[_]] = SecuredRequest[F, User, BearerToken]
+
   type BearerToken = TSecBearerToken[UserId]
   val BearerToken = TSecBearerToken
 
   type BearerAuthService[F[_]] = TSecAuthService[User, BearerToken, F]
 
   def BearerAuthService[M[_] : Monad](
-    pf: PartialFunction[SecuredRequest[M, User, BearerToken], M[Response[M]]]
+    pf: PartialFunction[BearerSecuredRequest[M], M[Response[M]]]
   ) : BearerAuthService[M] = TSecAuthService(pf)
 }
