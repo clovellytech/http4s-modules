@@ -51,7 +51,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with PropertyChecks
         _ <- authClient.deleteUser(u.username)
       } yield {
         u.username should equal (detail.username)
-        Duration.between(detail.joinTime, Instant.now()).toMillis should be < 1000L
+        Duration.between(detail.joinTime, Instant.now()).toMillis should be < 5000L
       }
 
       test.unsafeRunSync()

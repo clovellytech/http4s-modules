@@ -30,7 +30,8 @@ trait RequestSQL {
        from ct_feature_requests.vote
        where vote < 0)
 
-    select fs.feature_request_id, fs.requesting_user_id, fs.title, fs.description, fs.create_date, count(upvote_id) as upvotes, count(downvote_id) as downvotes
+    select fs.feature_request_id, fs.requesting_user_id, fs.title, fs.description,
+           count(upvote_id) as upvotes, count(downvote_id) as downvotes
     from ct_feature_requests.feature_request fs
     left outer join upvotes using (feature_request_id)
     left outer join downvotes using (feature_request_id)
@@ -39,7 +40,7 @@ trait RequestSQL {
   """.query
 
   def selectById(featureId : FeatureId) : Query0[(Feature, FeatureId, Instant)] = (select.toFragment ++ sql"""
-    where feature_id = $featureId
+    where feature_request_id = $featureId
   """).query
 
   def insertGetId(feature : Feature) : ConnectionIO[FeatureId] = insert(feature).withUniqueGeneratedKeys("feature_id")
