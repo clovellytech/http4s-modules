@@ -1,32 +1,34 @@
 package h4sm.featurerequests
 package infrastructure.endpoint
 
-import org.scalacheck.Properties
-import org.scalacheck.Prop.forAll
 import cats.effect.IO
 import h4sm.auth.infrastructure.endpoint.UserRequest
-import db.sql.testTransactor.testTransactor
+import db.sql.testTransactor._
 import domain.requests._
 import arbitraries._
 import h4sm.featurerequests.db.domain.VotedFeature
+import org.scalatest.prop.PropertyChecks
 
-object RequestEndpointProperties extends Properties("RequestEndpoint") {
-  val eps = new TestRequests[IO](testTransactor)
-  import eps._
-  import authTestEndpoints._
+object RequestEndpointProperties extends PropertyChecks with DbFixtureSuite {
+  val dbName = "request_endpoints_test_property_spec"
 
-  property("request can be stored") = forAll { (feat: FeatureRequest, u: UserRequest) =>
-    val test : IO[Boolean] = for {
-      _ <- postUser(u)
-      login <- loginUser(u)
-      _ <- addRequest(feat)(login)
-      all <- getRequests
-      res <- all.as[DefaultResult[List[VotedFeature]]]
-      _ <- deleteUser(u.username)
-    } yield {
-      res.result.exists(_.feature.title == feat.title)
+  test("request properties") { p =>
+    import p.reqs._
+    import authTestEndpoints._
+
+    forAll { (feat: FeatureRequest, u: UserRequest) =>
+      val test : IO[Boolean] = for {
+        _ <- postUser(u)
+        login <- loginUser(u)
+        _ <- addRequest(feat)(login)
+        all <- getRequests
+        res <- all.as[DefaultResult[List[VotedFeature]]]
+        _ <- deleteUser(u.username)
+      } yield {
+        res.result.exists(_.feature.title == feat.title)
+      }
+
+      test.unsafeRunSync()
     }
-
-    test.unsafeRunSync()
   }
 }

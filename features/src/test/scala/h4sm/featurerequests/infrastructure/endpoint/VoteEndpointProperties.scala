@@ -1,32 +1,33 @@
 package h4sm.featurerequests
 package infrastructure.endpoint
 
-import org.scalacheck.Properties
-import org.scalacheck.Prop.forAll
 import arbitraries._
 import cats.effect.IO
 import h4sm.auth.infrastructure.endpoint.UserRequest
-import db.sql.testTransactor.testTransactor
 import domain.requests._
 import h4sm.featurerequests.db.domain.VotedFeature
+import org.scalatest.prop.PropertyChecks
 
 
-class VoteEndpointProperties extends Properties("VoteEndpoint") {
-  val eps = new TestRequests[IO](testTransactor)
-  import eps._
-  import authTestEndpoints._
+class VoteEndpointProperties extends PropertyChecks with DbFixtureSuite {
+  val dbName = "vote_endpoints_test_property_spec"
 
-  property("vote can be submitted") = forAll { (feat : FeatureRequest, user : UserRequest) =>
-    val test : IO[Boolean] = for {
-      _ <- postUser(user)
-      login <- loginUser(user)
-      _ <- addRequest(feat)(login)
-      featuresResp <- getRequests
-      allFeatures <- featuresResp.as[DefaultResult[List[VotedFeature]]]
-    } yield {
-      allFeatures.result.exists(_.feature.title == feat.title)
+  test("vote can be submitted prop") { p : FixtureParam =>
+    import p.reqs._
+    import authTestEndpoints._
+
+    forAll { (feat: FeatureRequest, user: UserRequest) =>
+      val test: IO[Boolean] = for {
+        _ <- postUser(user)
+        login <- loginUser(user)
+        _ <- addRequest(feat)(login)
+        featuresResp <- getRequests
+        allFeatures <- featuresResp.as[DefaultResult[List[VotedFeature]]]
+      } yield {
+        allFeatures.result.exists(_.feature.title == feat.title)
+      }
+
+      test.unsafeRunSync()
     }
-
-    test.unsafeRunSync()
   }
 }
