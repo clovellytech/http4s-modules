@@ -12,21 +12,18 @@ import io.circe.generic.auto._
 
 
 object transactor {
-  private def createOrDropDb[F[_] : Sync](db : DatabaseConfig, name : String, word : String) : F[Unit] = {
-    implicitly[Sync[F]].delay {
-      val c = DriverManager.getConnection(s"jdbc:postgresql://${db.host}:${db.port}/", db.user,db.password)
+  private def createOrDropDb[F[_]](db : DatabaseConfig, name : String, word : String)(implicit F : Sync[F]) : F[Unit] =
+    F.delay {
+      Class.forName("org.postgresql.Driver")
+      val c = DriverManager.getConnection(s"jdbc:postgresql://${db.host}:${db.port}/", db.user, db.password)
       val statement = c.createStatement
       println(s"$word database $name")
       statement.executeUpdate(s"$word database $name")
       c.close()
     }
-  }
 
   def createDb[F[_] : Sync](db : DatabaseConfig, name : String) : F[Unit] = createOrDropDb(db, name, "create")
   def dropDb[F[_] : Sync](db : DatabaseConfig, name : String) : F[Unit] = createOrDropDb(db, name, "drop")
-
-  def createDb[F[_] : Sync](name : String) : F[Unit] = loadConfigF[F, DatabaseConfig]("db").flatMap(createDb(_, name))
-  def dropDb[F[_] : Sync](name : String) : F[Unit] = loadConfigF[F, DatabaseConfig]("db").flatMap(dropDb(_, name))
 
   def getTransactor[F[_] : Async : ContextShift] (cfg : DatabaseConfig) : Transactor[F] =
     Transactor.fromDriverManager[F](

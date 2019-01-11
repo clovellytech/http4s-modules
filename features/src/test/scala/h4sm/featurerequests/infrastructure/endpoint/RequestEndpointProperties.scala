@@ -1,18 +1,21 @@
 package h4sm.featurerequests
 package infrastructure.endpoint
 
-import cats.effect.{ContextShift, IO}
-import h4sm.auth.infrastructure.endpoint.UserRequest
-import domain.requests._
 import arbitraries._
+import cats.effect.{ContextShift, IO}
+import domain.requests._
+import h4sm.auth.infrastructure.endpoint.UserRequest
+import h4sm.db.config.{DatabaseConfig, loadConfigF}
 import h4sm.dbtesting.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
+import io.circe.generic.auto._
 import org.scalatest.prop.PropertyChecks
 
-object RequestEndpointProperties extends PropertyChecks with DbFixtureSuite {
+class RequestEndpointProperties extends PropertyChecks with DbFixtureSuite {
   val dbName = "request_endpoints_test_property_spec"
   implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
+  def config : DatabaseConfig = loadConfigF[IO, DatabaseConfig]("db").unsafeRunSync()
 
   test("request properties") { p =>
     val reqs = new TestRequests[IO](p.transactor)
