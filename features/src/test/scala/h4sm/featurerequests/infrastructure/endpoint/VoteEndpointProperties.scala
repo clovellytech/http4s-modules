@@ -2,18 +2,23 @@ package h4sm.featurerequests
 package infrastructure.endpoint
 
 import arbitraries._
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import h4sm.auth.infrastructure.endpoint.UserRequest
 import domain.requests._
+import h4sm.dbtesting.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
 import org.scalatest.prop.PropertyChecks
 
 
 class VoteEndpointProperties extends PropertyChecks with DbFixtureSuite {
   val dbName = "vote_endpoints_test_property_spec"
+  implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+
+  def schemaNames = Seq("ct_auth", "ct_feature_requests")
 
   test("vote can be submitted prop") { p : FixtureParam =>
-    import p.reqs._
+    val reqs = new TestRequests[IO](p.transactor)
+    import reqs._
     import authTestEndpoints._
 
     forAll { (feat: FeatureRequest, user: UserRequest) =>
