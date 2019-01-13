@@ -4,8 +4,7 @@ import sbt.librarymanagement.DependencyBuilders
 object dependencies {
   val addResolvers = Seq(
     "52north for postgis" at "http://52north.org/maven/repo/releases/",
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots"),     
+    Resolver.sonatypeRepo("releases")
   )
   
   val compilerPlugins = Seq(
@@ -22,7 +21,7 @@ object dependencies {
   val cryptobits = "1.1"
   val doobie = "0.6.0"
   val flyway = "5.2.4"
-  val http4s = "0.20.0-SNAPSHOT"
+  val http4s = "0.20.0-M5"
   val logback = "1.2.3"
   val postgres = "42.2.5"
   val scalaCheck = "1.14.0"
