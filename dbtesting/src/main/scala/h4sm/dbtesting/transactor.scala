@@ -7,8 +7,9 @@ import cats.effect.{Async, Sync, ContextShift}
 import cats.implicits._
 import doobie._
 import doobie.util.transactor.Transactor
-import h4sm.db.config.{DatabaseConfig, loadConfigF}
+import h4sm.db.config.DatabaseConfig
 import io.circe.generic.auto._
+import io.circe.config.parser
 
 
 object transactor {
@@ -39,7 +40,7 @@ object transactor {
     DatabaseConfig.initialize[F](cfg)(schemaNames : _*) *> F.delay(getTransactor[F](cfg))
 
   def getTransactorForDb[F[_] : ContextShift : Async](dbName : String, schemaNames : String*) : F[Transactor[F]] =
-    loadConfigF[F, DatabaseConfig]("db")
+    parser.decodePathF[F, DatabaseConfig]("db")
       .flatMap(cfg =>
         getInitializedTransactor(cfg.copy(databaseName = dbName), schemaNames : _*)
       )
