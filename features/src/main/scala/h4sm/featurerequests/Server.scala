@@ -6,8 +6,8 @@ import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import h4sm.db.config._
-import h4sm.featurerequests.config.FeatureRequestConfig
-import io.circe.generic.auto._
+import h4sm.featurerequests.config._
+import io.circe.config.parser
 import infrastructure.endpoint._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -40,7 +40,7 @@ class Server[F[_] : ConcurrentEffect : Timer : ContextShift] {
   }
 
   def run(ec : ExecutionContext) : F[ExitCode] = for {
-    cfg <- loadConfigF[F, FeatureRequestConfig]
+    cfg <- parser.decodeF[F, FeatureRequestConfig]
     FeatureRequestConfig(host, port, db) = cfg
     _ <- E.delay(DatabaseConfig.initialize(db)("ct_auth", "featurerequests"))
     exitCode <- HikariTransactor

@@ -3,22 +3,18 @@ package h4sm.db
 import cats.{Applicative, ApplicativeError, Functor}
 import cats.implicits._
 import cats.mtl.{ApplicativeAsk, DefaultApplicativeAsk}
-import com.typesafe.config.ConfigFactory
 import io.circe.Decoder
-import io.circe.config.syntax._
+import io.circe.config.parser
+import io.circe.generic.semiauto._
 
 package object config {
-  def loadConfigF[F[_], C : Decoder](implicit ev: ApplicativeError[F, Throwable]) : F[C] =
-    ConfigFactory.load().as[C].leftWiden[Throwable].raiseOrPure[F]
-
-  def loadConfigF[F[_], C : Decoder](name : String)(implicit ev: ApplicativeError[F, Throwable]) : F[C] =
-    ConfigFactory.load().as[C](name).leftWiden[Throwable].raiseOrPure[F]
+  implicit val dbConfigDecoder : Decoder[DatabaseConfig] = deriveDecoder
 
   def getPureConfigAsk[F[_], C: Decoder](name : String = "")(implicit
     ev : ApplicativeError[F, Throwable]
   ) : ApplicativeAsk[F, C] =
     new DefaultApplicativeAsk[F, C] {
-      val c : F[C] = loadConfigF[F, C](name)
+      val c : F[C] = parser.decodePathF[F, C](name)
       val applicative: Applicative[F] = implicitly
       def ask: F[C] = c
     }
