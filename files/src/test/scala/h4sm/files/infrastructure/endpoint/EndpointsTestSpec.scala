@@ -74,7 +74,7 @@ class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with 
         val bytes = f
         val bs = new ByteArrayOutputStream()
         val ps = new PrintStream(bs)
-        bytes.chunks.to(fs2.Sink[IO, fs2.Chunk[Byte]](c => IO(ps.write(c.toArray)))).compile.drain.unsafeRunSync()
+        bytes.chunks.through(_.evalMap(c => IO(ps.write(c.toArray)))).compile.drain.unsafeRunSync()
         bs
       }
       _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(xa)
