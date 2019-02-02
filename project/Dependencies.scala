@@ -27,7 +27,7 @@ object dependencies {
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.5"
   val simulacrum = "0.15.0"
-  val tsec = "0.1.1-ct"
+  val tsec = "0.1.0-M2"
 
   val httpDeps = Seq(
     "http4s-server",
