@@ -7,10 +7,10 @@ import cats.effect.IO
 import h4sm.auth.client.AuthClient
 import org.http4s.Status
 import org.scalatest._
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import arbitraries._
 
-class AuthEndpointsProperties extends FlatSpec with Matchers with PropertyChecks {
+class AuthEndpointsProperties extends FlatSpec with Matchers with ScalaCheckPropertyChecks {
   val authClient = AuthClient.fromTransactor(testTransactor)
 
   "A user" should "login" in {

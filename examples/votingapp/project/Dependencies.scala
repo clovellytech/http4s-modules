@@ -30,7 +30,7 @@ object dependencies {
   val logback = "1.2.3"
   val pureConfig = "0.9.2"
   val scalaCheck = "1.14.0"
-  val scalaTest = "3.0.5"
+  val scalaTest = "3.0.6"
   val simulacrum = "0.15.0"
   val tsec = "0.0.1-RC1"
 
