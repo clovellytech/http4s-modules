@@ -7,8 +7,7 @@ import h4sm.auth.infrastructure.endpoint.UserRequest
 import org.http4s.Headers
 import org.scalacheck.Arbitrary
 import org.scalatest.Assertion
-import org.scalatest.prop.PropertyChecks
-
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class TestAuthClient[F[_]: Sync](client : AuthClient[F]) {
   def withUser[A](u: UserRequest)(f: Headers => F[A]): F[A] = for {
@@ -19,7 +18,7 @@ class TestAuthClient[F[_]: Sync](client : AuthClient[F]) {
   } yield result
 }
 
-trait IOTestAuthClientChecks { this : PropertyChecks =>
+trait IOTestAuthClientChecks { this : ScalaCheckPropertyChecks =>
   def forAnyUser[A](tc : TestAuthClient[IO])(f : Headers => UserRequest => IO[Assertion])(implicit
     arb : Arbitrary[UserRequest]
   ) : Assertion = forAll {

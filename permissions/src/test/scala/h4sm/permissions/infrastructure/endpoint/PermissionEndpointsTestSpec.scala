@@ -14,12 +14,17 @@ import h4sm.dbtesting.DbFixtureSuite
 import h4sm.permissions.infrastructure.repository.{PermissionRepository, UserPermissionRepository}
 import permissions.domain._
 import org.scalatest._
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import tsec.passwordhashers.jca.BCrypt
 import repository.persistent.sql.arbitraries._
 import io.circe.config.parser
 
-class PermissionEndpointsTestSpec extends Matchers with PropertyChecks with DbFixtureSuite with IOTestAuthClientChecks {
+class PermissionEndpointsTestSpec
+extends Matchers
+with ScalaCheckPropertyChecks
+with DbFixtureSuite
+with IOTestAuthClientChecks {
+
   def dbName: String = "ct_permissions_endpoints_test_temp"
   implicit def cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def schemaNames: Seq[String] = Seq("ct_auth", "ct_permissions")

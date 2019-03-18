@@ -9,9 +9,9 @@ import h4sm.db.config._
 import h4sm.dbtesting.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
 import io.circe.config.parser
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class VoteEndpointProperties extends PropertyChecks with DbFixtureSuite {
+class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
   val dbName = "vote_endpoints_test_property_spec"
   implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()

@@ -9,9 +9,9 @@ import h4sm.db.config._
 import h4sm.dbtesting.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
 import io.circe.config.parser
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class RequestEndpointProperties extends PropertyChecks with DbFixtureSuite {
+class RequestEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
   val dbName = "request_endpoints_test_property_spec"
   implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def schemaNames = Seq("ct_auth", "ct_feature_requests")

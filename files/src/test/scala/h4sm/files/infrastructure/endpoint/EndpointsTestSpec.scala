@@ -17,13 +17,13 @@ import h4sm.files.db.sql.{files => filesSql}
 import h4sm.files.db.sql.arbitraries._
 import io.circe.generic.auto._
 import org.scalatest._
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import tsec.passwordhashers.jca.BCrypt
 import h4sm.auth.infrastructure.endpoint.arbitraries._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EndpointsTestSpec extends FlatSpec with Matchers with PropertyChecks with IOTestAuthClientChecks {
+class EndpointsTestSpec extends FlatSpec with Matchers with ScalaCheckPropertyChecks with IOTestAuthClientChecks {
   val xa = testTransactor
   implicit val cs = IO.contextShift(global)
   val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
