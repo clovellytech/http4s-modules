@@ -51,6 +51,7 @@ lazy val dbtesting = (project in file("./dbtesting"))
 lazy val auth = (project in file("./auth"))
   .settings(commonSettings)
   .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-auth",
     libraryDependencies ++= commonDeps ++ authDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
@@ -61,6 +62,7 @@ lazy val auth = (project in file("./auth"))
 lazy val files = (project in file("./files"))
   .settings(commonSettings)
   .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-files",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
@@ -70,6 +72,7 @@ lazy val files = (project in file("./files"))
 lazy val features = (project in file("./features"))
   .settings(commonSettings)
   .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-features",
     mainClass in reStart := Some("h4sm.featurerequests.Server"),
@@ -80,6 +83,7 @@ lazy val features = (project in file("./features"))
 lazy val permissions = (project in file("./permissions"))
   .settings(commonSettings)
   .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-permissions",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
