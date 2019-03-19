@@ -4,7 +4,7 @@ package infrastructure
 package endpoint
 
 import auth.infrastructure.endpoint._
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import doobie.Transactor
 import h4sm.auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
 import h4sm.auth.domain.users.UserRepositoryAlgebra
@@ -26,7 +26,6 @@ with DbFixtureSuite
 with IOTestAuthClientChecks {
 
   def dbName: String = "ct_permissions_endpoints_test_temp"
-  implicit def cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def schemaNames: Seq[String] = Seq("ct_auth", "ct_permissions")
   def config: DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 

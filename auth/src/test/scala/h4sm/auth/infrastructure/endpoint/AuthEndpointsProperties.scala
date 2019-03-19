@@ -5,15 +5,21 @@ import java.time.{Duration, Instant}
 
 import cats.effect.IO
 import h4sm.auth.client.AuthClient
+import h4sm.dbtesting.DbFixtureSuite
 import org.http4s.Status
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import arbitraries._
+import h4sm.db.config.DatabaseConfig
+import io.circe.config.parser
 
-class AuthEndpointsProperties extends FlatSpec with Matchers with ScalaCheckPropertyChecks {
+class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
   val authClient = AuthClient.fromTransactor(testTransactor)
+  def dbName: String = "ct_auth_temp_test"
+  def schemaNames: Seq[String] = List("ct_auth")
+  def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 
-  "A user" should "login" in {
+  test("A user should login") { _ =>
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
@@ -27,7 +33,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with ScalaCheckProp
     }
   }
 
-  "A duplicate registration" should "fail" in {
+  test("A duplicate registration should fail")  { _ =>
     forAll { u: UserRequest =>
       val test : IO[Assertion] = for {
         _ <- authClient.postUser(u)
@@ -41,7 +47,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with ScalaCheckProp
     }
   }
 
-  "A login" should "create usable session" in {
+  test("A login create usable session") { _ =>
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
@@ -58,7 +64,7 @@ class AuthEndpointsProperties extends FlatSpec with Matchers with ScalaCheckProp
     }
   }
 
-  "A bad password" should "return 400" in {
+  test("A bad password return 400") { _ =>
     forAll { (u : UserRequest) =>
       for {
         _ <- authClient.postUser(u)

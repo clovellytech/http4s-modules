@@ -2,7 +2,7 @@ package h4sm.featurerequests
 package infrastructure.endpoint
 
 import arbitraries._
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import domain.requests._
 import h4sm.auth.infrastructure.endpoint.UserRequest
 import h4sm.db.config._
@@ -13,7 +13,6 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
   val dbName = "vote_endpoints_test_property_spec"
-  implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
 
