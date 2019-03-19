@@ -7,9 +7,9 @@ import org.scalatest._
 import transactor._
 
 trait DbFixtureSuite extends fixture.FunSuiteLike {
-  def dbName : String
-  implicit def cs : ContextShift[IO]
+  implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def schemaNames : Seq[String]
+  def dbName : String
   def config : DatabaseConfig
 
   case class FixtureParam(transactor : Transactor[IO])

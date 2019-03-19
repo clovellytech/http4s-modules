@@ -7,7 +7,6 @@ import com.typesafe.config.ConfigFactory
 import doobie.util.transactor.Transactor
 import h4sm.db.config.DatabaseConfig
 import io.circe.config.syntax._
-import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext
 import h4sm.dbtesting.transactor.getInitializedTransactor
 
