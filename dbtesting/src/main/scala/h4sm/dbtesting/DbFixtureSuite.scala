@@ -9,7 +9,7 @@ import transactor._
 trait DbFixtureSuite extends fixture.FunSuiteLike {
   implicit def cs : ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
   def schemaNames : Seq[String]
-  def dbName : String
+  def dbName : String = "ct_test_db_" + this.getClass.getSimpleName.toLowerCase
   def config : DatabaseConfig
 
   case class FixtureParam(transactor : Transactor[IO])
@@ -33,5 +33,4 @@ trait DbFixtureSuite extends fixture.FunSuiteLike {
       dropDb[IO](config, dbName).unsafeRunSync()
     }
   }
-
 }

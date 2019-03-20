@@ -47,7 +47,6 @@ object Clients{
 class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks with IOTestAuthClientChecks {
 
   val schemaNames: Seq[String] = List("ct_auth", "ct_files")
-  val dbName: String = "ct_files_temp_test"
   val config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)

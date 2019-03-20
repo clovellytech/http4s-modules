@@ -15,7 +15,6 @@ import io.circe.config.parser
 
 class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
   val authClient = AuthClient.fromTransactor(testTransactor)
-  def dbName: String = "ct_auth_temp_test"
   def schemaNames: Seq[String] = List("ct_auth")
   def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 

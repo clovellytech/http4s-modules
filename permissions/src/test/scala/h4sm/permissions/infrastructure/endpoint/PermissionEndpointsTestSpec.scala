@@ -25,7 +25,6 @@ with ScalaCheckPropertyChecks
 with DbFixtureSuite
 with IOTestAuthClientChecks {
 
-  def dbName: String = "ct_permissions_endpoints_test_temp"
   def schemaNames: Seq[String] = Seq("ct_auth", "ct_permissions")
   def config: DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 

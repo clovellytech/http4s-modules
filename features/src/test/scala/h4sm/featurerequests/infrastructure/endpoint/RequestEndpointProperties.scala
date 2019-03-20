@@ -12,7 +12,6 @@ import io.circe.config.parser
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class RequestEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
-  val dbName = "request_endpoints_test_property_spec"
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
   def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 

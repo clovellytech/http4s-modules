@@ -12,7 +12,6 @@ import io.circe.config.parser
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
-  val dbName = "vote_endpoints_test_property_spec"
   def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
 
