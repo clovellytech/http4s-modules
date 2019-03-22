@@ -104,6 +104,19 @@ lazy val docs = (project in file("./h4sm-docs"))
     scalacOptions := options.consoleFlags
   )
   .enablePlugins(MdocPlugin)
+  .enablePlugins(MicrositesPlugin)
+  .settings(
+    micrositeName := "Composable Modules including database for http4s",
+    micrositeDescription := "Documenting uses of H4SM",
+    micrositeUrl := "https://clovellytech.github.io/h4sm",
+    micrositeAuthor := "clovellytech",
+    micrositeHomepage := "https://clovellytech.github.io/h4sm",
+    micrositeOrganizationHomepage := "http://www.github.com/clovellytech",
+    micrositeGithubOwner := "clovellytech",
+    micrositeGithubToken := getEnvVar("GITHUB_TOKEN"),
+    micrositeGitterChannelUrl := "clovellytech/h4sm",
+    micrositeShareOnSocial := true,
+  )
   .dependsOn(auth, db, dbtesting, features, files)
 
 lazy val h4sm = (project in file("."))

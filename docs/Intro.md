@@ -1,3 +1,9 @@
+---
+layout: home
+title:  "Http4s Modules"
+section: "home"
+---
+
 Http4s Modules
 ===
 
