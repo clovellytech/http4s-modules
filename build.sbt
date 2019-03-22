@@ -113,6 +113,7 @@ lazy val docs = (project in file("./h4sm-docs"))
     micrositeHomepage := "https://clovellytech.github.io/h4sm",
     micrositeOrganizationHomepage := "http://www.github.com/clovellytech",
     micrositeGithubOwner := "clovellytech",
+    micrositeGithubRepo := "http4s-modules",
     micrositeGitterChannelUrl := "clovellytech/h4sm",
     micrositeShareOnSocial := true,
     micrositeCompilingDocsTool := WithMdoc,
