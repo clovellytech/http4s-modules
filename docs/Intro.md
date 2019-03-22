@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: docs
 title:  "Http4s Modules"
 section: "home"
 ---
