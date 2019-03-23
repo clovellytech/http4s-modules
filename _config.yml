@@ -1,5 +1,5 @@
 name: Composable Modules including database for http4s
-baseurl: ''
+baseurl: /http4s-modules
 description: Documenting uses of H4SM
 highlighter: rouge
 docs: true
