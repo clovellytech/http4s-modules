@@ -117,8 +117,7 @@ lazy val docs = (project in file("./h4sm-docs"))
     micrositeGithubRepo := "http4s-modules",
     micrositeGitterChannelUrl := "clovellytech/h4sm",
     micrositeShareOnSocial := true,
-    micrositeCompilingDocsTool := WithMdoc,
-    micrositeHighlightTheme := "monokai"
+    micrositeCompilingDocsTool := WithMdoc
   )
   .dependsOn(auth, db, dbtesting, features, files)
 
