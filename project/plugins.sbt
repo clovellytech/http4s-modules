@@ -1,6 +1,0 @@
-addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "1.1.1" )
-addSbtPlugin("com.47deg"  % "sbt-microsites" % "0.9.0")
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.5")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2")

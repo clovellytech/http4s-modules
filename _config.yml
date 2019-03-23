@@ -1,0 +1,11 @@
+name: Composable Modules including database for http4s
+baseurl: ''
+description: Documenting uses of H4SM
+highlighter: rouge
+docs: true
+collections:
+  tut:
+    output: true
+version: 0.0.23
+org: com.clovellytech
+markdown: kramdown
