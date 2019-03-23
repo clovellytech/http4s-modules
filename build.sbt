@@ -108,7 +108,8 @@ lazy val docs = (project in file("./h4sm-docs"))
   .settings(
     micrositeName := "Composable Modules including database for http4s",
     micrositeDescription := "Documenting uses of H4SM",
-    micrositeUrl := "https://clovellytech.github.io/h4sm",
+    micrositeUrl := "https://clovellytech.github.io/http4s-modules/",
+    micrositeBaseUrl := "/http4s-modules",
     micrositeAuthor := "clovellytech",
     micrositeHomepage := "https://clovellytech.github.io/h4sm",
     micrositeOrganizationHomepage := "http://www.github.com/clovellytech",
