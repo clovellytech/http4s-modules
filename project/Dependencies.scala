@@ -9,7 +9,8 @@ object dependencies {
   
   val compilerPlugins = Seq(
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.10"),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
   )
 
   val bcrypt = "3.1"
@@ -64,7 +65,7 @@ object dependencies {
   ) ++ Seq(
     "circe-core",
     "circe-generic",
-    "circe-parser",
+    "circe-parser", 
     "circe-java8"
   ).map("io.circe" %% _ % circe) ++ Seq(
     "io.circe" %% "circe-config" % circeConfig
