@@ -15,11 +15,9 @@ import h4sm.featurerequests.db.domain.Feature
 import doobie.util.transactor.Transactor
 
 class RequestEndpoints[F[_]: Sync : RequestRepositoryAlgebra] extends Http4sDsl[F] {
-  val requestService = implicitly[RequestRepositoryAlgebra[F]]
-
   def unAuthEndpoints : HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "request" => for {
-      feats <- requestService.selectWithVoteCounts
+      feats <- RequestRepositoryAlgebra[F].selectWithVoteCounts
       resp <- Ok(DefaultResult(feats).asJson)
     } yield resp
   }
@@ -28,7 +26,7 @@ class RequestEndpoints[F[_]: Sync : RequestRepositoryAlgebra] extends Http4sDsl[
     case req @ POST -> Root / "request" asAuthed _ => for {
       featureRequest <- req.request.as[FeatureRequest]
       feature = Feature(req.authenticator.identity.some, featureRequest.title, featureRequest.description)
-      _ <- requestService.insert(feature)
+      _ <- RequestRepositoryAlgebra[F].insert(feature)
       resp <- Ok()
     } yield resp
   }

@@ -13,13 +13,11 @@ import doobie.util.transactor.Transactor
 import tsec.authentication._
 
 class VoteEndpoints[F[_]: Sync : VoteRepositoryAlgebra] extends Http4sDsl[F] {
-  val voteService = implicitly[VoteRepositoryAlgebra[F]]
-
   def submitVote : BearerAuthService[F] = BearerAuthService {
     case req @ POST -> Root / "vote" asAuthed _ => for {
       voteReq <- req.request.as[VoteRequest]
       vote = Vote(voteReq.featureRequest, req.authenticator.identity.some, voteReq.vote, voteReq.comment)
-      _ <- voteService.insert(vote)
+      _ <- VoteRepositoryAlgebra[F].insert(vote)
       resp <- Ok()
     } yield resp
   }

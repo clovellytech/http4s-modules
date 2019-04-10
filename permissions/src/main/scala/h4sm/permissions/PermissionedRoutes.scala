@@ -20,9 +20,7 @@ object PermissionedRoutes {
   def apply[F[_] : UserPermissionAlgebra : Monad](perm : (String, String))(
     pf : PartialFunction[BearerSecuredRequest[F], F[Response[F]]]
   ) : BearerAuthService[F] = {
-    val P = implicitly[UserPermissionAlgebra[F]]
-
-    def hasPermission(id : UserId) : F[Boolean] = P.hasPermission(id, perm._1, perm._2)
+    def hasPermission(id : UserId) : F[Boolean] = UserPermissionAlgebra[F].hasPermission(id, perm._1, perm._2)
 
     Kleisli { (req: BearerSecuredRequest[F]) =>
       for {

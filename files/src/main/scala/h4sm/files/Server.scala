@@ -24,17 +24,12 @@ class Server[
        : ServerConfigAsk
        : DBConfigAsk] {
 
-  val DBC = implicitly[DBConfigAsk[F]]
-  val S = implicitly[ServerConfigAsk[F]]
-  val C = implicitly[ConfigAsk[F]]
-  val E = implicitly[ConcurrentEffect[F]]
-
   def app(xa: Transactor[F], serverConf : ServerConfig, ec : ExecutionContext): F[ExitCode] = {
     implicit val e = ec
     val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
-    implicit val fileMetaStorage = new FileMetaService (xa) (E)
+    implicit val fileMetaStorage = new FileMetaService(xa)(ConcurrentEffect[F])
     implicit val fileStorage = new LocalFileStoreService[F]
-    val fileEndpoints = new FileEndpoints[F] (authEndpoints)
+    val fileEndpoints = new FileEndpoints[F](authEndpoints)
 
     val httpApp = Router(
       "/auth" -> authEndpoints.endpoints,
@@ -52,10 +47,10 @@ class Server[
 ///  F : Bracket[F, Throwable]
   def run(implicit ec : ExecutionContext): F[ExitCode] = {
     for {
-      db <- DBC.ask
-      serverConf <- S.ask
-      _ <- C.ask
-      _ <- E.delay(DatabaseConfig.initialize(db)("ct_auth", "ct_files"))
+      db <- DBConfigAsk[F].ask
+      serverConf <- ServerConfigAsk[F].ask
+      _ <- ConfigAsk[F].ask
+      _ <- ConcurrentEffect[F].delay(DatabaseConfig.initialize(db)("ct_auth", "ct_files"))
       exitCode <- HikariTransactor
                     .newHikariTransactor(db.driver, db.url, db.user, db.password, ec, ec)
                     .use(app(_, serverConf, ec))

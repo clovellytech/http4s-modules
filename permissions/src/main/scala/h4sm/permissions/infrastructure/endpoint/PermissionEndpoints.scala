@@ -15,22 +15,20 @@ import tsec.authentication._
 class PermissionEndpoints[
   F[_] : Sync : UserPermissionAlgebra : PermissionAlgebra, A
 ](ae : AuthEndpoints[F, A]) extends Http4sDsl[F] {
-
-  val F = implicitly[PermissionAlgebra[F]]
   val codecs = new Codecs[F]
   import codecs._
 
   def createEndpoint : BearerAuthService[F] = PermissionedRoutes("ct_permissions" -> "admin") {
     case req@POST -> Root asAuthed _ => for {
       perm <- req.request.as[Permission]
-      _ <- F.insert(perm)
+      _ <- PermissionAlgebra[F].insert(perm)
       result <- Ok()
     } yield result
   }
 
   def listEndpoint : BearerAuthService[F] = PermissionedRoutes("permissions" -> "view") {
     case GET -> Root asAuthed _ => for {
-      perms <- F.select
+      perms <- PermissionAlgebra[F].select
       sendPerms = perms.map{ case (perm, permid, _) => (perm, permid)}
       res <- Ok(SiteResult(sendPerms))
     } yield res
@@ -38,7 +36,7 @@ class PermissionEndpoints[
 
   def selectByAppEndpoint : BearerAuthService[F] = PermissionedRoutes("permissions" -> "view") {
     case GET -> Root / appName asAuthed _ => for {
-      perms <- F.selectByAppName(appName)
+      perms <- PermissionAlgebra[F].selectByAppName(appName)
       res <- Ok(SiteResult(perms))
     } yield res
   }

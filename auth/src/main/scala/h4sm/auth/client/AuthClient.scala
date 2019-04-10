@@ -17,7 +17,7 @@ import domain.tokens.TokenRepositoryAlgebra
 import domain.users.UserRepositoryAlgebra
 import doobie.util.transactor.Transactor
 
-class AuthClient[F[_]: Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra]
+class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]
 extends Http4sDsl[F] with Http4sClientDsl[F] {
   val userService = implicitly[UserRepositoryAlgebra[F]]
   val tokenService = implicitly[TokenRepositoryAlgebra[F]]
