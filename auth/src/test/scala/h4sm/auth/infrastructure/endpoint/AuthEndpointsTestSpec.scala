@@ -41,7 +41,7 @@ class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
       _ <- deleteUser(user.username)
     } yield {
       login.status should equal(Status.Ok)
-      login.headers.map(_.name.toString) should contain("Authorization")
+      login.headers.toList.map(_.name.toString) should contain("Authorization")
     }
   }
 
