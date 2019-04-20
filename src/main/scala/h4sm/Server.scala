@@ -2,19 +2,19 @@ package h4sm
 
 import cats.effect._
 import cats.implicits._
+import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
+import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import auth.domain.tokens.AsBaseTokenInstances._
+import db.config._
 import doobie._
-import auth.infrastructure.endpoint.AuthEndpoints
 import doobie.hikari.HikariTransactor
-import h4sm.db.config._
-import h4sm.files.infrastructure.endpoint.FileEndpoints
+import files.infrastructure.endpoint.FileEndpoints
 import org.http4s.HttpRoutes
 import org.http4s.server.{Router, Server}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
-import tsec.passwordhashers.jca.BCrypt
-
 import scala.concurrent.ExecutionContext
-
+import tsec.passwordhashers.jca.BCrypt
 
 /*
  * Build a server that uses every module in this project...
@@ -24,13 +24,15 @@ class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.C
 ) {
 
   def router(xa : Transactor[F], testMode : Boolean) : HttpRoutes[F] = {
-    val auth = AuthEndpoints.persistingEndpoints[F, BCrypt](xa)
-    val files = FileEndpoints.persistingEndpoints[F](xa, auth, ExecutionContext.Implicits.global)
+    implicit val userService = new UserRepositoryInterpreter(xa)
+    implicit val tokenService = new TokenRepositoryInterpreter(xa)
+    val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer)
+    val files = FileEndpoints.persistingEndpoints(xa, authEndpoints.Auth, ExecutionContext.Implicits.global)
 
     Router(
       "/users" -> {
-        if (testMode) auth.testService <+> auth.endpoints
-        else auth.endpoints
+        if (testMode) authEndpoints.testService <+> authEndpoints.endpoints
+        else authEndpoints.endpoints
       },
       "/files" -> files.endpoints
     )

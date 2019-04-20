@@ -3,6 +3,8 @@ package h4sm.permissions
 import cats.Monad
 import cats.data.{Kleisli, OptionT}
 import h4sm.auth._
+import h4sm.auth.domain.tokens.AsBaseToken
+import AsBaseToken.ops._
 import h4sm.permissions.domain.UserPermissionAlgebra
 import org.http4s._
 
@@ -17,21 +19,19 @@ import org.http4s._
   */
 object PermissionedRoutes {
 
-  def apply[F[_] : UserPermissionAlgebra : Monad](perm : (String, String))(
-    pf : PartialFunction[BearerSecuredRequest[F], F[Response[F]]]
-  ) : BearerAuthService[F] = {
+  def apply[F[_] : UserPermissionAlgebra : Monad, T[_]](perm : (String, String))(
+    pf : PartialFunction[UserSecuredRequest[F, T], F[Response[F]]]
+  )(implicit a: AsBaseToken[T[UserId]]) : UserAuthService[F, T] = {
     def hasPermission(id : UserId) : F[Boolean] = UserPermissionAlgebra[F].hasPermission(id, perm._1, perm._2)
 
-    Kleisli { (req: BearerSecuredRequest[F]) =>
+    Kleisli { (req: UserSecuredRequest[F, T]) =>
       for {
-        _ <- OptionT.liftF(hasPermission(req.authenticator.identity)).filter(identity)
+        _ <- OptionT.liftF(hasPermission(req.authenticator.asBase.identity)).filter(identity)
         resp <- pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
       } yield resp
     }
   }
 
-  def apply[F[_]](
-    pf: PartialFunction[BearerSecuredRequest[F], F[Response[F]]]
-  )(implicit F: Monad[F]): BearerAuthService[F] =
+  def apply[F[_]: Monad, T[_]](pf: PartialFunction[UserSecuredRequest[F, T], F[Response[F]]]): UserAuthService[F, T] =
     Kleisli(req => pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none)))
 }

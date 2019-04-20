@@ -4,21 +4,21 @@ package infrastructure.endpoint
 
 import cats.effect.Sync
 import cats.implicits._
-import h4sm.auth.BearerAuthService
+import h4sm.auth.{UserAuthService, UserId}
+import h4sm.auth.domain.tokens.AsBaseToken
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import h4sm.permissions.domain.{Permission, PermissionAlgebra, UserPermissionAlgebra}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import tsec.authentication._
 
-
 class PermissionEndpoints[
-  F[_] : Sync : UserPermissionAlgebra : PermissionAlgebra, A
-](ae : AuthEndpoints[F, A]) extends Http4sDsl[F] {
+  F[_] : Sync : UserPermissionAlgebra : PermissionAlgebra, A, T[_]
+](ae : AuthEndpoints[F, A, T])(implicit b: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
   val codecs = new Codecs[F]
   import codecs._
 
-  def createEndpoint : BearerAuthService[F] = PermissionedRoutes("ct_permissions" -> "admin") {
+  def createEndpoint : UserAuthService[F, T] = PermissionedRoutes("ct_permissions" -> "admin") {
     case req@POST -> Root asAuthed _ => for {
       perm <- req.request.as[Permission]
       _ <- PermissionAlgebra[F].insert(perm)
@@ -26,7 +26,7 @@ class PermissionEndpoints[
     } yield result
   }
 
-  def listEndpoint : BearerAuthService[F] = PermissionedRoutes("permissions" -> "view") {
+  def listEndpoint : UserAuthService[F, T] = PermissionedRoutes("permissions" -> "view") {
     case GET -> Root asAuthed _ => for {
       perms <- PermissionAlgebra[F].select
       sendPerms = perms.map{ case (perm, permid, _) => (perm, permid)}
@@ -34,14 +34,14 @@ class PermissionEndpoints[
     } yield res
   }
 
-  def selectByAppEndpoint : BearerAuthService[F] = PermissionedRoutes("permissions" -> "view") {
+  def selectByAppEndpoint : UserAuthService[F, T] = PermissionedRoutes("permissions" -> "view") {
     case GET -> Root / appName asAuthed _ => for {
       perms <- PermissionAlgebra[F].selectByAppName(appName)
       res <- Ok(SiteResult(perms))
     } yield res
   }
 
-  def authServices : BearerAuthService[F] = List(
+  def authServices : UserAuthService[F, T] = List(
     createEndpoint,
     listEndpoint,
     selectByAppEndpoint

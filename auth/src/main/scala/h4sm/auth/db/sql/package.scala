@@ -8,7 +8,7 @@ import doobie.postgres.implicits._
 
 package object sql {
   object users extends UserSQL
-  object tokens extends BearerSQL
+  object tokens extends BaseTokenSql
 
   implicit val userIdMeta = Meta[UserId]
   implicit val instantMeta = Meta[Instant]

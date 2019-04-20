@@ -13,46 +13,42 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.circe._
 import tsec.common._
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
-import tsec.passwordhashers.jca.{BCrypt, JCAPasswordPlatform}
+import tsec.passwordhashers.jca.JCAPasswordPlatform
 import tsec.authentication._
 import db.domain.User
 import domain.Error
 import domain.users.UserRepositoryAlgebra
-import domain.tokens.TokenRepositoryAlgebra
-import doobie.util.transactor.Transactor
+import domain.tokens.{AsBaseToken, TokenRepositoryAlgebra}
 import infrastructure.authentication.TransBackingStore._
-import infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import domain.tokens.AsBaseToken.ops._
+import domain.tokens.AsBaseTokenInstances._
+import domain.tokens.BaseTokenReaderInstances._
 
-
-object AuthEndpoints {
-  def persistingEndpoints[F[_] : Sync, A](xa: Transactor[F], crypt: JCAPasswordPlatform[A] = BCrypt)(
-    implicit P : PasswordHasher[F, A]
-  ) : AuthEndpoints[F, A] = {
-    implicit val userService = new UserRepositoryInterpreter(xa)
-    implicit val tokenService = new TokenRepositoryInterpreter(xa)
-    val authEndpoints =  new AuthEndpoints(crypt)
-    authEndpoints
-  }
-}
-
-class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra : TokenRepositoryAlgebra, A](hasher : JCAPasswordPlatform[A])(
-  implicit P : PasswordHasher[F, A]
-)
-extends Http4sDsl[F] {
-  implicit val boolEncoder : EntityEncoder[F, Boolean] = jsonEncoderOf
-
-  val userService = implicitly[UserRepositoryAlgebra[F]]
-
-  val bearerTokenAuth = BearerTokenAuthenticator(
-    tokenTrans(TokenRepositoryAlgebra[F]),
+object Authenticators {
+  def bearer[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]: UserAuthenticator[F, TSecBearerToken] = BearerTokenAuthenticator(
+    tokenTrans[TSecBearerToken].apply(TokenRepositoryAlgebra[F]),
     userTrans(UserRepositoryAlgebra[F]),
     TSecTokenSettings(
       expiryDuration = 10.minutes,
       maxIdle = None
     )
   )
+}
 
-  val Auth = SecuredRequestHandler(bearerTokenAuth)
+
+class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra, A, T[_]](
+  hasher : JCAPasswordPlatform[A],
+  authenticator: UserAuthenticator[F, T]
+)(
+  implicit P : PasswordHasher[F, A],
+  A: AsBaseToken[T[UserId]]
+)
+extends Http4sDsl[F] {
+  implicit val boolEncoder : EntityEncoder[F, Boolean] = jsonEncoderOf
+
+  val userService = implicitly[UserRepositoryAlgebra[F]]
+
+  val Auth = SecuredRequestHandler(authenticator)
 
   val unauthService : HttpRoutes[F] = HttpRoutes.of {
     case req @ POST -> Root / "user" => {
@@ -77,8 +73,8 @@ extends Http4sDsl[F] {
         hash = PasswordHash[A](new String(user.hash))
         status <- hasher.checkpw[F](userRequest.password.getBytes, hash)
         resp <- if(status == Verified) Ok() else Sync[F].raiseError(Error.BadLogin() : Throwable)
-        tok <- bearerTokenAuth.create(uuid)
-      } yield bearerTokenAuth.embed(resp, tok)
+        tok <- authenticator.create(uuid)
+      } yield authenticator.embed(resp, tok)
 
       res.recoverWith{ case _ => BadRequest() }
     }
@@ -87,7 +83,7 @@ extends Http4sDsl[F] {
       UserRepositoryAlgebra[F].byUsername(username).isDefined.flatMap(Ok apply _)
   }
 
-  val authService: BearerAuthService[F] = {
+  val authService: UserAuthService[F, T] = {
     def respUser(ou : OptionT[F, (User, UUID, Instant)]) : F[Response[F]] = for {
       ou2 <- ou.value
       u <- Sync[F].fromOption(ou2, Error.NotFound())
@@ -95,8 +91,8 @@ extends Http4sDsl[F] {
       resp <- Ok(UserDetail(user.username, joinTime).asJson)
     } yield resp
 
-    BearerAuthService {
-      case req@GET -> Root / "user" asAuthed _ => respUser(UserRepositoryAlgebra[F].byId(req.authenticator.identity))
+    UserAuthService {
+      case req@GET -> Root / "user" asAuthed _ => respUser(UserRepositoryAlgebra[F].byId(req.authenticator.asBase.identity))
 
       case GET -> Root / "user" / name asAuthed _ => respUser(UserRepositoryAlgebra[F].byUsername(name))
     }
