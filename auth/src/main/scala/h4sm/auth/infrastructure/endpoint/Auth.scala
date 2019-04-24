@@ -23,8 +23,27 @@ import infrastructure.authentication.TransBackingStore._
 import domain.tokens.AsBaseToken.ops._
 import domain.tokens.AsBaseTokenInstances._
 import domain.tokens.BaseTokenReaderInstances._
+import tsec.cipher.symmetric.{AES, IvGen}
+import tsec.cipher.symmetric.jca._
 
 object Authenticators {
+
+  def statelessCookie[F[_]: Sync: UserRepositoryAlgebra, Alg: JAuthEncryptor[F, ?]: IvGen[F, ?]](
+    key: SecretKey[Alg],
+    expiryDuration: FiniteDuration = 10.minutes, 
+    maxIdle: Option[FiniteDuration] = None
+  )(implicit a: AES[Alg]): UserAuthenticator[F, AuthEncryptedCookie[Alg, ?]] = 
+    EncryptedCookieAuthenticator.stateless(
+      TSecCookieSettings(
+        cookieName = "ct-auth",
+        secure = true,
+        expiryDuration = expiryDuration,
+        maxIdle = maxIdle
+      ),
+      userTrans(UserRepositoryAlgebra[F]),
+      key
+    )
+
   def bearer[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]: UserAuthenticator[F, TSecBearerToken] = BearerTokenAuthenticator(
     tokenTrans[TSecBearerToken].apply(TokenRepositoryAlgebra[F]),
     userTrans(UserRepositoryAlgebra[F]),

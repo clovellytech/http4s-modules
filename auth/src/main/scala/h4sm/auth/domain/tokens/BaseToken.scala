@@ -2,7 +2,7 @@ package h4sm.auth.domain.tokens
 
 import h4sm.auth.{Instant, UserId}
 import simulacrum.{op, typeclass}
-import tsec.authentication.TSecBearerToken
+import tsec.authentication._
 import tsec.common.SecureRandomId
 
 final case class BaseToken(secureId: SecureRandomId, identity: UserId, expiry: Instant, lastTouched: Option[Instant])
@@ -20,6 +20,9 @@ trait BaseTokenReader[T]{
 object AsBaseTokenInstances{
   implicit val bearerAsBase: AsBaseToken[TSecBearerToken[UserId]] = new AsBaseToken[TSecBearerToken[UserId]] {
     def asBase(t: TSecBearerToken[UserId]): BaseToken = BaseToken(t.id, t.identity, t.expiry, t.lastTouched)
+  }
+  implicit def encryptedCookieAsBase[A]: AsBaseToken[AuthEncryptedCookie[A, UserId]] = new AsBaseToken[AuthEncryptedCookie[A, UserId]] {
+    def asBase(t: AuthEncryptedCookie[A, UserId]): BaseToken = BaseToken(SecureRandomId(t.id.toString), t.identity, t.expiry, t.lastTouched)
   }
 }
 
