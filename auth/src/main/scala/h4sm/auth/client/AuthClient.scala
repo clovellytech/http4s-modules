@@ -4,7 +4,7 @@ package client
 import cats.data.OptionT
 import cats.implicits._
 import cats.effect.Sync
-import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserDetail, UserRequest}
+import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, Authenticators, UserDetail, UserRequest}
 import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import org.http4s._
 import org.http4s.circe._
@@ -13,18 +13,17 @@ import org.http4s.dsl._
 import org.http4s.client.dsl._
 import org.http4s.Uri.uri
 import tsec.passwordhashers.jca.BCrypt
-import domain.tokens.TokenRepositoryAlgebra
 import domain.users.UserRepositoryAlgebra
 import doobie.util.transactor.Transactor
+import tsec.authentication.TSecBearerToken
+import domain.tokens.TokenRepositoryAlgebra
+import domain.tokens._
 
 class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]
 extends Http4sDsl[F] with Http4sClientDsl[F] {
-  val userService = implicitly[UserRepositoryAlgebra[F]]
-  val tokenService = implicitly[TokenRepositoryAlgebra[F]]
-
   implicit val booldecoder : EntityDecoder[F, Boolean] = jsonOf
 
-  val authEndpoints: AuthEndpoints[F, BCrypt] = new AuthEndpoints[F, BCrypt](BCrypt)
+  val authEndpoints: AuthEndpoints[F, BCrypt, TSecBearerToken] = new AuthEndpoints(BCrypt, Authenticators.bearer)
   val auth = authEndpoints.endpoints.orNotFound
 
   def getAuthHeaders(from: Response[F]) : Headers =
@@ -39,9 +38,9 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
   }
 
   def deleteUser(username: String): F[Unit] = (for {
-    u <- userService.byUsername(username)
+    u <- UserRepositoryAlgebra[F].byUsername(username)
     (_, uid, _) = u
-    _ <- OptionT.liftF(userService.delete(uid))
+    _ <- OptionT.liftF(UserRepositoryAlgebra[F].delete(uid))
   } yield ()).getOrElse(())
 
   def postUser(userRequest: UserRequest): F[Response[F]] = POST(userRequest, uri("/user")).flatMap(auth run _)

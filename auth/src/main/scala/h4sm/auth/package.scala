@@ -5,7 +5,7 @@ import java.util.UUID
 import cats.Monad
 import h4sm.auth.db.domain.User
 import org.http4s.Response
-import tsec.authentication.{SecuredRequest, TSecAuthService, TSecBearerToken}
+import tsec.authentication._
 
 package object auth {
 
@@ -14,14 +14,20 @@ package object auth {
 
   type SecureRandomId = tsec.common.SecureRandomId
 
-  type BearerSecuredRequest[F[_]] = SecuredRequest[F, User, BearerToken]
+  type UserSecuredRequest[F[_], T[_]] = SecuredRequest[F, User, T[UserId]]
 
-  type BearerToken = TSecBearerToken[UserId]
-  val BearerToken = TSecBearerToken
+  type UserAuthService[F[_], T[_]] = TSecAuthService[User, T[UserId], F]
+  type UserAuthenticator[F[_], T[_]] = Authenticator[F, UserId, User, T[UserId]]
 
-  type BearerAuthService[F[_]] = TSecAuthService[User, BearerToken, F]
+  type UserSecuredRequestHandler[F[_], T[_]] = SecuredRequestHandler[F, UserId, User, T[UserId]]
 
-  def BearerAuthService[M[_] : Monad](
-    pf: PartialFunction[BearerSecuredRequest[M], M[Response[M]]]
-  ) : BearerAuthService[M] = TSecAuthService(pf)
+  type BearerAuthService[F[_]] = UserAuthService[F, TSecBearerToken]
+  type BearerSecuredRequest[F[_]] = UserSecuredRequest[F, TSecBearerToken]
+
+  def BearerAuthService[M[_]: Monad](pf: PartialFunction[UserSecuredRequest[M, TSecBearerToken], M[Response[M]]]) =
+    UserAuthService[M, TSecBearerToken](pf)
+
+  def UserAuthService[M[_] : Monad, T[_]](
+    pf: PartialFunction[UserSecuredRequest[M, T], M[Response[M]]]
+  ): UserAuthService[M, T] = TSecAuthService(pf)
 }

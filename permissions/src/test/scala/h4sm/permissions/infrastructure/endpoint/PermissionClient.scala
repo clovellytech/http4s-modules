@@ -13,7 +13,7 @@ import domain._
 
 import dbtesting.endpoints.ClientError._
 
-class PermissionClient[F[_] : Sync, Alg](es : PermissionEndpoints[F, Alg]) extends Http4sDsl[F] with Http4sClientDsl[F] {
+class PermissionClient[F[_] : Sync, Alg, T[_]](es : PermissionEndpoints[F, Alg, T]) extends Http4sDsl[F] with Http4sClientDsl[F] {
 
   val endpoints: Kleisli[F, Request[F], Response[F]] = es.endpoints.orNotFound
   val cs : Codecs[F] = new Codecs

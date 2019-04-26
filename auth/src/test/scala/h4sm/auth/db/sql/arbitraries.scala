@@ -3,9 +3,9 @@ package db.sql
 
 import cats.syntax.option._
 import h4sm.auth.db.domain.User
+import h4sm.auth.domain.tokens.BaseToken
 import org.scalacheck.{Arbitrary, Gen}
 import h4sm.dbtesting.arbitraries._
-import tsec.authentication.TSecBearerToken
 import tsec.common.SecureRandomId
 
 object arbitraries {
@@ -16,13 +16,13 @@ object arbitraries {
     Gen.posNum[Int].map(num => SecureRandomId(num.toString))
   }
 
-  implicit val bearerTokenArb : Arbitrary[BearerToken] = Arbitrary {
+  implicit val baseTokenArb : Arbitrary[BaseToken] = Arbitrary {
     for {
       sid <- secureRandomIdArb.arbitrary
       uuid <- Gen.uuid
       time <- arbInstant.arbitrary
       otherTime <- arbInstant.arbitrary
-    } yield TSecBearerToken(sid, uuid, time, otherTime.some)
+    } yield BaseToken(sid, uuid, time, otherTime.some)
   }
 
   implicit val userArb : Arbitrary[User] = Arbitrary {

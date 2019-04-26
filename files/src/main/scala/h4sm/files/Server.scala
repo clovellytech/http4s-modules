@@ -2,17 +2,19 @@ package h4sm.files
 
 import cats.effect.{ConcurrentEffect, ContextShift, ExitCode, Timer}
 import cats.implicits._
-import h4sm.auth.infrastructure.endpoint.AuthEndpoints
+import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
 import h4sm.db.config.DatabaseConfig
 import h4sm.files.config._
 import h4sm.files.infrastructure.endpoint.FileEndpoints
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
+import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import tsec.passwordhashers.jca.BCrypt
 import infrastructure.backends._
 import org.http4s.server.Router
+import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext
 
@@ -26,10 +28,12 @@ class Server[
 
   def app(xa: Transactor[F], serverConf : ServerConfig, ec : ExecutionContext): F[ExitCode] = {
     implicit val e = ec
-    val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
+    implicit val userService = new UserRepositoryInterpreter(xa)
+    implicit val tokenService = new TokenRepositoryInterpreter(xa)
+    val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer)
     implicit val fileMetaStorage = new FileMetaService(xa)(ConcurrentEffect[F])
     implicit val fileStorage = new LocalFileStoreService[F]
-    val fileEndpoints = new FileEndpoints[F](authEndpoints)
+    val fileEndpoints = new FileEndpoints(authEndpoints.Auth)
 
     val httpApp = Router(
       "/auth" -> authEndpoints.endpoints,

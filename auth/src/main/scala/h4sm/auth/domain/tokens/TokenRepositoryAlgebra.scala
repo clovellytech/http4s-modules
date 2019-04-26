@@ -6,4 +6,4 @@ import simulacrum.typeclass
 import tsec.common.SecureRandomId
 
 @typeclass
-trait TokenRepositoryAlgebra[F[_]] extends CRUDAlgebra[F, SecureRandomId, BearerToken, Unit]
+trait TokenRepositoryAlgebra[F[_]] extends CRUDAlgebra[F, SecureRandomId, BaseToken, Unit]

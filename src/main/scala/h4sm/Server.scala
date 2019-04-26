@@ -2,19 +2,21 @@ package h4sm
 
 import cats.effect._
 import cats.implicits._
+import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
+import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import auth.domain.tokens._
+import auth.domain.users.UserRepositoryAlgebra
+import db.config._
 import doobie._
-import auth.infrastructure.endpoint.AuthEndpoints
 import doobie.hikari.HikariTransactor
-import h4sm.db.config._
-import h4sm.files.infrastructure.endpoint.FileEndpoints
+import files.infrastructure.endpoint.FileEndpoints
 import org.http4s.HttpRoutes
 import org.http4s.server.{Router, Server}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
-import tsec.passwordhashers.jca.BCrypt
-
 import scala.concurrent.ExecutionContext
-
+import tsec.passwordhashers.jca._
+import tsec.cipher.symmetric.jca._
 
 /*
  * Build a server that uses every module in this project...
@@ -23,10 +25,7 @@ class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.C
   C : ConfigAsk[F]
 ) {
 
-  def router(xa : Transactor[F], testMode : Boolean) : HttpRoutes[F] = {
-    val auth = AuthEndpoints.persistingEndpoints[F, BCrypt](xa)
-    val files = FileEndpoints.persistingEndpoints[F](xa, auth, ExecutionContext.Implicits.global)
-
+  def router[A, T[_]](testMode: Boolean, auth: AuthEndpoints[F, A, T], files: FileEndpoints[F, T]) : HttpRoutes[F] = {
     Router(
       "/users" -> {
         if (testMode) auth.testService <+> auth.endpoints
@@ -36,20 +35,28 @@ class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.C
     )
   }
 
-  def createServer : Resource[F, Server[F]] = for {
-    cfg <- Resource.liftF(C.ask)
-    MainConfig(db, fc, ServerConfig(host, port, numThreads), test) = cfg
-    _ = if (test) println("DANGER, RUNNING IN TEST MODE!!")
-    connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
-    tranec <- ExecutionContexts.cachedThreadPool[F]
-    xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
-    _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files"))
-
-    server <- BlazeServerBuilder[F]
-              .bindHttp(port, host)
-              .withHttpApp(router(xa, cfg.test).orNotFound)
-              .resource
-  } yield server
+  def createServer : Resource[F, Server[F]] = {
+    implicit val encryptor = AES128GCM.genEncryptor[F]
+    implicit val gcmstrategy = AES128GCM.defaultIvStrategy[F]
+    for {
+      cfg <- Resource.liftF(C.ask)
+      MainConfig(db, fc, ServerConfig(host, port, numThreads), test) = cfg
+      _ = if (test) println("DANGER, RUNNING IN TEST MODE!!")
+      connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
+      tranec <- ExecutionContexts.cachedThreadPool[F]
+      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
+      key <- Resource.liftF(AES128GCM.generateKey[F])
+      implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
+      implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
+      authEndpoints = new AuthEndpoints(BCrypt, Authenticators.statelessCookie(key))
+      _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files"))
+      files = FileEndpoints.persistingEndpoints(xa, authEndpoints.Auth, ExecutionContext.Implicits.global)
+      server <- BlazeServerBuilder[F]
+                .bindHttp(port, host)
+                .withHttpApp(router(cfg.test, authEndpoints, files).orNotFound)
+                .resource
+    } yield server
+  }
 }
 
 object ServerMain extends IOApp {

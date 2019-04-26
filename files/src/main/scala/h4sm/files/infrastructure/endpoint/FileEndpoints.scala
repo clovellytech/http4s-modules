@@ -4,32 +4,33 @@ package infrastructure.endpoint
 import java.io.File
 import java.util.UUID
 
-import h4sm.files.domain._
 import cats.implicits._
-import org.http4s._
-import org.http4s.multipart._
-import cats.effect.{ContextShift, Sync}
-import h4sm.auth.BearerAuthService
-import h4sm.auth.infrastructure.endpoint.AuthEndpoints
-import h4sm.files.domain.FileMetaAlgebra
-import org.http4s.dsl._
-import tsec.authentication._
 import config._
 import doobie.util.transactor.Transactor
-import h4sm.files.db.FileInfoId
-import org.http4s.headers.Location
 import fs2.Stream
+import org.http4s._
+import org.http4s.dsl._
+import org.http4s.headers.Location
+import org.http4s.multipart._
+import cats.effect.{ContextShift, Sync}
+import h4sm.auth._
+import h4sm.auth.domain.tokens.AsBaseToken.ops._
+import h4sm.auth.domain.tokens.AsBaseToken
+import h4sm.files.db.FileInfoId
+import h4sm.files.domain._
 import h4sm.files.infrastructure.backends.{FileMetaService, LocalFileStoreService}
+import tsec.authentication._
 
 import scala.concurrent.ExecutionContext
 
-class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
+class FileEndpoints[F[_], T[_]](auth : UserSecuredRequestHandler[F, T])(implicit
   S  : Sync[F],
   F  : FileMetaAlgebra[F],
   FS : FileStoreAlgebra[F],
   CS : ContextShift[F],
   C  : ConfigAsk[F],
-  ec : ExecutionContext
+  ec : ExecutionContext,
+  baseToken: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] {
 
   val fileNotExists : F[File] = Error.fileNotExistError("Requested file not found").raiseError[F, File]
@@ -53,9 +54,9 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
     case GET -> Root / "config" => C.ask.flatMap(c => Ok(c.uploadMax.toString))
   }
 
-  def authEndpoints: BearerAuthService[F] = BearerAuthService {
+  def authEndpoints: UserAuthService[F, T] = UserAuthService {
     case req@GET -> Root / uuidstr asAuthed _ => {
-      val pred = (i: FileInfo) => i.isPublic || (i.uploadedBy.compareTo(req.authenticator.identity) == 0)
+      val pred = (i: FileInfo) => i.isPublic || (i.uploadedBy.compareTo(req.authenticator.asBase.identity) == 0)
       for {
         fileInfo <- getFile(uuidstr, pred)
         (_, _, bytes) = fileInfo
@@ -64,7 +65,7 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
     }
 
     case req@GET -> Root asAuthed _ => for {
-      infos <- F.retrieveUserMeta(req.authenticator.identity)
+      infos <- F.retrieveUserMeta(req.authenticator.asBase.identity)
       resp <- Ok(SiteResult(infos))
     } yield resp
 
@@ -78,7 +79,7 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
         },
         mp => for {
           savedFileIds <- mp.parts.traverse { part =>
-            val finfo = FileInfo(part.name, none, part.filename, none, req.authenticator.identity, false)
+            val finfo = FileInfo(part.name, none, part.filename, none, req.authenticator.asBase.identity, false)
             for {
               finfoId <- F.storeMeta(finfo)
               _ <- FS.write(finfoId, finfo, part.body)
@@ -104,18 +105,18 @@ class FileEndpoints[F[_]](auth : AuthEndpoints[F, _])(implicit
     } yield resp
   }
 
-  def endpoints : HttpRoutes[F] = unAuthEndpoints.combineK(auth.Auth.liftService(authEndpoints))
+  def endpoints : HttpRoutes[F] = unAuthEndpoints.combineK(auth.liftService(authEndpoints))
 }
 
 object FileEndpoints {
-  def persistingEndpoints[F[_] : Sync : ContextShift : ConfigAsk](
+  def persistingEndpoints[F[_] : Sync : ContextShift : ConfigAsk, T[_]](
     xa : Transactor[F],
-    authEndpoints: AuthEndpoints[F, _],
+    auth: UserSecuredRequestHandler[F, T],
     ec : ExecutionContext
-  ) : FileEndpoints[F] = {
+  )(implicit b: AsBaseToken[T[UserId]]) : FileEndpoints[F, T] = {
     implicit val fileMeta = new FileMetaService[F](xa)
     implicit val ex = ec
     implicit val fileStore = new LocalFileStoreService[F]()
-    new FileEndpoints[F](authEndpoints)
+    new FileEndpoints(auth)
   }
 }

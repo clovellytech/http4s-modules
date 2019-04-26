@@ -21,7 +21,10 @@ import scala.concurrent.ExecutionContext
 
 import dbtesting.endpoints.ClientError._
 
-class FilesClient[F[_] : ContextShift](fileEndpoints : FileEndpoints[F])(implicit F : Sync[F], ec : ExecutionContext) extends Http4sDsl[F] with Http4sClientDsl[F]{
+class FilesClient[F[_] : ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])(
+  implicit F : Sync[F],
+  ec : ExecutionContext
+) extends Http4sDsl[F] with Http4sClientDsl[F]{
   val codecs = new FileCodecs[F]
   import codecs._
 

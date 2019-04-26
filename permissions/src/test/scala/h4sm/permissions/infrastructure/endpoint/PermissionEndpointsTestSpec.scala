@@ -7,8 +7,10 @@ import auth.infrastructure.endpoint._
 import cats.effect.IO
 import doobie.Transactor
 import h4sm.auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
+import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.users.UserRepositoryAlgebra
 import h4sm.auth.infrastructure.endpoint.arbitraries._
+import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import h4sm.db.config._
 import h4sm.dbtesting.DbFixtureSuite
 import h4sm.permissions.infrastructure.repository.{PermissionRepository, UserPermissionRepository}
@@ -18,6 +20,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import tsec.passwordhashers.jca.BCrypt
 import repository.persistent.sql.arbitraries._
 import io.circe.config.parser
+import tsec.authentication.TSecBearerToken
 
 class PermissionEndpointsTestSpec
 extends Matchers
@@ -33,16 +36,18 @@ with IOTestAuthClientChecks {
     permRepo : PermissionAlgebra[IO],
     userPermRepo : UserPermissionAlgebra[IO],
     testAuthClient : TestAuthClient[IO],
-    permClient : PermissionClient[IO, BCrypt])
+    permClient : PermissionClient[IO, BCrypt, TSecBearerToken])
 
   def clients(xa : Transactor[IO]) : Clients = {
-    val authEndpoints = AuthEndpoints.persistingEndpoints(xa)
+    implicit val userService = new UserRepositoryInterpreter(xa)
+    implicit val tokenService = new TokenRepositoryInterpreter(xa)
+    val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer[IO])
     implicit val permRepo = new PermissionRepository[IO](xa)
     implicit val userPermRepo = new UserPermissionRepository[IO](xa)
     val userRepo = authEndpoints.userService
-    val permissionEndpoints = new PermissionEndpoints[IO, BCrypt](authEndpoints)
+    val permissionEndpoints = new PermissionEndpoints[IO, BCrypt, TSecBearerToken](authEndpoints)
     val authClient = AuthClient.fromTransactor(xa)
-    val permissionClient = new PermissionClient[IO, BCrypt](permissionEndpoints)
+    val permissionClient = new PermissionClient(permissionEndpoints)
     val testAuthClient = new TestAuthClient(authClient)
     Clients(userRepo, permRepo, userPermRepo, testAuthClient, permissionClient)
   }
