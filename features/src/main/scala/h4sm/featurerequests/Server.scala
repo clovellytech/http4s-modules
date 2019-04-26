@@ -13,7 +13,7 @@ import infrastructure.endpoint._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
-import h4sm.auth.domain.tokens.AsBaseTokenInstances._
+import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext
 import tsec.passwordhashers.jca.BCrypt

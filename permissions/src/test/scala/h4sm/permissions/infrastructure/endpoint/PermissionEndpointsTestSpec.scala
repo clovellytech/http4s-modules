@@ -7,6 +7,7 @@ import auth.infrastructure.endpoint._
 import cats.effect.IO
 import doobie.Transactor
 import h4sm.auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
+import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.users.UserRepositoryAlgebra
 import h4sm.auth.infrastructure.endpoint.arbitraries._
 import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
@@ -20,7 +21,6 @@ import tsec.passwordhashers.jca.BCrypt
 import repository.persistent.sql.arbitraries._
 import io.circe.config.parser
 import tsec.authentication.TSecBearerToken
-import h4sm.auth.domain.tokens.AsBaseTokenInstances._
 
 class PermissionEndpointsTestSpec
 extends Matchers

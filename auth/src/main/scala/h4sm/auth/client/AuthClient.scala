@@ -17,7 +17,7 @@ import domain.users.UserRepositoryAlgebra
 import doobie.util.transactor.Transactor
 import tsec.authentication.TSecBearerToken
 import domain.tokens.TokenRepositoryAlgebra
-import domain.tokens.AsBaseTokenInstances._
+import domain.tokens._
 
 class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]
 extends Http4sDsl[F] with Http4sClientDsl[F] {

@@ -14,7 +14,7 @@ import org.http4s.implicits._
 import tsec.passwordhashers.jca.BCrypt
 import infrastructure.backends._
 import org.http4s.server.Router
-import h4sm.auth.domain.tokens.AsBaseTokenInstances._
+import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext
 

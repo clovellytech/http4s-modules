@@ -4,8 +4,7 @@ import cats.effect._
 import cats.implicits._
 import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
 import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
-import auth.domain.tokens.AsBaseTokenInstances._
-import auth.domain.tokens.TokenRepositoryAlgebra
+import auth.domain.tokens._
 import auth.domain.users.UserRepositoryAlgebra
 import db.config._
 import doobie._

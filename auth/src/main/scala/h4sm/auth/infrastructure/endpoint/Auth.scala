@@ -21,8 +21,7 @@ import domain.users.UserRepositoryAlgebra
 import domain.tokens.{AsBaseToken, TokenRepositoryAlgebra}
 import infrastructure.authentication.TransBackingStore._
 import domain.tokens.AsBaseToken.ops._
-import domain.tokens.AsBaseTokenInstances._
-import domain.tokens.BaseTokenReaderInstances._
+import domain.tokens._
 import tsec.cipher.symmetric.{AES, IvGen}
 import tsec.cipher.symmetric.jca._
 

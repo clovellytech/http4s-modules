@@ -25,7 +25,7 @@ import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import tsec.authentication.TSecBearerToken
 import tsec.passwordhashers.jca.BCrypt
-import h4sm.auth.domain.tokens.AsBaseTokenInstances._
+import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
