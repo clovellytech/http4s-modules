@@ -45,9 +45,14 @@ Building endpoints
 ```scala mdoc
 import tsec.passwordhashers.jca.BCrypt
 import auth.infrastructure.endpoint._
+import auth.infrastructure.repository.persistent._
+import auth.domain.users._
+import auth.domain.tokens._
 import featurerequests.infrastructure.endpoint._
 
-val authEndpoints = AuthEndpoints.persistingEndpoints(xa, BCrypt)
+implicit val users = new UserRepositoryInterpreter(xa)
+implicit val tokens = new TokenRepositoryInterpreter(xa)
+val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer[IO])
 val authService = authEndpoints.Auth
 val requests = RequestEndpoints.persistingEndpoints(xa)
 val votes = VoteEndpoints.persistingEndpoints(xa)
