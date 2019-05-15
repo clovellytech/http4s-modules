@@ -11,6 +11,7 @@ import io.circe.syntax._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe._
+import org.http4s.headers.`WWW-Authenticate`
 import tsec.common._
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 import tsec.passwordhashers.jca.JCAPasswordPlatform
@@ -25,6 +26,7 @@ import domain.tokens._
 import tsec.cipher.symmetric.{AES, IvGen}
 import tsec.cipher.symmetric.jca._
 
+final case class SiteResult[A](result: A)
 object Authenticators {
 
   def statelessCookie[F[_]: Sync: UserRepositoryAlgebra, Alg: JAuthEncryptor[F, ?]: IvGen[F, ?]](
@@ -70,6 +72,12 @@ extends Http4sDsl[F] {
 
   val Auth = SecuredRequestHandler(authenticator)
 
+  val badResp = Unauthorized(
+    `WWW-Authenticate`(
+      Challenge("Digest", "shedkey", Map("username" -> "bad username", "password" -> "bad password"))
+      )
+    )
+
   val unauthService : HttpRoutes[F] = HttpRoutes.of {
     case req @ POST -> Root / "user" => {
       val res: F[Response[F]] = for {
@@ -82,21 +90,34 @@ extends Http4sDsl[F] {
         result <- Ok()
       } yield result
 
-      res.recoverWith{ case _ => BadRequest() }
+      res.recoverWith { 
+        case _ : Error.Duplicate => Conflict("Username already exists") 
+        case _ => BadRequest()
+      }
     }
 
     case req @ POST -> Root / "login" => {
       val res : F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        u <- UserRepositoryAlgebra[F].byUsername(userRequest.username).toRight(Error.NotFound() : Throwable).value.flatMap(_.raiseOrPure[F])
+        u <- UserRepositoryAlgebra[F]
+              .byUsername(userRequest.username)
+              .toRight(Error.NotFound())
+              .leftWiden[Throwable]
+              .value
+              .flatMap(_.raiseOrPure[F])
         (user, uuid, joinTime) = u
         hash = PasswordHash[A](new String(user.hash))
         status <- hasher.checkpw[F](userRequest.password.getBytes, hash)
-        resp <- if(status == Verified) Ok() else Sync[F].raiseError(Error.BadLogin() : Throwable)
+        resp <- if(status == Verified) Ok(SiteResult(userRequest.username)) 
+                else Sync[F].raiseError(Error.BadLogin())
         tok <- authenticator.create(uuid)
       } yield authenticator.embed(resp, tok)
 
-      res.recoverWith{ case _ => BadRequest() }
+      res.recoverWith {
+        case _: Error.BadLogin => badResp
+        case _: Error.NotFound => badResp
+        case _ => BadRequest("Not found") 
+      }
     }
 
     case GET -> Root / "exists" / username =>

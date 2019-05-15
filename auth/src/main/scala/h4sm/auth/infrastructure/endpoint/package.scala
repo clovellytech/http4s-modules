@@ -17,4 +17,7 @@ package object endpoint {
   implicit def userDetailEntityDec[F[_] : Sync] : EntityDecoder[F, UserDetail] = jsonOf
   implicit val userDetailEncoder : Encoder[UserDetail] = deriveEncoder
   implicit def userDetailEntityEnc[F[_]: Sync] : EntityEncoder[F, UserDetail] = jsonEncoderOf
+
+  implicit def siteResultEnc1[A: Encoder]: Encoder[SiteResult[A]] = deriveEncoder
+  implicit def siteResultEnc2[F[_]: Sync, A: Encoder]: EntityEncoder[F, SiteResult[A]] = jsonEncoderOf
 }
