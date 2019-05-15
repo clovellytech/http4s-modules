@@ -29,14 +29,15 @@ import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-final case class Clients[F[_], A, T[_]](auth: TestAuthClient[F], files: FilesClient[F, T])
+final case class Clients[F[_], A, T[_]](auth: TestAuthClient[F, T], files: FilesClient[F, T])
 
 object Clients{
   def apply[F[_]: Sync: ContextShift](xa: Transactor[F]): Clients[F, BCrypt, TSecBearerToken] = {
     implicit val userService = new UserRepositoryInterpreter(xa)
     implicit val tokenService = new TokenRepositoryInterpreter(xa)
     val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer[F])
-    val authClient = AuthClient.fromTransactor(xa)
+    val authenticator = Authenticators.bearer[F]
+    val authClient = new AuthClient(authenticator)
 
     val testAuth = new TestAuthClient(authClient)
 

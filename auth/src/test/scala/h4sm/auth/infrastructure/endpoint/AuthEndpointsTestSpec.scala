@@ -1,14 +1,20 @@
-package h4sm.auth.infrastructure
+package h4sm.auth
+package infrastructure
 package endpoint
 
 import org.scalatest._
 import cats.effect.IO
 import cats.implicits._
+import domain.tokens._
+import infrastructure.repository.persistent._
 import org.http4s.Status
 import h4sm.auth.client.AuthClient
 
 class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
-  val endpoints = AuthClient.fromTransactor(testTransactor)
+  implicit val userService = new UserRepositoryInterpreter(testTransactor)
+  implicit val tokenService = new TokenRepositoryInterpreter(testTransactor)
+  val authenticator = Authenticators.bearer[IO]
+  val endpoints = new AuthClient(authenticator)
   import endpoints._
 
   val user = UserRequest("zak", "password")

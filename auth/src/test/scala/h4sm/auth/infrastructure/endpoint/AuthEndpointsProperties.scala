@@ -5,6 +5,7 @@ import java.time.{Duration, Instant}
 
 import cats.effect.IO
 import h4sm.auth.client.AuthClient
+import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.dbtesting.DbFixtureSuite
 import org.http4s.Status
 import org.scalatest._
@@ -14,7 +15,10 @@ import h4sm.db.config.DatabaseConfig
 import io.circe.config.parser
 
 class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
-  val authClient = AuthClient.fromTransactor(testTransactor)
+  implicit val userService = new UserRepositoryInterpreter(testTransactor)
+  implicit val tokenService = new TokenRepositoryInterpreter(testTransactor)
+  val authenticator = Authenticators.bearer[IO]
+  val authClient = new AuthClient(authenticator)
   def schemaNames: Seq[String] = List("ct_auth")
   def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 

@@ -4,8 +4,7 @@ package client
 import cats.data.OptionT
 import cats.implicits._
 import cats.effect.Sync
-import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, Authenticators, UserDetail, UserRequest}
-import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, UserDetail, UserRequest}
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.implicits._
@@ -14,16 +13,17 @@ import org.http4s.client.dsl._
 import org.http4s.Uri.uri
 import tsec.passwordhashers.jca.BCrypt
 import domain.users.UserRepositoryAlgebra
-import doobie.util.transactor.Transactor
-import tsec.authentication.TSecBearerToken
 import domain.tokens.TokenRepositoryAlgebra
 import domain.tokens._
 
-class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]
+class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra, T[_]](
+  authenticator: UserAuthenticator[F, T]
+)(implicit b: AsBaseToken[T[UserId]])
 extends Http4sDsl[F] with Http4sClientDsl[F] {
+  type Token = T[UserId]
   implicit val booldecoder : EntityDecoder[F, Boolean] = jsonOf
 
-  val authEndpoints: AuthEndpoints[F, BCrypt, TSecBearerToken] = new AuthEndpoints(BCrypt, Authenticators.bearer)
+  val authEndpoints: AuthEndpoints[F, BCrypt, T] = new AuthEndpoints(BCrypt, authenticator)
   val auth = authEndpoints.endpoints.orNotFound
 
   def getAuthHeaders(from: Response[F]) : Headers =
@@ -67,12 +67,4 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
     res <- auth.run(req.withHeaders(headers))
     userDetail <- res.as[UserDetail]
   } yield userDetail
-}
-
-object AuthClient {
-  def fromTransactor[F[_] : Sync](xa : Transactor[F]) : AuthClient[F] = {
-    implicit val userService = new UserRepositoryInterpreter[F](xa)
-    implicit val tokenService = new TokenRepositoryInterpreter[F](xa)
-    new AuthClient[F]
-  }
 }

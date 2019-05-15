@@ -9,7 +9,7 @@ import org.scalacheck.Arbitrary
 import org.scalatest.Assertion
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class TestAuthClient[F[_]: Sync](client : AuthClient[F]) {
+class TestAuthClient[F[_]: Sync, T[_]](client : AuthClient[F, T]) {
   def withUser[A](u: UserRequest)(f: Headers => F[A]): F[A] = for {
     _ <- client.postUser(u)
     login <- client.loginUser(u)
@@ -19,13 +19,13 @@ class TestAuthClient[F[_]: Sync](client : AuthClient[F]) {
 }
 
 trait IOTestAuthClientChecks { this : ScalaCheckPropertyChecks =>
-  def forAnyUser[A](tc : TestAuthClient[IO])(f : Headers => UserRequest => IO[Assertion])(implicit
+  def forAnyUser[A, T[_]](tc : TestAuthClient[IO, T])(f : Headers => UserRequest => IO[Assertion])(implicit
     arb : Arbitrary[UserRequest]
   ) : Assertion = forAll {
     (u : UserRequest) => tc.withUser(u)(headers => f(headers)(u)).unsafeRunSync()
   }
 
-  def forAnyUser2[A : Arbitrary](tc : TestAuthClient[IO])(f : Headers => (UserRequest, A) => IO[Assertion])(implicit
+  def forAnyUser2[A : Arbitrary, T[_]](tc : TestAuthClient[IO, T])(f : Headers => (UserRequest, A) => IO[Assertion])(implicit
     arb : Arbitrary[UserRequest]
   ) : Assertion = forAll {
     (u: UserRequest, a : A) => tc.withUser(u)(headers => f(headers)(u, a)).unsafeRunSync()

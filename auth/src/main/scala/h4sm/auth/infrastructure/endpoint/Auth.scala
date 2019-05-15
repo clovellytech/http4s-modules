@@ -62,6 +62,8 @@ class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra, A, T[_]](
   A: AsBaseToken[T[UserId]]
 )
 extends Http4sDsl[F] {
+  type Token = T[UserId]
+
   implicit val boolEncoder : EntityEncoder[F, Boolean] = jsonEncoderOf
 
   val userService = implicitly[UserRepositoryAlgebra[F]]

@@ -4,6 +4,8 @@ package infrastructure.endpoint
 import cats.effect.Sync
 import cats.implicits._
 import h4sm.auth.client.AuthClient
+import h4sm.auth.infrastructure.endpoint.Authenticators
+import h4sm.auth.infrastructure.repository.persistent._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl._
@@ -14,8 +16,10 @@ import doobie.util.transactor.Transactor
 import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
 
 class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
-
-  val authTestEndpoints = AuthClient.fromTransactor(xa)
+  implicit val userService = new UserRepositoryInterpreter(xa)
+  implicit val tokenService = new TokenRepositoryInterpreter(xa)
+  val authenticator = Authenticators.bearer[F]
+  val authTestEndpoints = new AuthClient(authenticator)
 
   val authEndpoints = authTestEndpoints.authEndpoints
   val Auth = authEndpoints.Auth
