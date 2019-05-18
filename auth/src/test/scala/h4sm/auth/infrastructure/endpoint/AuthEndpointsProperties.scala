@@ -43,7 +43,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         post <- authClient.postUser(u)
         _ <- authClient.deleteUser(u.username)
       } yield {
-        post.status should equal(Status.BadRequest)
+        post.status should equal(Status.Conflict)
       }
 
       test.unsafeRunSync()
