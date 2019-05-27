@@ -2,7 +2,7 @@ package h4sm.featurerequests
 package infrastructure
 package endpoint
 
-import cats.effect.Sync
+import cats.effect.{Bracket, Sync}
 import cats.implicits._
 import org.http4s.dsl.Http4sDsl
 import h4sm.auth.BearerAuthService
@@ -26,7 +26,7 @@ class VoteEndpoints[F[_]: Sync : VoteRepositoryAlgebra] extends Http4sDsl[F] {
 }
 
 object VoteEndpoints {
-  def persistingEndpoints[F[_]: Sync](xa: Transactor[F]) : VoteEndpoints[F] = {
+  def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable]](xa: Transactor[F]): VoteEndpoints[F] = {
     implicit val voteRepo = new VoteRepositoryInterpreter(xa)
     new VoteEndpoints[F]
   }

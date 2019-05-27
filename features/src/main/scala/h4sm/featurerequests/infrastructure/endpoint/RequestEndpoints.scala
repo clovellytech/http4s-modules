@@ -1,7 +1,7 @@
 package h4sm.featurerequests
 package infrastructure.endpoint
 
-import cats.effect.Sync
+import cats.effect.{Sync, Bracket}
 import cats.implicits._
 import io.circe.syntax._
 import org.http4s._
@@ -14,7 +14,7 @@ import h4sm.featurerequests.infrastructure.repository.persistent.RequestReposito
 import h4sm.featurerequests.db.domain.Feature
 import doobie.util.transactor.Transactor
 
-class RequestEndpoints[F[_]: Sync : RequestRepositoryAlgebra] extends Http4sDsl[F] {
+class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra] extends Http4sDsl[F] {
   def unAuthEndpoints : HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "request" => for {
       feats <- RequestRepositoryAlgebra[F].selectWithVoteCounts
@@ -33,7 +33,7 @@ class RequestEndpoints[F[_]: Sync : RequestRepositoryAlgebra] extends Http4sDsl[
 }
 
 object RequestEndpoints {
-  def persistingEndpoints[F[_] : Sync](xa: Transactor[F]) : RequestEndpoints[F] = {
+  def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable]](xa: Transactor[F]): RequestEndpoints[F] = {
     implicit val requestRepo = new RequestRepositoryInterpreter(xa)
     new RequestEndpoints[F]
   }

@@ -5,6 +5,7 @@ import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
 import db.domain._
+import h4sm.db.implicits._
 
 trait UserSQL {
   def select : Query0[(User, UserId, Instant)] = sql"""

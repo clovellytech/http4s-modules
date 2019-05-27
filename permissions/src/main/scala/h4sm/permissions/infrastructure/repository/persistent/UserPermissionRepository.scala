@@ -2,7 +2,7 @@ package h4sm.permissions.infrastructure.repository
 
 import java.time.Instant
 
-import cats.Monad
+import cats.effect.Bracket
 import cats.implicits._
 import cats.data.OptionT
 import doobie._
@@ -11,7 +11,8 @@ import h4sm.auth.UserId
 import h4sm.permissions.domain._
 import persistent.sql._
 
-class UserPermissionRepository[F[_] : Monad](xa : Transactor[F]) extends UserPermissionAlgebra[F] {
+class UserPermissionRepository[F[_] : Bracket[?[_], Throwable]](xa : Transactor[F]) 
+extends UserPermissionAlgebra[F] {
   def hasPermission(uid: UserId, appName: String, name: String): F[Boolean] =
     OptionT(userPermissions.userPermission(uid, appName, name).option).isDefined.transact(xa)
 

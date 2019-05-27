@@ -1,8 +1,10 @@
-package h4sm.featurerequests.db
+package h4sm
+package featurerequests.db
 package sql
 
 import java.time.Instant
 
+import db.implicits._
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._

@@ -4,12 +4,13 @@ package infrastructure.repository.persistent
 import cats.data.OptionT
 import cats.Monad
 import cats.implicits._
+import cats.effect.Bracket
 import doobie._
 import doobie.implicits._
 import domain.tokens.{BaseToken, TokenRepositoryAlgebra}
 import h4sm.auth.db.sql.tokens
 
-class TokenRepositoryInterpreter[M[_] : Monad](xa : Transactor[M])
+class TokenRepositoryInterpreter[M[_]: Monad: Bracket[?[_], Throwable]](xa : Transactor[M])
 extends TokenRepositoryAlgebra[M] {
   def insert(a: BaseToken): M[Unit] = tokens.insert(a).run.as(()).transact(xa)
 
