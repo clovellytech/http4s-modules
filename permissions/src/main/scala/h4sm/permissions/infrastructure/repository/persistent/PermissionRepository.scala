@@ -1,6 +1,6 @@
 package h4sm.permissions.infrastructure.repository
 
-import cats.Monad
+import cats.effect.Bracket
 import cats.implicits._
 import cats.data.OptionT
 import doobie._
@@ -8,7 +8,7 @@ import doobie.implicits._
 import h4sm.permissions.domain.{Permission, PermissionId, PermissionAlgebra}
 import persistent.sql.permissions
 
-class PermissionRepository[F[_] : Monad](xa : Transactor[F]) extends PermissionAlgebra[F] {
+class PermissionRepository[F[_]: Bracket[?[_], Throwable]](xa : Transactor[F]) extends PermissionAlgebra[F] {
   def insert(a: Permission): F[Unit] = permissions.insert(a).run.as(()).transact(xa)
 
   def insertGetId(a: Permission): OptionT[F, PermissionId] = OptionT.liftF(permissions.insertGetId(a).transact(xa))

@@ -3,7 +3,7 @@ package infrastructure.repository.persistent
 
 import java.time.Instant
 
-import cats.Monad
+import cats.effect.Bracket
 import cats.data.OptionT
 import cats.implicits._
 import doobie._
@@ -13,7 +13,8 @@ import db.domain._
 import db.sql._
 import domain.requests._
 
-class RequestRepositoryInterpreter[M[_]: Monad](xa: Transactor[M]) extends RequestRepositoryAlgebra[M] {
+class RequestRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transactor[M]) 
+extends RequestRepositoryAlgebra[M] {
   def insert(r: Feature): M[Unit] = requests.insert(r).run.as(()).transact(xa)
 
   def select: M[List[(Feature, FeatureId, Instant)]] = requests.select.to[List].transact(xa)

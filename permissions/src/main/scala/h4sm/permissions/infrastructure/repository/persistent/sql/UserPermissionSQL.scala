@@ -6,6 +6,7 @@ package repository.persistent.sql
 import java.time.Instant
 
 import auth.UserId
+import db.implicits._
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._

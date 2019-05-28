@@ -1,9 +1,12 @@
-package h4sm.permissions.infrastructure.repository.persistent.sql
+package h4sm
+package permissions
+package infrastructure.repository.persistent.sql
 
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import h4sm.permissions.domain.{Permission, PermissionId}
+import domain.{Permission, PermissionId}
+import db.implicits._
 
 trait PermissionSQL {
 
