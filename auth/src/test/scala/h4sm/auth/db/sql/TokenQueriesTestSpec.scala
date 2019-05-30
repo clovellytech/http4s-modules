@@ -1,17 +1,18 @@
-package h4sm.auth
-package db
+package h4sm
+package auth.db
 package sql
 
+import arbitraries._
 import cats.effect.IO
+import dbtesting.arbitraries._
+import dbtesting.DbFixtureBeforeAfter
 import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
 import org.scalatest.FunSuite
-import h4sm.dbtesting.arbitraries._
-import arbitraries._
-import infrastructure.testTransactor
 
-class TokenQueriesTestSpec extends FunSuite with IOChecker {
-  val transactor: Transactor[IO] = testTransactor
+class TokenQueriesTestSpec extends FunSuite with DbFixtureBeforeAfter with IOChecker {
+  def schemaNames: Seq[String] = List("ct_auth")
+  def transactor: Transactor[IO] = dbtesting.transactor.getTransactor[IO](cfg)
 
   import tokens._
 

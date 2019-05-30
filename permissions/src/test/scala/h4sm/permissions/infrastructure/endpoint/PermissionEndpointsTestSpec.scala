@@ -7,20 +7,18 @@ import auth.infrastructure.endpoint._
 import cats.effect.{IO, Sync}
 import cats.implicits._
 import doobie.Transactor
-import h4sm.auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
-import h4sm.auth.domain.tokens._
-import h4sm.auth.domain.users.UserRepositoryAlgebra
-import h4sm.auth.infrastructure.endpoint.arbitraries._
-import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
-import h4sm.db.config._
-import h4sm.dbtesting.DbFixtureSuite
-import h4sm.permissions.infrastructure.repository.{PermissionRepository, UserPermissionRepository}
+import auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
+import auth.domain.tokens._
+import auth.domain.users.UserRepositoryAlgebra
+import auth.infrastructure.endpoint.arbitraries._
+import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import dbtesting.DbFixtureSuite
+import permissions.infrastructure.repository.{PermissionRepository, UserPermissionRepository}
 import permissions.domain._
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import tsec.passwordhashers.jca.BCrypt
 import repository.persistent.sql.arbitraries._
-import io.circe.config.parser
 import tsec.authentication.TSecBearerToken
 
 class PermissionEndpointsTestSpec
@@ -30,7 +28,6 @@ with DbFixtureSuite
 with IOTestAuthClientChecks {
 
   def schemaNames: Seq[String] = Seq("ct_auth", "ct_permissions")
-  def config: DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 
   case class Clients[F[_], T[_]](
     userRepo : UserRepositoryAlgebra[F],

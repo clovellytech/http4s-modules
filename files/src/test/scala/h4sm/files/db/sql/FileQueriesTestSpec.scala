@@ -1,21 +1,22 @@
-package h4sm.files
+package h4sm
+package files
 package db.sql
 
 import cats.effect.IO
-import org.scalatest._
-import h4sm.dbtesting.arbitraries._
+import db.sql.files._
+import dbtesting.arbitraries._
+import dbtesting.DbFixtureSuite
+import domain.arbitraries._
 import doobie.scalatest.IOChecker
 import doobie.Transactor
-import infrastructure.testTransactor
-import files._
-import h4sm.files.domain.arbitraries._
 
-class FileQueriesTestSpec extends FunSuite with IOChecker {
-  override def transactor: Transactor[IO] = testTransactor
+class FileQueriesTestSpec extends DbFixtureSuite with IOChecker {
+  def schemaNames = List("ct_auth", "ct_files")
+  def transactor: Transactor[IO] = dbtesting.transactor.getTransactor[IO](cfg)
 
-  test("insert should typecheck")(check(applyArb(insert _)))
-  test("select by id should typecheck")(check(applyArb(selectById _)))
-  test("select user files should typecheck")(check(applyArb(selectFiles _)))
-  test("update upload time should typecheck")(check(applyArb(updateFileUploadTime _)))
-  test("delete by id should typecheck")(check(applyArb(deleteById _)))
+  test("insert should typecheck")(_ => check(applyArb(insert _)))
+  test("select by id should typecheck")(_ => check(applyArb(selectById _)))
+  test("select user files should typecheck")(_ => check(applyArb(selectFiles _)))
+  test("update upload time should typecheck")(_ => check(applyArb(updateFileUploadTime _)))
+  test("delete by id should typecheck")(_ => check(applyArb(deleteById _)))
 }

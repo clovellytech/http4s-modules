@@ -2,25 +2,25 @@ package h4sm
 package permissions.infrastructure.repository
 package persistent.sql
 
+import arbitraries._
 import cats.effect.IO
+import dbtesting.arbitraries._
+import dbtesting.DbFixtureSuite
 import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
-import org.scalatest._
 import org.scalacheck._
 
-import dbtesting.arbitraries._
-import arbitraries._
-
-class PermissionQueriesTestSpec extends FunSuite with IOChecker {
-  def transactor: Transactor[IO] = persistent.sql.transactor.testTransactor
+class PermissionQueriesTestSpec extends DbFixtureSuite with IOChecker {
+  def schemaNames = List("ct_auth", "ct_permissions")
+  def transactor: Transactor[IO] = dbtesting.transactor.getTransactor[IO](cfg)
 
   implicit val stringArb = Arbitrary(nonEmptyString)
 
-  test("select should typecheck")(check(permissions.select))
-  test("select by id should typecheck")(check(applyArb(permissions.byId _)))
-  test("select by app name should typecheck")(check(applyArb(permissions.byAppName _)))
-  test("select by atttributes should typecheck")(check(applyArb((permissions.byAttributes _).tupled)))
-  test("insert should typecheck")(check(applyArb(permissions.insert _)))
-  test("safe update should typecheck")(check(applyArb((permissions.safeUpdate _).tupled)))
-  test("delete should typecheck")(check(applyArb(permissions.delete _)))
+  test("select should typecheck")(_ => check(permissions.select))
+  test("select by id should typecheck")(_ => check(applyArb(permissions.byId _)))
+  test("select by app name should typecheck")(_ => check(applyArb(permissions.byAppName _)))
+  test("select by atttributes should typecheck")(_ => check(applyArb((permissions.byAttributes _).tupled)))
+  test("insert should typecheck")(_ => check(applyArb(permissions.insert _)))
+  test("safe update should typecheck")(_ => check(applyArb((permissions.safeUpdate _).tupled)))
+  test("delete should typecheck")(_ => check(applyArb(permissions.delete _)))
 }

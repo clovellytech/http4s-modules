@@ -19,7 +19,6 @@ import h4sm.files.domain.FileInfo
 import h4sm.files.infrastructure.backends._
 import h4sm.files.db.sql.{files => filesSql}
 import h4sm.files.db.sql.arbitraries._
-import io.circe.config.parser
 import io.circe.generic.auto._
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -52,9 +51,7 @@ object Clients{
 }
 
 class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks with IOTestAuthClientChecks {
-
   val schemaNames: Seq[String] = List("ct_auth", "ct_files")
-  val config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)
 

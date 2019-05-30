@@ -1,23 +1,21 @@
-package h4sm.auth.db
+package h4sm
+package auth.db
 package sql
 
-import java.util.UUID
-
+import arbitraries._
 import cats.effect.IO
-import org.scalatest.FunSuite
+import dbtesting.arbitraries._
+import dbtesting.DbFixtureBeforeAfter
+import domain._
 import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
+import java.util.UUID
+import org.scalatest.FunSuite
+import users._
 
-import domain._
-import h4sm.auth.infrastructure.testTransactor
-
-import h4sm.dbtesting.arbitraries._
-import arbitraries._
-
-class UserQueriesTestSpec extends FunSuite with IOChecker {
-  val transactor: Transactor[IO] = testTransactor
-
-  import users._
+class UserQueriesTestSpec extends FunSuite with DbFixtureBeforeAfter with IOChecker {
+  def schemaNames: Seq[String] = List("ct_auth")
+  val transactor: Transactor[IO] = dbtesting.transactor.getTransactor[IO](cfg)
 
   val u = User("name", "hash".getBytes())
   val uuid = UUID.randomUUID()

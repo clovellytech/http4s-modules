@@ -5,15 +5,12 @@ import arbitraries._
 import cats.effect.IO
 import domain.requests._
 import h4sm.auth.infrastructure.endpoint.UserRequest
-import h4sm.db.config._
 import h4sm.dbtesting.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
-import io.circe.config.parser
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class RequestEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
-  def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 
   test("request properties") { p =>
     val reqs = new TestRequests[IO](p.transactor)

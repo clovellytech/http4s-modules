@@ -1,9 +1,11 @@
-package h4sm.auth.infrastructure
+package h4sm
+package auth.infrastructure
 package endpoint
 
 import java.time.{Duration, Instant}
 
 import cats.effect.IO
+import doobie.util.transactor.Transactor
 import h4sm.auth.client.AuthClient
 import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.dbtesting.DbFixtureSuite
@@ -11,18 +13,19 @@ import org.http4s.Status
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import arbitraries._
-import h4sm.db.config.DatabaseConfig
-import io.circe.config.parser
+import tsec.authentication.TSecBearerToken
 
 class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
-  implicit val userService = new UserRepositoryInterpreter(testTransactor)
-  implicit val tokenService = new TokenRepositoryInterpreter(testTransactor)
-  val authenticator = Authenticators.bearer[IO]
-  val authClient = new AuthClient(authenticator)
   def schemaNames: Seq[String] = List("ct_auth")
-  def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
 
-  test("A user should login") { _ =>
+  def client(tr: Transactor[IO]): AuthClient[IO, TSecBearerToken] = {
+    implicit val userService = new UserRepositoryInterpreter(tr)
+    implicit val tokenService = new TokenRepositoryInterpreter(tr)
+    new AuthClient(Authenticators.bearer[IO])
+  }
+
+  test("A user should login") { p =>
+    val authClient = client(p.transactor)
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
@@ -36,7 +39,8 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
     }
   }
 
-  test("A duplicate registration should fail")  { _ =>
+  test("A duplicate registration should fail") { p =>
+    val authClient = client(p.transactor)
     forAll { u: UserRequest =>
       val test : IO[Assertion] = for {
         _ <- authClient.postUser(u)
@@ -50,7 +54,8 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
     }
   }
 
-  test("A login create usable session") { _ =>
+  test("A login create usable session") { p =>
+    val authClient = client(p.transactor)
     forAll { u : UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
@@ -67,7 +72,8 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
     }
   }
 
-  test("A bad password return 400") { _ =>
+  test("A bad password return 400") { p =>
+    val authClient = client(p.transactor)
     forAll { (u : UserRequest) =>
       for {
         _ <- authClient.postUser(u)

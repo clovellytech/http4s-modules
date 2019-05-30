@@ -1,46 +1,57 @@
-package h4sm.auth
+package h4sm
+package auth
 package infrastructure
 package endpoint
 
-import org.scalatest._
 import cats.effect.IO
 import cats.implicits._
 import domain.tokens._
+import doobie.util.transactor.Transactor
 import infrastructure.repository.persistent._
+import org.scalatest._
 import org.http4s.Status
-import h4sm.auth.client.AuthClient
+import auth.client.AuthClient
+import dbtesting.DbFixtureSuite
+import tsec.authentication.TSecBearerToken
 
-class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
-  implicit val userService = new UserRepositoryInterpreter(testTransactor)
-  implicit val tokenService = new TokenRepositoryInterpreter(testTransactor)
-  val authenticator = Authenticators.bearer[IO]
-  val endpoints = new AuthClient(authenticator)
-  import endpoints._
+class AuthEndpointsTestSpec extends DbFixtureSuite with IOFixtureTest with Matchers{
+  val schemaNames : Seq[String] = List("ct_auth")
+
+  def client(tr: Transactor[IO]): AuthClient[IO, TSecBearerToken] = {
+    implicit val userService = new UserRepositoryInterpreter(tr)
+    implicit val tokenService = new TokenRepositoryInterpreter(tr)
+    new AuthClient(Authenticators.bearer[IO])
+  }
 
   val user = UserRequest("zak", "password")
 
-  testIO("a signup request should return 200 status"){
+  testIO("a signup request should return 200 status"){ p =>
+    val authClient = client(p.transactor)
     for {
-      post <- postUser(user)
-      _ <- deleteUser(user.username)
+      post <- authClient.postUser(user)
+      _ <- authClient.deleteUser(user.username)
     } yield {
       post.status should equal (Status.Ok)
     }
   }
 
-  testIO("a user exists request should return false for no user"){
-    userExists(user.username).map(_ should equal (false))
+  testIO("a user exists request should return false for no user"){ p =>
+    val authClient = client(p.transactor)
+    authClient.userExists(user.username).map(_ should equal (false))
   }
 
-  testIO("a signed up user should show user exists"){
+  testIO("a signed up user should show user exists"){ p => 
+    val authClient = client(p.transactor)
     for {
-      _ <- postUser(user)
-      exists <- userExists(user.username)
-      _ <- deleteUser(user.username)
+      _ <- authClient.postUser(user)
+      exists <- authClient.userExists(user.username)
+      _ <- authClient.deleteUser(user.username)
     } yield exists should equal (true)
   }
 
-  testIO("a login request should return 200"){
+  testIO("a login request should return 200"){ p =>
+    val authClient = client(p.transactor)
+    import authClient._
     for {
       _ <- postUser(user)
       login <- loginUser(user)
@@ -51,7 +62,9 @@ class AuthEndpointsTestSpec extends FunSuite with IOTest with Matchers{
     }
   }
 
-  testIO("a user should get a usable session on login"){
+  testIO("a user should get a usable session on login"){ p =>
+    val authClient = client(p.transactor)
+    import authClient._
     for {
       _ <- postUser(user)
       login <- loginUser(user)

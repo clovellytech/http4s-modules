@@ -1,18 +1,18 @@
-package h4sm.featurerequests.db
+package h4sm
+package featurerequests.db
 package sql
 
+import arbitraries._
 import cats.effect.IO
 import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
-import org.scalatest._
+import dbtesting.arbitraries._
+import dbtesting.DbFixtureSuite
 import votes._
-import h4sm.dbtesting.arbitraries._
-import arbitraries._
 
-class VoteSQLTestSpec extends FlatSpec with Matchers with IOChecker {
-  val transactor: Transactor[IO] = testTransactor.testTransactor
+class VoteSQLTestSpec extends DbFixtureSuite with IOChecker {
+  val schemaNames = List("ct_auth", "ct_feature_requests")
+  def transactor: Transactor[IO] = dbtesting.transactor.getTransactor(cfg)
 
-  "Vote SQL" should "typecheck" in {
-    check(applyArb(insert _))
-  }
+  test("insert typechecks")(_ => check(applyArb(insert _)))
 }

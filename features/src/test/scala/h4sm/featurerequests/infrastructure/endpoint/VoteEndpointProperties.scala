@@ -5,14 +5,11 @@ import arbitraries._
 import cats.effect.IO
 import domain.requests._
 import h4sm.auth.infrastructure.endpoint.UserRequest
-import h4sm.db.config._
 import h4sm.dbtesting.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
-import io.circe.config.parser
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
-  def config : DatabaseConfig = parser.decodePathF[IO, DatabaseConfig]("db").unsafeRunSync()
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
 
   test("vote can be submitted prop") { p : FixtureParam =>
