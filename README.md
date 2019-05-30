@@ -44,7 +44,7 @@ libraryDependencies ++= Seq(
 	"h4sm-features",
 	"h4sm-files", 
 	"h4sm-permissions"
-).map("com.clovellytech" %% _ % "0.0.23")
+).map("com.clovellytech" %% _ % "0.0.29")
 ```
 
 Setup
