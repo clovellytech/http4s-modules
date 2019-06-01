@@ -31,7 +31,7 @@ object dependencies {
   val pureConfig = "0.9.2"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.7"
-  val simulacrum = "0.17.0"
+  val simulacrum = "0.18.0"
   val tsec = "0.0.1-RC1"
 
   val httpDeps = Seq(
