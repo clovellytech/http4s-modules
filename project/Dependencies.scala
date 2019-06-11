@@ -27,7 +27,7 @@ object dependencies {
   val postgres = "42.2.5"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.7"
-  val simulacrum = "0.18.0"
+  val simulacrum = "0.19.0"
   val tsec = "0.1.0"
 
   val httpDeps = Seq(
