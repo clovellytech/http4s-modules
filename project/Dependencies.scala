@@ -6,7 +6,7 @@ object dependencies {
     "52north for postgis" at "http://52north.org/maven/repo/releases/",
     Resolver.sonatypeRepo("releases")
   )
-  
+
   val compilerPlugins = Seq(
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.10"),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
@@ -26,7 +26,7 @@ object dependencies {
   val logback = "1.2.3"
   val postgres = "42.2.5"
   val scalaCheck = "1.14.0"
-  val scalaTest = "3.0.7"
+  val scalaTest = "3.0.8"
   val simulacrum = "0.19.0"
   val tsec = "0.1.0"
 
@@ -65,7 +65,7 @@ object dependencies {
   ) ++ Seq(
     "circe-core",
     "circe-generic",
-    "circe-parser", 
+    "circe-parser",
     "circe-java8"
   ).map("io.circe" %% _ % circe) ++ Seq(
     "io.circe" %% "circe-config" % circeConfig
