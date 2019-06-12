@@ -26,7 +26,7 @@ object dependencies {
   val logback = "1.2.3"
   val postgres = "42.2.5"
   val scalaCheck = "1.14.0"
-  val scalaTest = "3.0.7"
+  val scalaTest = "3.0.8"
   val simulacrum = "0.18.0"
   val tsec = "0.1.0"
 
