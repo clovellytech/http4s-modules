@@ -90,9 +90,20 @@ lazy val permissions = (project in file("./permissions"))
   )
   .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
+lazy val petstore = (project in file("./petstore"))
+  .settings(commonSettings)
+  .settings(commonSettings)
+  .settings(publishArtifact in Test := true)
+  .settings(
+    name := "h4sm-permissions",
+    libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
+  )
+  .dependsOn(auth % withTests, db % withTests, permissions, files, dbtesting % testOnly)
+
 lazy val docs = (project in file("./h4sm-docs"))
   .settings(
     name := "h4sm-docs",
+    moduleName := "myproject-docs",
     mdocVariables := Map(
       "VERSION" -> version.value
     ),
@@ -104,22 +115,8 @@ lazy val docs = (project in file("./h4sm-docs"))
     scalacOptions := options.consoleFlags
   )
   .enablePlugins(MdocPlugin)
-  .enablePlugins(MicrositesPlugin)
-  .settings(
-    micrositeName := "Http4s Modules",
-    micrositeDescription := "Documenting uses of H4SM",
-    micrositeUrl := "https://clovellytech.github.io/http4s-modules/",
-    micrositeBaseUrl := "/http4s-modules",
-    micrositeAuthor := "clovellytech",
-    micrositeHomepage := "https://clovellytech.github.io/http4s-modules",
-    micrositeOrganizationHomepage := "http://www.github.com/clovellytech",
-    micrositeGithubOwner := "clovellytech",
-    micrositeGithubRepo := "http4s-modules",
-    micrositeGitterChannelUrl := "clovellytech/h4sm",
-    micrositeShareOnSocial := true,
-    micrositeCompilingDocsTool := WithMdoc
-  )
-  .dependsOn(auth, db, dbtesting, features, files)
+  .enablePlugins(DocusaurusPlugin)
+  .dependsOn(auth, db, dbtesting, features, files, permissions)
 
 lazy val h4sm = (project in file("."))
   .settings(name := "h4sm")

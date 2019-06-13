@@ -1,4 +1,4 @@
-# typesafe config uses reference.conf for public configuration examples, 
+# typesafe config uses reference.conf for public configuration examples,
 # and application.conf should be ignored.
 application.conf
 
@@ -85,3 +85,15 @@ GitHub.sublime-settings
 /.bloop/
 /project/.bloop/
 /.metals/
+
+# docusaurus:
+node_modules
+
+lib/core/metadata.js
+lib/core/MetadataBlog.js
+
+website/translated_docs
+website/build/
+website/yarn.lock
+website/node_modules
+website/i18n/*

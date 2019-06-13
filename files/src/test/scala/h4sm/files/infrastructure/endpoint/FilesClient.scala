@@ -19,7 +19,7 @@ import org.http4s.multipart._
 
 import scala.concurrent.ExecutionContext
 
-import dbtesting.endpoints.ClientError._
+import dbtesting.infrastructure.endpoints._
 
 class FilesClient[F[_] : ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])(
   implicit F : Sync[F],
