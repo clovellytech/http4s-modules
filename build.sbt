@@ -116,7 +116,7 @@ lazy val docs = (project in file("./h4sm-docs"))
   )
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
-  .dependsOn(auth, db, dbtesting, features, files, permissions)
+  .dependsOn(auth, db, dbtesting, features, files, permissions, petstore)
 
 lazy val h4sm = (project in file("."))
   .settings(name := "h4sm")
