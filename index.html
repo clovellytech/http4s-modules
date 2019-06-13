@@ -23,7 +23,7 @@
 
 <div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext.Implicits.global</span>
 <span class="k">implicit</span> <span class="k">val</span> <span class="n">cs</span> <span class="k">=</span> <span class="nc">IO</span><span class="o">.</span><span class="n">contextShift</span><span class="o">(</span><span class="n">global</span><span class="o">)</span>
-<span class="c1">// cs: effect.ContextShift[IO] = cats.effect.internals.IOContextShift@2383922d
+<span class="c1">// cs: effect.ContextShift[IO] = cats.effect.internals.IOContextShift@11f709f8
 </span><span class="k">val</span> <span class="n">db</span> <span class="k">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">decodePathF</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">DatabaseConfig</span><span class="o">](</span><span class="s">"db"</span><span class="o">)</span>
 <span class="c1">// db: IO[DatabaseConfig] = Pure(
 //   DatabaseConfig("127.0.0.1", 5432, "postgres", "", "h4sm_docs_gen")
@@ -34,7 +34,7 @@
 //   &lt;function1&gt;
 // )
 </span><span class="k">val</span> <span class="n">xa</span> <span class="k">=</span> <span class="n">transactor</span><span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
-<span class="c1">// xa: Transactor[IO] = doobie.util.transactor$Transactor$$anon$10@a23cf56
+<span class="c1">// xa: Transactor[IO] = doobie.util.transactor$Transactor$$anon$10@2c304e56
 </span></code></pre>
 </div>
 
@@ -50,26 +50,26 @@
 <span class="k">import</span> <span class="nn">featurerequests.infrastructure.endpoint._</span>
 
 <span class="k">implicit</span> <span class="k">val</span> <span class="n">users</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">UserRepositoryInterpreter</span><span class="o">(</span><span class="n">xa</span><span class="o">)</span>
-<span class="c1">// users: UserRepositoryInterpreter[IO] = h4sm.auth.infrastructure.repository.persistent.UserRepositoryInterpreter@4b9a318
+<span class="c1">// users: UserRepositoryInterpreter[IO] = h4sm.auth.infrastructure.repository.persistent.UserRepositoryInterpreter@4cd084b6
 </span><span class="k">implicit</span> <span class="k">val</span> <span class="n">tokens</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TokenRepositoryInterpreter</span><span class="o">(</span><span class="n">xa</span><span class="o">)</span>
-<span class="c1">// tokens: TokenRepositoryInterpreter[IO] = h4sm.auth.infrastructure.repository.persistent.TokenRepositoryInterpreter@5da8623a
+<span class="c1">// tokens: TokenRepositoryInterpreter[IO] = h4sm.auth.infrastructure.repository.persistent.TokenRepositoryInterpreter@68e48e11
 </span><span class="k">val</span> <span class="n">authEndpoints</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">AuthEndpoints</span><span class="o">(</span><span class="nc">BCrypt</span><span class="o">,</span> <span class="nc">Authenticators</span><span class="o">.</span><span class="n">bearer</span><span class="o">[</span><span class="kt">IO</span><span class="o">])</span>
-<span class="c1">// authEndpoints: AuthEndpoints[IO, BCrypt, tsec.authentication.TSecBearerToken] = h4sm.auth.infrastructure.endpoint.AuthEndpoints@e638022
+<span class="c1">// authEndpoints: AuthEndpoints[IO, BCrypt, tsec.authentication.TSecBearerToken] = h4sm.auth.infrastructure.endpoint.AuthEndpoints@13058378
 </span><span class="k">val</span> <span class="n">authService</span> <span class="k">=</span> <span class="n">authEndpoints</span><span class="o">.</span><span class="nc">Auth</span>
-<span class="c1">// authService: tsec.authentication.SecuredRequestHandler[IO, auth.package.UserId, auth.db.domain.User, tsec.authentication.TSecBearerToken[auth.package.UserId]] = tsec.authentication.SecuredRequestHandler$$anon$2@393d9650
+<span class="c1">// authService: tsec.authentication.SecuredRequestHandler[IO, auth.package.UserId, auth.db.domain.User, tsec.authentication.TSecBearerToken[auth.package.UserId]] = tsec.authentication.SecuredRequestHandler$$anon$2@45ba57fe
 </span><span class="k">val</span> <span class="n">requests</span> <span class="k">=</span> <span class="nc">RequestEndpoints</span><span class="o">.</span><span class="n">persistingEndpoints</span><span class="o">(</span><span class="n">xa</span><span class="o">)</span>
-<span class="c1">// requests: RequestEndpoints[IO] = h4sm.featurerequests.infrastructure.endpoint.RequestEndpoints@2ad1abb
+<span class="c1">// requests: RequestEndpoints[IO] = h4sm.featurerequests.infrastructure.endpoint.RequestEndpoints@540469ba
 </span><span class="k">val</span> <span class="n">votes</span> <span class="k">=</span> <span class="nc">VoteEndpoints</span><span class="o">.</span><span class="n">persistingEndpoints</span><span class="o">(</span><span class="n">xa</span><span class="o">)</span>
-<span class="c1">// votes: VoteEndpoints[IO] = h4sm.featurerequests.infrastructure.endpoint.VoteEndpoints@8368136
+<span class="c1">// votes: VoteEndpoints[IO] = h4sm.featurerequests.infrastructure.endpoint.VoteEndpoints@4621ad68
 </span>
 <span class="k">val</span> <span class="n">requestEndpoints</span> <span class="k">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">unAuthEndpoints</span> <span class="o">&lt;+&gt;</span> <span class="n">authService</span><span class="o">.</span><span class="n">liftService</span><span class="o">(</span><span class="n">requests</span><span class="o">.</span><span class="n">authEndpoints</span><span class="o">)</span>
 <span class="c1">// requestEndpoints: data.Kleisli[data.OptionT[IO, β$0$], org.http4s.Request[IO], org.http4s.Response[IO]] = Kleisli(
-//   cats.data.KleisliSemigroupK$$Lambda$5257/0x0000000101cb2040@58e21edf
+//   cats.data.KleisliSemigroupK$$Lambda$5265/0x0000000101cb2040@7c1760b4
 // )
 </span>
 <span class="k">val</span> <span class="n">voteEndpoints</span> <span class="k">=</span> <span class="n">authService</span><span class="o">.</span><span class="n">liftService</span><span class="o">(</span><span class="n">votes</span><span class="o">.</span><span class="n">endpoints</span><span class="o">)</span>
 <span class="c1">// voteEndpoints: org.http4s.package.HttpRoutes[IO] = Kleisli(
-//   cats.data.KleisliApplicativeError$$Lambda$5256/0x0000000101cb1040@15a68351
+//   cats.data.KleisliApplicativeError$$Lambda$5264/0x0000000101cb1040@48d49fd8
 // )
 </span></code></pre>
 </div>
@@ -88,7 +88,7 @@
 
 <span class="k">val</span> <span class="n">authClient</span> <span class="k">=</span> <span class="n">authEndpoints</span><span class="o">.</span><span class="n">endpoints</span><span class="o">.</span><span class="n">orNotFound</span>
 <span class="c1">// authClient: data.Kleisli[IO, org.http4s.Request[IO], org.http4s.Response[IO]] = Kleisli(
-//   org.http4s.syntax.KleisliResponseOps$$Lambda$5258/0x0000000101cb2840@7905a984
+//   org.http4s.syntax.KleisliResponseOps$$Lambda$5266/0x0000000101cb2840@497bc964
 // )
 </span>
 <span class="k">val</span> <span class="n">userReq</span> <span class="k">=</span> <span class="nc">UserRequest</span><span class="o">(</span><span class="s">"email"</span><span class="o">,</span> <span class="s">"pass"</span><span class="o">)</span>
@@ -112,7 +112,7 @@
 //       HttpVersion(1, 1),
 //       Headers(Content-Type: application/json, Content-Length: 38),
 //       Stream(..),
-//       io.chrisdavenport.vault.Vault@67d0843c
+//       io.chrisdavenport.vault.Vault@3808b438
 //     )
 //   ),
 //   &lt;function1&gt;
