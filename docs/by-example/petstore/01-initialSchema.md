@@ -17,7 +17,7 @@ create table if not exists ct_petstore.pet (
   update_time timestamp with time zone not null default now(),
   name text not null,
   bio text,
-  created_by uuid references ct_auth.user (user_id),
+  created_by uuid not null references ct_auth.user (user_id),
   status text not null,
   photo_urls text[]
 );
