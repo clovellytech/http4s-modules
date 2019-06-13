@@ -16,13 +16,13 @@ import java.time.Instant
 
 final case class PetA(
   petId: UUID,
-  createTime Option[Instant],
+  createTime: Option[Instant],
   updateTime: Option[Instant],
   name: String,
   bio: String,
-  created_by: Option[UUID],
+  createdBy: Option[UUID],
   status: String,
-  photo_urls: List[String]
+  photoUrls: List[String]
 )
 ```
 
