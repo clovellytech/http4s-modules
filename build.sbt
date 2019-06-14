@@ -95,7 +95,7 @@ lazy val petstore = (project in file("./petstore"))
   .settings(commonSettings)
   .settings(publishArtifact in Test := true)
   .settings(
-    name := "h4sm-permissions",
+    name := "h4sm-petstore",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(auth % withTests, db % withTests, permissions, files, dbtesting % testOnly)
