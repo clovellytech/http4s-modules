@@ -27,14 +27,13 @@ jobs:
       - sbt test
       - sbt docs/mdoc
       - sbt docs/docusaurusCreateSite
-      - cd website && yarn run build
 
 deploy:
   provider: pages
   skip-cleanup: true
   github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
   keep-history: true
-  local-dir: ./website/build
+  local-dir: ./website/build/http4s-modules
   target-branch: gh-pages
   on:
     branch: master
