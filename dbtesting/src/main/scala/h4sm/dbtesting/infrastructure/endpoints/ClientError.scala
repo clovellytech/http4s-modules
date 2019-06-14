@@ -1,5 +1,5 @@
 package h4sm
-package dbtesting.endpoints
+package dbtesting.infrastructure.endpoints
 
 import org.http4s._
 import cats.effect.Sync
@@ -9,7 +9,7 @@ sealed abstract class ClientError extends Throwable with Product with Serializab
 final case class UriError(message : String) extends ClientError
 final case class CommunicationError(status: Status, message : String) extends ClientError
 
-object ClientError {
+trait ClientErrors {
   def commError(status : Status) : Throwable = CommunicationError(status, "Error, status was not Ok")
   def uriError(message: String) : Throwable = UriError(message)
 

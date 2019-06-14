@@ -11,15 +11,13 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.client.dsl.Http4sClientDsl
 import domain._
 
-import dbtesting.endpoints.ClientError._
+import dbtesting.infrastructure.endpoints._
 
-class PermissionClient[F[_] : Sync, Alg, T[_]](es : PermissionEndpoints[F, Alg, T]) extends Http4sDsl[F] with Http4sClientDsl[F] {
+class PermissionClient[F[_] : Sync, Alg, T[_]](es : PermissionEndpoints[F, Alg, T]) extends Http4sDsl[F] with Http4sClientDsl[F] with TestClientDsl[F] {
 
   val endpoints: Kleisli[F, Request[F], Response[F]] = es.endpoints.orNotFound
   val cs : Codecs[F] = new Codecs
   import cs._
-
-  def post[A : EntityEncoder[F, ?]](a : A, u : Uri)(implicit h : Headers) = POST(a, u, h.toList : _*)
 
   def addPermission(p : Permission)(implicit h : Headers) : F[Unit] = for {
     req <- post(p, Uri.uri("/"))
