@@ -103,7 +103,7 @@ lazy val petstore = (project in file("./petstore"))
 lazy val docs = (project in file("./h4sm-docs"))
   .settings(
     name := "h4sm-docs",
-    moduleName := "myproject-docs",
+    moduleName := "h4sm-docs",
     mdocVariables := Map(
       "VERSION" -> version.value
     ),

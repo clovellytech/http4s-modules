@@ -27,7 +27,7 @@ const siteConfig = {
   baseUrl: '/http4s-modules/', // Base URL for your project */
   customDocsPath: "h4sm-docs/target/mdoc",
   // Used for publishing and more
-  projectName: 'http4s-modules-docs',
+  projectName: 'http4s-modules',
   organizationName: 'clovellytech',
 
   // For no header links in the top nav bar -> headerLinks: [],

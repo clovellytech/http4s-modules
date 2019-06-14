@@ -27,6 +27,7 @@ jobs:
       - sbt test
       - sbt docs/mdoc
       - sbt docs/docusaurusCreateSite
+      - cd website && yarn run build
 
 deploy:
   provider: pages
