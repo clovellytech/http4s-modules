@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Http4s Modules by Example - Build Endpoints · Http4s Modules Docs</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Now that we have our inital endpoints and database set up, all that remains is to tie them together by creating a server:&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Http4s Modules by Example - Build Endpoints · Http4s Modules Docs"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clovellytech.github.io/http4s-modules/"/><meta property="og:description" content="&lt;p&gt;Now that we have our inital endpoints and database set up, all that remains is to tie them together by creating a server:&lt;/p&gt;
+"/><meta property="og:image" content="https://clovellytech.github.io/http4s-modules/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clovellytech.github.io/http4s-modules/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/http4s-modules/"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/http4s-modules/js/scrollSpy.js"></script><link rel="stylesheet" href="/http4s-modules/css/main.css"/><script src="/http4s-modules/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/http4s-modules/"><h2 class="headerTitle">Http4s Modules Docs</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"></ul></nav></div></header></div></div><div class="navPusher singleRowMobileNav"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Http4s Modules by Example - Build Endpoints</h1></header><article><div><span><p>Now that we have our inital endpoints and database set up, all that remains is to tie them together by creating a server:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> cats.effect._
+<span class="hljs-keyword">import</span> cats.implicits._
+<span class="hljs-keyword">import</span> h4sm.auth.infrastructure.endpoint._
+<span class="hljs-keyword">import</span> h4sm.auth.infrastructure.repository.persistent._
+<span class="hljs-keyword">import</span> h4sm.auth.domain.tokens._
+<span class="hljs-keyword">import</span> h4sm.auth.domain.users.<span class="hljs-type">UserRepositoryAlgebra</span>
+<span class="hljs-keyword">import</span> h4sm.db.config._
+<span class="hljs-keyword">import</span> h4sm.petstore.domain._
+<span class="hljs-keyword">import</span> h4sm.petstore.infrastructure.endpoint._
+<span class="hljs-keyword">import</span> h4sm.petstore.infrastructure.repository.persistent._
+<span class="hljs-keyword">import</span> doobie._
+<span class="hljs-keyword">import</span> doobie.hikari.<span class="hljs-type">HikariTransactor</span>
+<span class="hljs-keyword">import</span> io.circe.config.parser
+<span class="hljs-keyword">import</span> io.circe.generic.auto._
+<span class="hljs-keyword">import</span> org.http4s.<span class="hljs-type">HttpRoutes</span>
+<span class="hljs-keyword">import</span> org.http4s.server.{<span class="hljs-type">Router</span>, <span class="hljs-type">Server</span>}
+<span class="hljs-keyword">import</span> org.http4s.server.blaze.<span class="hljs-type">BlazeServerBuilder</span>
+<span class="hljs-keyword">import</span> org.http4s.implicits._
+<span class="hljs-keyword">import</span> tsec.passwordhashers.jca._
+<span class="hljs-keyword">import</span> tsec.cipher.symmetric.jca._
+<span class="hljs-keyword">import</span> tsec.authentication.<span class="hljs-type">SecuredRequestHandler</span>
+
+<span class="hljs-comment">/*
+ * Build a server that uses every module in this project...
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetstoreServer</span>[<span class="hljs-type">F</span>[_] </span>: <span class="hljs-type">ContextShift</span> : <span class="hljs-type">ConcurrentEffect</span> : <span class="hljs-type">Timer</span>] {
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">router</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">T</span>[_]](
+    auth: <span class="hljs-type">AuthEndpoints</span>[<span class="hljs-type">F</span>, <span class="hljs-type">A</span>, <span class="hljs-type">T</span>], 
+    pets: <span class="hljs-type">PetEndpoints</span>[<span class="hljs-type">F</span>, <span class="hljs-type">T</span>], 
+    orders: <span class="hljs-type">OrderEndpoints</span>[<span class="hljs-type">F</span>, <span class="hljs-type">T</span>]
+  ) : <span class="hljs-type">HttpRoutes</span>[<span class="hljs-type">F</span>] = {
+    <span class="hljs-type">Router</span>(
+      <span class="hljs-string">"/users"</span> -&gt; auth.endpoints,
+      <span class="hljs-string">"/pets"</span> -&gt; pets.endpoints,
+      <span class="hljs-string">"/orders"</span> -&gt; orders.endpoints
+    )
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">createServer</span> </span>: <span class="hljs-type">Resource</span>[<span class="hljs-type">F</span>, <span class="hljs-type">Server</span>[<span class="hljs-type">F</span>]] = {
+    <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> encryptor = <span class="hljs-type">AES128GCM</span>.genEncryptor[<span class="hljs-type">F</span>]
+    <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> gcmstrategy = <span class="hljs-type">AES128GCM</span>.defaultIvStrategy[<span class="hljs-type">F</span>]
+    <span class="hljs-keyword">for</span> {
+      db &lt;- <span class="hljs-type">Resource</span>.liftF(parser.decodePathF[<span class="hljs-type">F</span>, <span class="hljs-type">DatabaseConfig</span>](<span class="hljs-string">"db"</span>))
+      connec &lt;- <span class="hljs-type">ExecutionContexts</span>.fixedThreadPool[<span class="hljs-type">F</span>](<span class="hljs-number">10</span>)
+      tranec &lt;- <span class="hljs-type">ExecutionContexts</span>.cachedThreadPool[<span class="hljs-type">F</span>]
+      xa &lt;- <span class="hljs-type">HikariTransactor</span>.newHikariTransactor[<span class="hljs-type">F</span>](db.driver, db.url, db.user, db.password, connec, tranec)
+      key &lt;- <span class="hljs-type">Resource</span>.liftF(<span class="hljs-type">AES128GCM</span>.generateKey[<span class="hljs-type">F</span>])
+      implicit0(us: <span class="hljs-type">UserRepositoryAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">UserRepositoryInterpreter</span>(xa)
+      implicit0(ts: <span class="hljs-type">TokenRepositoryAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">TokenRepositoryInterpreter</span>(xa)
+      implicit0(ps: <span class="hljs-type">PetAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">PetRepository</span>(xa)
+      implicit0(os: <span class="hljs-type">OrderAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">OrderRepository</span>(xa)
+      authenticator = <span class="hljs-type">Authenticators</span>.statelessCookie(key)
+      auth = <span class="hljs-type">SecuredRequestHandler</span>(authenticator)
+      authEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">AuthEndpoints</span>(<span class="hljs-type">BCrypt</span>, authenticator)
+      petEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">PetEndpoints</span>(auth)
+      orderEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">OrderEndpoints</span>(auth)
+      _ &lt;- <span class="hljs-type">Resource</span>.liftF(<span class="hljs-type">DatabaseConfig</span>.initialize[<span class="hljs-type">F</span>](db)(<span class="hljs-string">"ct_auth"</span>, <span class="hljs-string">"ct_petstore"</span>))
+      server &lt;- <span class="hljs-type">BlazeServerBuilder</span>[<span class="hljs-type">F</span>]
+                .bindHttp(<span class="hljs-number">8080</span>, <span class="hljs-string">"localhost"</span>)
+                .withHttpApp(router(authEndpoints, petEndpoints, orderEndpoints).orNotFound)
+                .resource
+    } <span class="hljs-keyword">yield</span> server
+  }
+}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/http4s-modules/" class="nav-home"></a><div><h5>Docs</h5><a href="/http4s-modules/docs/">Getting Started</a></div><div><h5>Community</h5><a href="https://gitter.io/clovellytech/http4s-modules">Project Gitter Chat</a><a href="https://github.com/clovellytech/http4s-modules">GitHub</a><a class="github-button" href="https://github.com/clovellytech/http4s-modules" data-icon="octicon-star" data-count-href="/clovellytech/http4s-modules/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 ClovellyTech</section></footer></div></body></html>

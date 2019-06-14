@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Http4s Modules by Example - Initial Petstore Schema · Http4s Modules Docs</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;To implement our petstore API, we will use a schema that depends on tables from &lt;code&gt;ct_auth&lt;/code&gt; and &lt;code&gt;ct_permissions&lt;/code&gt; existing. These postgres schemas include tables that define users, tokens, and permissions that may be defined by other modules on the users&#x27;s abilities.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Http4s Modules by Example - Initial Petstore Schema · Http4s Modules Docs"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clovellytech.github.io/http4s-modules/"/><meta property="og:description" content="&lt;p&gt;To implement our petstore API, we will use a schema that depends on tables from &lt;code&gt;ct_auth&lt;/code&gt; and &lt;code&gt;ct_permissions&lt;/code&gt; existing. These postgres schemas include tables that define users, tokens, and permissions that may be defined by other modules on the users&#x27;s abilities.&lt;/p&gt;
+"/><meta property="og:image" content="https://clovellytech.github.io/http4s-modules/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clovellytech.github.io/http4s-modules/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/http4s-modules/"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/http4s-modules/js/scrollSpy.js"></script><link rel="stylesheet" href="/http4s-modules/css/main.css"/><script src="/http4s-modules/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/http4s-modules/"><h2 class="headerTitle">Http4s Modules Docs</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"></ul></nav></div></header></div></div><div class="navPusher singleRowMobileNav"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Http4s Modules by Example - Initial Petstore Schema</h1></header><article><div><span><p>To implement our petstore API, we will use a schema that depends on tables from <code>ct_auth</code> and <code>ct_permissions</code> existing. These postgres schemas include tables that define users, tokens, and permissions that may be defined by other modules on the users's abilities.</p>
+<p>We need new tables in our ct_petstore schema, which will store pets and orders</p>
+<p>The below schemas are created in <code>/h4sm-docs/resources/db/migration/ct_petstore/01-initial-schema.sql</code></p>
+<pre><code class="hljs css language-sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">schema</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span> ct_petstore;
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span> ct_petstore.pet (
+  pet_id <span class="hljs-keyword">uuid</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> primary <span class="hljs-keyword">key</span> <span class="hljs-keyword">default</span> gen_random_uuid(),
+  create_date <span class="hljs-built_in">timestamp</span> <span class="hljs-keyword">with</span> <span class="hljs-built_in">time</span> zone <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">now</span>(),
+  update_time <span class="hljs-built_in">timestamp</span> <span class="hljs-keyword">with</span> <span class="hljs-built_in">time</span> zone <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">now</span>(),
+  <span class="hljs-keyword">name</span> <span class="hljs-built_in">text</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span>,
+  bio <span class="hljs-built_in">text</span>,
+  created_by <span class="hljs-keyword">uuid</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">references</span> ct_auth.user (user_id),
+  <span class="hljs-keyword">status</span> <span class="hljs-built_in">text</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span>,
+  photo_urls <span class="hljs-built_in">text</span>[]
+);
+
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span> ct_petstore.order (
+  order_id <span class="hljs-keyword">uuid</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> primary <span class="hljs-keyword">key</span> <span class="hljs-keyword">default</span> gen_random_uuid(),
+  pet_id <span class="hljs-keyword">uuid</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">references</span> ct_petstore.pet,
+  user_id <span class="hljs-keyword">uuid</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">references</span> ct_auth.user,
+  create_time <span class="hljs-built_in">timestamp</span> <span class="hljs-keyword">with</span> <span class="hljs-built_in">time</span> zone <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">now</span>(),
+  ship_date <span class="hljs-built_in">timestamp</span> <span class="hljs-keyword">with</span> <span class="hljs-built_in">time</span> zone
+);
+</code></pre>
+<p>Both the pet table and the order table reference the users which are already provided.</p>
+<p>Now that we have our initial schema defined, we need to ensure that our schema will be properly migrated, and all dependent schemas will also be created before this one.</p>
+<p>Let us create a starter object we will call Server. It will not serve anything yet, but this will be our scaffold that will eventually contain all the components needed to serve our API.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> cats.effect.<span class="hljs-type">Sync</span>
+<span class="hljs-keyword">import</span> cats.implicits._
+<span class="hljs-keyword">import</span> h4sm.db.config._
+<span class="hljs-keyword">import</span> h4sm.files.config.<span class="hljs-type">FileConfig</span>
+<span class="hljs-keyword">import</span> io.circe.<span class="hljs-type">Decoder</span>
+<span class="hljs-keyword">import</span> io.circe.config.parser
+<span class="hljs-keyword">import</span> io.circe.generic.auto._  <span class="hljs-comment">// for parsing our configuration file.  // for parsing our configuration file.</span>
+
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServerConfig</span>(<span class="hljs-params">port: <span class="hljs-type">Int</span>, host: <span class="hljs-type">String</span>, numThreads: <span class="hljs-type">Int</span></span>)</span>
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainConfig</span>(<span class="hljs-params">db: <span class="hljs-type">DatabaseConfig</span>, files: <span class="hljs-type">FileConfig</span>, server: <span class="hljs-type">ServerConfig</span></span>)</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Server</span>[<span class="hljs-type">F</span>[_]</span>: <span class="hljs-type">Sync</span>] {
+  <span class="hljs-comment">// I require a Sync for F, because DatabaseConfig.initialize requires a Sync for F, below...</span>
+
+  <span class="hljs-comment">// These schemas will be migrated in order (table definitions written to database.)</span>
+  <span class="hljs-keyword">val</span> schemaNames: <span class="hljs-type">Seq</span>[<span class="hljs-type">String</span>] = <span class="hljs-type">List</span>(<span class="hljs-string">"ct_auth"</span>, <span class="hljs-string">"ct_permissions"</span>, <span class="hljs-string">"ct_files"</span>, <span class="hljs-string">"ct_petstore"</span>)
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = <span class="hljs-keyword">for</span> {
+    cfg &lt;- parser.decodeF[<span class="hljs-type">F</span>, <span class="hljs-type">MainConfig</span>]()
+    <span class="hljs-type">MainConfig</span>(db, fc, <span class="hljs-type">ServerConfig</span>(host, port, numThreads)) = cfg
+    _ &lt;- <span class="hljs-type">DatabaseConfig</span>.initialize[<span class="hljs-type">F</span>](db)(schemaNames: _*)
+  } <span class="hljs-keyword">yield</span> ()
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Server</span></span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">init</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">Sync</span>]: <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = <span class="hljs-keyword">new</span> <span class="hljs-type">Server</span>[<span class="hljs-type">F</span>]().initialize
+}
+</code></pre>
+<p>Now that we have our initial <code>Server</code> class set up, let's try to actually write these table definitions to our database. There are no endpoints to serve yet. Lots will change for this little <code>Server</code> class soon.</p>
+<p>Note that we get to delay the specification of the effect type <code>F</code> in which this code is run until this moment. Here is the first invocation of our program:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> cats.effect.<span class="hljs-type">IO</span>
+
+<span class="hljs-keyword">val</span> program = <span class="hljs-type">Server</span>.init[<span class="hljs-type">IO</span>].flatMap(_ =&gt; <span class="hljs-type">IO</span>(println(<span class="hljs-string">"Done!"</span>)))
+<span class="hljs-comment">// program: IO[Unit] = Bind(</span>
+<span class="hljs-comment">//   Bind(</span>
+<span class="hljs-comment">//     Pure(</span>
+<span class="hljs-comment">//       MainConfig(</span>
+<span class="hljs-comment">//         DatabaseConfig("127.0.0.1", 5432, "postgres", "", "h4sm_docs_gen"),</span>
+<span class="hljs-comment">//         FileConfig("local", "/tmp", 32),</span>
+<span class="hljs-comment">//         ServerConfig(8080, "127.0.0.1", 32)</span>
+<span class="hljs-comment">//       )</span>
+<span class="hljs-comment">//     ),</span>
+<span class="hljs-comment">//     &lt;function1&gt;</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   &lt;function1&gt;</span>
+<span class="hljs-comment">// )</span>
+program.unsafeRunSync()
+<span class="hljs-comment">// Done!</span>
+</code></pre>
+<p>Our database tables have been migrated to our database, let's <a href="/http4s-modules/docs/by-example/petstore/queries">move forward with writing some queries</a></p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/http4s-modules/" class="nav-home"></a><div><h5>Docs</h5><a href="/http4s-modules/docs/">Getting Started</a></div><div><h5>Community</h5><a href="https://gitter.io/clovellytech/http4s-modules">Project Gitter Chat</a><a href="https://github.com/clovellytech/http4s-modules">GitHub</a><a class="github-button" href="https://github.com/clovellytech/http4s-modules" data-icon="octicon-star" data-count-href="/clovellytech/http4s-modules/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 ClovellyTech</section></footer></div></body></html>
