@@ -23,12 +23,10 @@ before_script:
 
 jobs:
   include:
-    - stage: verify
-
-      script:
-        - sbt test
-        - sbt docs/mdoc
-        - sbt docs/docusaurusCreateSite
+    script:
+      - sbt test
+      - sbt docs/mdoc
+      - sbt docs/docusaurusCreateSite
 
 deploy:
   provider: pages
@@ -38,4 +36,4 @@ deploy:
   local-dir: ./website/build
   target-branch: gh-pages
   on:
-    branch: "feature-petstore-docusaurus-documentation"
+    branch: master
