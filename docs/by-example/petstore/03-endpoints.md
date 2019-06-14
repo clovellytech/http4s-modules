@@ -8,7 +8,6 @@ Now that our algebras are complete for storing and querying pets and orders, let
 Eventually we will need to handle permissions, to allow only employees of the petstore to add pets and update ship dates on orders. For now let's implement the endpoints only requiring registered users.
 
 ```scala mdoc
-
 import cats.effect.Sync
 import cats.implicits._
 import h4sm.auth._
@@ -63,6 +62,7 @@ class PetEndpoints[F[_]: Sync: PetAlgebra, T[_]](auth : UserSecuredRequestHandle
   def endpoints = auth.liftService(authService)
 }
 ```
+*/petstore/infrastructure/endpoints/PetEndpoints.scala*
 
 Note we're using PetAlgebra as a typeclass. This means when it comes time to create these endpoints, we'll need an implicit instance of PetAlgebra[F] available for whatever F gets chosen to run our server with. You'll see how that comes together in the next section. See `petstore/domain/PetAlgebra.scala`. 
 
@@ -147,3 +147,5 @@ val insertAndRetrieve: Resource[IO, List[(Pet, PetId, Instant)]] = for {
 } yield petsResult.result
 
 ```
+
+[Now let's write a Server class that will hook these endpoints up.](04-server.md)
