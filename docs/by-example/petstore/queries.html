@@ -144,7 +144,7 @@ object PetSql extends PetSql
 </code></pre>
 <p>Note the use of <code>DbFixtureSuite</code>, which will automatically create and then destroy a test postgres database for us.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> t = <span class="hljs-keyword">new</span> <span class="hljs-type">PetSqlTestSpec</span>
-<span class="hljs-comment">// t: PetSqlTestSpec = repl.Session$App$PetSqlTestSpec@11d033be</span>
+<span class="hljs-comment">// t: PetSqlTestSpec = repl.Session$App$PetSqlTestSpec@3074a5ff</span>
 t.execute(color = <span class="hljs-literal">false</span>)
 <span class="hljs-comment">// Session$App$PetSqlTestSpec:</span>
 <span class="hljs-comment">// - insert should typecheck</span>
@@ -224,5 +224,5 @@ t.execute(color = <span class="hljs-literal">false</span>)
 }
 </code></pre>
 <p>In the petstore module, these implementations are also complete for managing orders.</p>
-<p>At this point, we're ready to <a href="03-endpoints.md">implement our endpoints</a>.</p>
+<p>At this point, we're ready to <a href="/http4s-modules/docs/by-example/petstore/endpoints">implement our endpoints</a>.</p>
 </span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#specifying-domain">Specifying Domain</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/http4s-modules/" class="nav-home"></a><div><h5>Docs</h5><a href="/http4s-modules/docs/">Getting Started</a></div><div><h5>Community</h5><a href="https://gitter.io/clovellytech/http4s-modules">Project Gitter Chat</a><a href="https://github.com/clovellytech/http4s-modules">GitHub</a><a class="github-button" href="https://github.com/clovellytech/http4s-modules" data-icon="octicon-star" data-count-href="/clovellytech/http4s-modules/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 ClovellyTech</section></footer></div></body></html>
