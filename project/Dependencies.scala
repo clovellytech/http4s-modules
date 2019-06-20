@@ -24,7 +24,7 @@ object dependencies {
   val flyway = "5.2.4"
   val http4s = "0.20.3"
   val logback = "1.2.3"
-  val postgres = "42.2.5"
+  val postgres = "42.2.6"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.8"
   val simulacrum = "0.19.0"
