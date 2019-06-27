@@ -6,6 +6,7 @@
 <span class="hljs-keyword">import</span> h4sm.auth.infrastructure.endpoint._
 <span class="hljs-keyword">import</span> h4sm.auth.infrastructure.repository.persistent._
 <span class="hljs-keyword">import</span> h4sm.auth.domain.tokens._
+<span class="hljs-keyword">import</span> h4sm.auth.domain.<span class="hljs-type">UserService</span>
 <span class="hljs-keyword">import</span> h4sm.auth.domain.users.<span class="hljs-type">UserRepositoryAlgebra</span>
 <span class="hljs-keyword">import</span> h4sm.db.config._
 <span class="hljs-keyword">import</span> h4sm.petstore.domain._
@@ -46,14 +47,14 @@
       implicit0(ts: <span class="hljs-type">TokenRepositoryAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">TokenRepositoryInterpreter</span>(xa)
       implicit0(ps: <span class="hljs-type">PetAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">PetRepository</span>(xa)
       implicit0(os: <span class="hljs-type">OrderAlgebra</span>[<span class="hljs-type">F</span>]) = <span class="hljs-keyword">new</span> <span class="hljs-type">OrderRepository</span>(xa)
-      
+      userService = <span class="hljs-keyword">new</span> <span class="hljs-type">UserService</span>[<span class="hljs-type">F</span>, <span class="hljs-type">BCrypt</span>](<span class="hljs-type">BCrypt</span>)
       <span class="hljs-comment">// Key for stateless cookie authenticator</span>
       key &lt;- <span class="hljs-type">Resource</span>.liftF(<span class="hljs-type">AES128GCM</span>.generateKey[<span class="hljs-type">F</span>])
       authenticator = <span class="hljs-type">Authenticators</span>.statelessCookie(key)
       auth = <span class="hljs-type">SecuredRequestHandler</span>(authenticator)
 
       <span class="hljs-comment">// Endpoints</span>
-      authEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">AuthEndpoints</span>(<span class="hljs-type">BCrypt</span>, authenticator)
+      authEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">AuthEndpoints</span>(userService, authenticator)
       petEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">PetEndpoints</span>(auth)
       orderEndpoints = <span class="hljs-keyword">new</span> <span class="hljs-type">OrderEndpoints</span>(auth)
  
