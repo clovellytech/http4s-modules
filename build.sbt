@@ -31,7 +31,7 @@ lazy val publishSettings = Seq(
 val withTests : String = "compile->compile;test->test"
 val testOnly : String = "test->test"
 
-lazy val db = (project in file("./db"))
+lazy val db = (project in file("./modules/db"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(
@@ -39,16 +39,16 @@ lazy val db = (project in file("./db"))
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDepsInTestOnly
   )
 
-lazy val dbtesting = (project in file("./dbtesting"))
+lazy val dbtesting = (project in file("./modules/testutil"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(
-    name := "h4sm-dbtesting",
+    name := "h4sm-testutil",
     libraryDependencies ++= commonDeps ++ httpDeps ++ dbDeps ++ testDeps
   )
   .dependsOn(db)
 
-lazy val auth = (project in file("./auth"))
+lazy val auth = (project in file("./modules/auth"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(publishArtifact in Test := true)
@@ -59,7 +59,7 @@ lazy val auth = (project in file("./auth"))
   .dependsOn(db)
   .dependsOn(dbtesting % "test->test")
 
-lazy val files = (project in file("./files"))
+lazy val files = (project in file("./modules/files"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(publishArtifact in Test := true)
@@ -69,7 +69,7 @@ lazy val files = (project in file("./files"))
   )
   .dependsOn(db % withTests, auth % withTests, dbtesting % withTests)
 
-lazy val features = (project in file("./features"))
+lazy val features = (project in file("./modules/features"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(publishArtifact in Test := true)
@@ -80,7 +80,7 @@ lazy val features = (project in file("./features"))
   )
   .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
-lazy val permissions = (project in file("./permissions"))
+lazy val permissions = (project in file("./modules/permissions"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(publishArtifact in Test := true)
@@ -90,7 +90,7 @@ lazy val permissions = (project in file("./permissions"))
   )
   .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
 
-lazy val petstore = (project in file("./petstore"))
+lazy val petstore = (project in file("./modules/petstore"))
   .settings(commonSettings)
   .settings(commonSettings)
   .settings(publishArtifact in Test := true)
@@ -100,7 +100,7 @@ lazy val petstore = (project in file("./petstore"))
   )
   .dependsOn(auth % withTests, db % withTests, permissions, files, dbtesting % testOnly)
 
-lazy val invitations = (project in file("./invitations"))
+lazy val invitations = (project in file("./modules/invitations"))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(publishArtifact in Test := true)

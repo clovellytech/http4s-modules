@@ -136,7 +136,7 @@ To make our testing easier, I'll write an arbitrary generator to build `Pet`s:
 
 ```scala mdoc
 import org.scalacheck._
-import h4sm.dbtesting.arbitraries._
+import h4sm.testutil.arbitraries._
 
 object arbitraries {
   implicit val arbPet: Arbitrary[Pet] = Arbitrary(
@@ -159,9 +159,9 @@ Now all our queries are available as `PetSql`. Let's write some typechecking tes
 ```scala mdoc 
 import cats.effect.IO
 import h4sm.db.config.DatabaseConfig
-import h4sm.dbtesting.arbitraries._
-import h4sm.dbtesting.DbFixtureSuite
-import h4sm.dbtesting.transactor.getTransactor
+import h4sm.testutil.arbitraries._
+import h4sm.testutil.DbFixtureSuite
+import h4sm.testutil.transactor.getTransactor
 import doobie.scalatest.IOChecker
 import doobie.Transactor
 import arbitraries._
