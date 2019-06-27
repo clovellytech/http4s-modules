@@ -13,6 +13,7 @@ object dependencies {
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
   )
 
+  val apacheLang3 = "3.9"
   val bcrypt = "3.1"
   val cats = "1.6.1"
   val catsMtl = "0.5.0"
@@ -60,6 +61,7 @@ object dependencies {
     "cats-effect" -> catsEffect,
     "cats-mtl-core" -> catsMtl
   ).map(("org.typelevel" %% (_ : String) % (_: String)).tupled) ++ Seq(
+    "org.apache.commons" % "commons-lang3" % apacheLang3,
     "ch.qos.logback" %  "logback-classic" % logback,
     "com.github.mpilquist" %% "simulacrum" % simulacrum
   ) ++ Seq(

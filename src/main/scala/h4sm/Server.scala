@@ -4,6 +4,7 @@ import cats.effect._
 import cats.implicits._
 import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
 import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import auth.domain._
 import auth.domain.tokens._
 import auth.domain.users.UserRepositoryAlgebra
 import db.config._
@@ -47,8 +48,9 @@ class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.C
       xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
       key <- Resource.liftF(AES128GCM.generateKey[F])
       implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
+      userService = new UserService[F, BCrypt](BCrypt)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
-      authEndpoints = new AuthEndpoints(BCrypt, Authenticators.statelessCookie(key))
+      authEndpoints = new AuthEndpoints(userService, Authenticators.statelessCookie(key))
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files"))
       files = FileEndpoints.persistingEndpoints(xa, authEndpoints.Auth, ExecutionContext.Implicits.global)
       server <- BlazeServerBuilder[F]

@@ -5,22 +5,27 @@ package endpoint
 
 import cats.effect.IO
 import cats.implicits._
+import dbtesting.EndpointTestSpec
+import domain.UserService
 import domain.tokens._
 import doobie.util.transactor.Transactor
 import infrastructure.repository.persistent._
 import org.scalatest._
 import org.http4s.Status
 import auth.client.AuthClient
-import dbtesting.DbFixtureSuite
 import tsec.authentication.TSecBearerToken
+import tsec.passwordhashers.jca.BCrypt
+import h4sm.auth.domain.UserService
 
-class AuthEndpointsTestSpec extends DbFixtureSuite with IOFixtureTest with Matchers{
+
+class AuthEndpointsTestSpec extends EndpointTestSpec {
   val schemaNames : Seq[String] = List("ct_auth")
 
-  def client(tr: Transactor[IO]): AuthClient[IO, TSecBearerToken] = {
-    implicit val userService = new UserRepositoryInterpreter(tr)
+  def client(tr: Transactor[IO]): AuthClient[IO, BCrypt, TSecBearerToken] = {
+    implicit val userAlg = new UserRepositoryInterpreter(tr)
+    val userService = new UserService[IO, BCrypt](BCrypt)
     implicit val tokenService = new TokenRepositoryInterpreter(tr)
-    new AuthClient(Authenticators.bearer[IO])
+    new AuthClient(userService, Authenticators.bearer[IO])
   }
 
   val user = UserRequest("zak", "password")

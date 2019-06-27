@@ -87,8 +87,14 @@ import h4sm.db.config._
 import h4sm.petstore.domain._
 import h4sm.petstore.infrastructure.repository.persistent._
 import io.circe.config.parser
+import tsec.passwordhashers.jca.BCrypt
 
-def petEndpoints[F[_]: Sync: ConcurrentEffect : Timer: ContextShift]: Resource[F, (AuthClient[F, TSecBearerToken], PetEndpoints[F, TSecBearerToken])] = for {
+def petEndpoints[
+  F[_]: Sync
+  : ConcurrentEffect
+  : Timer
+  : ContextShift
+]: Resource[F, (AuthClient[F, BCrypt, TSecBearerToken], PetEndpoints[F, TSecBearerToken])] = for {
   // load our configuration and get a transactor for doobie:
   db <- Resource.liftF(parser.decodePathF[F, DatabaseConfig]("db"))
   // Initializes our entire database, including our authentication dependency:
@@ -102,10 +108,11 @@ def petEndpoints[F[_]: Sync: ConcurrentEffect : Timer: ContextShift]: Resource[F
   implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
   implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
   implicit0(ps: PetAlgebra[F]) = new PetRepository(xa)
+  userService = new UserService[F, BCrypt](BCrypt)
   authenticator = Authenticators.bearer
   auth = SecuredRequestHandler(authenticator)
 
-} yield (new AuthClient(authenticator), new PetEndpoints(auth))
+} yield (new AuthClient(userService, authenticator), new PetEndpoints(auth))
 ```
 
 At this point we will switch into `IO`:

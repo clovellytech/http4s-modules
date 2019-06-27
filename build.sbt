@@ -100,6 +100,16 @@ lazy val petstore = (project in file("./petstore"))
   )
   .dependsOn(auth % withTests, db % withTests, permissions, files, dbtesting % testOnly)
 
+lazy val invitations = (project in file("./invitations"))
+  .settings(commonSettings)
+  .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
+  .settings(
+    name := "h4sm-invitations",
+    libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
+  )
+  .dependsOn(auth % withTests, db % withTests, dbtesting % withTests)
+
 lazy val docs = (project in file("./h4sm-docs"))
   .settings(
     name := "h4sm-docs",

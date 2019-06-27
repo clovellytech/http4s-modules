@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext
 
 import dbtesting.infrastructure.endpoints._
 
-class FilesClient[F[_] : ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])(
+class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])(
   implicit F : Sync[F],
   ec : ExecutionContext
 ) extends Http4sDsl[F] with Http4sClientDsl[F]{
