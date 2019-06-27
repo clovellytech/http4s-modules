@@ -6,6 +6,7 @@ import cats.implicits._
 import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
 import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import auth.domain.tokens._
+import auth.domain.UserService
 import auth.domain.users.UserRepositoryAlgebra
 import doobie._
 import doobie.hikari.HikariTransactor
@@ -51,9 +52,10 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
       implicit0(ps: PetAlgebra[F]) = new PetRepository(xa)
       implicit0(os: OrderAlgebra[F]) = new OrderRepository(xa)
+      userService = new UserService[F, BCrypt](BCrypt)
       authenticator = Authenticators.statelessCookie(key)
       auth = SecuredRequestHandler(authenticator)
-      authEndpoints = new AuthEndpoints(BCrypt, authenticator)
+      authEndpoints = new AuthEndpoints(userService, authenticator)
       petEndpoints = new PetEndpoints(auth)
       orderEndpoints = new OrderEndpoints(auth)
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_petstore"))

@@ -3,16 +3,12 @@ package featurerequests.db
 package sql
 
 import arbitraries._
-import cats.effect.IO
-import doobie.scalatest.IOChecker
-import doobie.util.transactor.Transactor
 import dbtesting.arbitraries._
-import dbtesting.DbFixtureSuite
+import dbtesting.TypeCheckTestSpec
 import votes._
 
-class VoteSQLTestSpec extends DbFixtureSuite with IOChecker {
+class VoteSQLTestSpec extends TypeCheckTestSpec {
   val schemaNames = List("ct_auth", "ct_feature_requests")
-  def transactor: Transactor[IO] = dbtesting.transactor.getTransactor(cfg)
 
-  test("insert typechecks")(_ => check(applyArb(insert _)))
+  test("insert typechecks")(check(applyArb(insert _)))
 }

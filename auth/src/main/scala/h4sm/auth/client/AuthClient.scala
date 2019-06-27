@@ -11,19 +11,20 @@ import org.http4s.implicits._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 import org.http4s.Uri.uri
-import tsec.passwordhashers.jca.BCrypt
+import domain.UserService
 import domain.users.UserRepositoryAlgebra
 import domain.tokens.TokenRepositoryAlgebra
 import domain.tokens._
 
-class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra, T[_]](
+class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra, A, T[_]](
+  userService: UserService[F, A],
   authenticator: UserAuthenticator[F, T]
 )(implicit b: AsBaseToken[T[UserId]])
 extends Http4sDsl[F] with Http4sClientDsl[F] {
   type Token = T[UserId]
   implicit val booldecoder : EntityDecoder[F, Boolean] = jsonOf
 
-  val authEndpoints: AuthEndpoints[F, BCrypt, T] = new AuthEndpoints(BCrypt, authenticator)
+  val authEndpoints: AuthEndpoints[F, A, T] = new AuthEndpoints(userService, authenticator)
   val auth = authEndpoints.endpoints.orNotFound
 
   def getAuthHeaders(from: Response[F]) : Headers =
@@ -38,8 +39,7 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
   }
 
   def deleteUser(username: String): F[Unit] = (for {
-    u <- UserRepositoryAlgebra[F].byUsername(username)
-    (_, uid, _) = u
+    (_, uid, _) <- UserRepositoryAlgebra[F].byUsername(username)
     _ <- OptionT.liftF(UserRepositoryAlgebra[F].delete(uid))
   } yield ()).getOrElse(())
 

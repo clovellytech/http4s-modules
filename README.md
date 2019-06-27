@@ -15,7 +15,9 @@ To provide a library of production ready modules, complete with database schema,
 * auth - A complete user authentication implementation using `tsec`. Only uses Bearer tokens for now.
 * features - An example library that allows users to submit feature requests and vote on features.
 * files - A complete file upload and retrieval module. Only local file storage is implemented so far. AWS or other backends can be added by providing a typeclass instance.
+* invitations - Add the ability for users to invite new users.
 * permissions - Built on top of tsec-http4s, an easy way to create routes that are guarded by a user having certain permissions.
+* petstore - As a learning example, the scala-pet-store implemented with h4sm modules
 * more to come! Something you would like to see here? Submit an issue! 
 
 Contributors and Recognition
@@ -34,9 +36,10 @@ Add any of the following dependencies to your build.sbt:
 libraryDependencies ++= Seq(
 	"h4sm-auth",
 	"h4sm-features",
-	"h4sm-files", 
+	"h4sm-files",
+	"h4sm-invitations",
 	"h4sm-permissions"
-).map("com.clovellytech" %% _ % "0.0.30")
+).map("com.clovellytech" %% _ % "0.0.31")
 ```
 
 

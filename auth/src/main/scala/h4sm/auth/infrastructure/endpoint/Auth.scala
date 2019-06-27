@@ -1,23 +1,16 @@
 package h4sm.auth
 package infrastructure.endpoint
 
-import java.util.UUID
-
 import scala.concurrent.duration._
 import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
-import io.circe.syntax._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe._
 import org.http4s.headers.`WWW-Authenticate`
-import tsec.common._
-import tsec.passwordhashers.{PasswordHash, PasswordHasher}
-import tsec.passwordhashers.jca.JCAPasswordPlatform
 import tsec.authentication._
-import db.domain.User
-import domain.Error
+import domain._
 import domain.users.UserRepositoryAlgebra
 import domain.tokens.{AsBaseToken, TokenRepositoryAlgebra}
 import infrastructure.authentication.TransBackingStore._
@@ -57,18 +50,13 @@ object Authenticators {
 
 
 class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra, A, T[_]](
-  hasher : JCAPasswordPlatform[A],
+  userService: UserService[F, A],
   authenticator: UserAuthenticator[F, T]
-)(
-  implicit P : PasswordHasher[F, A],
-  A: AsBaseToken[T[UserId]]
-)
+)(implicit A: AsBaseToken[T[UserId]])
 extends Http4sDsl[F] {
   type Token = T[UserId]
 
   implicit val boolEncoder : EntityEncoder[F, Boolean] = jsonEncoderOf
-
-  val userService = implicitly[UserRepositoryAlgebra[F]]
 
   val Auth = SecuredRequestHandler(authenticator)
 
@@ -82,11 +70,7 @@ extends Http4sDsl[F] {
     case req @ POST -> Root / "user" => {
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        foundUser <- UserRepositoryAlgebra[F].byUsername(userRequest.username).isDefined
-        _ <- if(foundUser) Sync[F].raiseError(Error.Duplicate()) else ().pure[F]
-        hash <- hasher.hashpw[F](userRequest.password.getBytes())
-        user = User(userRequest.username, hash.getBytes)
-        _ <- UserRepositoryAlgebra[F].insertGetId(user).getOrElseF(Sync[F].raiseError(Error.Duplicate()))
+        _ <- userService.signupUser(userRequest.username, userRequest.password)
         result <- Ok()
       } yield result
 
@@ -99,18 +83,9 @@ extends Http4sDsl[F] {
     case req @ POST -> Root / "login" => {
       val res : F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        u <- UserRepositoryAlgebra[F]
-              .byUsername(userRequest.username)
-              .toRight(Error.NotFound())
-              .leftWiden[Throwable]
-              .value
-              .flatMap(_.raiseOrPure[F])
-        (user, uuid, joinTime) = u
-        hash = PasswordHash[A](new String(user.hash))
-        status <- hasher.checkpw[F](userRequest.password.getBytes, hash)
-        resp <- if(status == Verified) Ok(SiteResult(userRequest.username)) 
-                else Sync[F].raiseError(Error.BadLogin())
-        tok <- authenticator.create(uuid)
+        (user, userId) <- userService.lookup(userRequest.username, userRequest.password)
+        resp <- Ok(SiteResult(userRequest.username)) 
+        tok <- authenticator.create(userId)
       } yield authenticator.embed(resp, tok)
 
       res.recoverWith {
@@ -124,19 +99,16 @@ extends Http4sDsl[F] {
       UserRepositoryAlgebra[F].byUsername(username).isDefined.flatMap(Ok apply _)
   }
 
-  val authService: UserAuthService[F, T] = {
-    def respUser(ou : OptionT[F, (User, UUID, Instant)]) : F[Response[F]] = for {
-      ou2 <- ou.value
-      u <- Sync[F].fromOption(ou2, Error.NotFound())
-      (user, _, joinTime) = u
-      resp <- Ok(UserDetail(user.username, joinTime).asJson)
+  val authService: UserAuthService[F, T] = UserAuthService {
+    case req@GET -> Root / "user" asAuthed _ => for {
+      (user, _, joinTime) <- userService.byUserId(req.authenticator.asBase.identity)
+      resp <- Ok(UserDetail(user.username, joinTime))
     } yield resp
 
-    UserAuthService {
-      case req@GET -> Root / "user" asAuthed _ => respUser(UserRepositoryAlgebra[F].byId(req.authenticator.asBase.identity))
-
-      case GET -> Root / "user" / name asAuthed _ => respUser(UserRepositoryAlgebra[F].byUsername(name))
-    }
+    case GET -> Root / "user" / name asAuthed _ => for {
+      (user, _, joinTime) <- userService.byUsername(name)
+      resp <- Ok(UserDetail(user.username, joinTime))
+    } yield resp
   }
 
   def testService : HttpRoutes[F] = HttpRoutes.of {

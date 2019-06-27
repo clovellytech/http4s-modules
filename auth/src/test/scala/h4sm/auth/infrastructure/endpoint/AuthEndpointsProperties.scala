@@ -2,26 +2,29 @@ package h4sm
 package auth.infrastructure
 package endpoint
 
-import java.time.{Duration, Instant}
-
-import cats.effect.IO
+import cats.effect.{IO, Bracket, Sync}
 import doobie.util.transactor.Transactor
 import h4sm.auth.client.AuthClient
 import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.dbtesting.DbFixtureSuite
+import java.time.{Duration, Instant}
 import org.http4s.Status
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import arbitraries._
 import tsec.authentication.TSecBearerToken
+import tsec.passwordhashers.jca.BCrypt
+import tsec.passwordhashers.PasswordHasher
+import h4sm.auth.domain.UserService
 
 class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
   def schemaNames: Seq[String] = List("ct_auth")
 
-  def client(tr: Transactor[IO]): AuthClient[IO, TSecBearerToken] = {
-    implicit val userService = new UserRepositoryInterpreter(tr)
+  def client[F[_]: Sync: Bracket[?[_], Throwable]: PasswordHasher[?[_], BCrypt]](tr: Transactor[F]): AuthClient[F, BCrypt, TSecBearerToken] = {
+    implicit val userAlg = new UserRepositoryInterpreter(tr)
+    val userService = new UserService[F, BCrypt](BCrypt)
     implicit val tokenService = new TokenRepositoryInterpreter(tr)
-    new AuthClient(Authenticators.bearer[IO])
+    new AuthClient(userService, Authenticators.bearer[F])
   }
 
   test("A user should login") { p =>

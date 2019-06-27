@@ -12,6 +12,7 @@ import cats.implicits._
 import h4sm.auth.infrastructure.endpoint._
 import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.auth.domain.tokens._
+import h4sm.auth.domain.UserService
 import h4sm.auth.domain.users.UserRepositoryAlgebra
 import h4sm.db.config._
 import h4sm.petstore.domain._
@@ -52,14 +53,14 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
       implicit0(ps: PetAlgebra[F]) = new PetRepository(xa)
       implicit0(os: OrderAlgebra[F]) = new OrderRepository(xa)
-      
+      userService = new UserService[F, BCrypt](BCrypt)
       // Key for stateless cookie authenticator
       key <- Resource.liftF(AES128GCM.generateKey[F])
       authenticator = Authenticators.statelessCookie(key)
       auth = SecuredRequestHandler(authenticator)
 
       // Endpoints
-      authEndpoints = new AuthEndpoints(BCrypt, authenticator)
+      authEndpoints = new AuthEndpoints(userService, authenticator)
       petEndpoints = new PetEndpoints(auth)
       orderEndpoints = new OrderEndpoints(auth)
  

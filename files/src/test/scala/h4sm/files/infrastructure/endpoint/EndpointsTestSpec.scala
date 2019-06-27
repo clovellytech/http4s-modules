@@ -1,4 +1,5 @@
-package h4sm.files
+package h4sm
+package files
 package infrastructure
 package endpoint
 
@@ -8,17 +9,18 @@ import cats.effect.{ContextShift, IO, Sync}
 import cats.implicits._
 import doobie.implicits._
 import doobie.util.transactor.Transactor
-import h4sm.auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
-import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, Authenticators, UserRequest}
-import h4sm.auth.infrastructure.endpoint.arbitraries._
-import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
+import auth.domain.UserService
+import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators, UserRequest}
+import auth.infrastructure.endpoint.arbitraries._
+import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
 import h4sm.db.config._
-import h4sm.dbtesting.DbFixtureSuite
-import h4sm.files.config.FileConfig
-import h4sm.files.domain.FileInfo
-import h4sm.files.infrastructure.backends._
-import h4sm.files.db.sql.{files => filesSql}
-import h4sm.files.db.sql.arbitraries._
+import dbtesting.DbFixtureSuite
+import files.config.FileConfig
+import files.domain.FileInfo
+import files.infrastructure.backends._
+import files.db.sql.{files => filesSql}
+import files.db.sql.arbitraries._
 import io.circe.generic.auto._
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -28,15 +30,16 @@ import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-final case class Clients[F[_], A, T[_]](auth: TestAuthClient[F, T], files: FilesClient[F, T])
+final case class Clients[F[_], A, T[_]](auth: TestAuthClient[F, A, T], files: FilesClient[F, T])
 
 object Clients{
   def apply[F[_]: Sync: ContextShift](xa: Transactor[F]): Clients[F, BCrypt, TSecBearerToken] = {
-    implicit val userService = new UserRepositoryInterpreter(xa)
+    implicit val userAlg = new UserRepositoryInterpreter(xa)
+    val userService = new UserService[F, BCrypt](BCrypt)
     implicit val tokenService = new TokenRepositoryInterpreter(xa)
-    val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer[F])
+    val authEndpoints = new AuthEndpoints(userService, Authenticators.bearer[F])
     val authenticator = Authenticators.bearer[F]
-    val authClient = new AuthClient(authenticator)
+    val authClient = new AuthClient(userService, authenticator)
 
     val testAuth = new TestAuthClient(authClient)
 

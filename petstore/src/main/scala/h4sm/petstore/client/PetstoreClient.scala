@@ -12,7 +12,7 @@ import h4sm.petstore.infrastructure.endpoint._
 import org.http4s.Uri
 
 
-class PetstoreClient[F[_]: Sync, T[_]](ps: PetEndpoints[F, T], os: OrderEndpoints[F, T]) extends Http4sDsl[F] with Http4sClientDsl[F] with TestClientDsl[F] with Codecs[F] {
+class PetstoreClient[F[_]: Sync, T[_]](ps: PetEndpoints[F, T], os: OrderEndpoints[F, T]) extends Http4sDsl[F] with Http4sClientDsl[F] with SessionClientDsl[F] with Codecs[F] {
 
   val pets = ps.endpoints.orNotFound
   val orders = os.endpoints.orNotFound

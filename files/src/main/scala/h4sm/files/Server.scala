@@ -2,6 +2,8 @@ package h4sm.files
 
 import cats.effect.{ConcurrentEffect, ContextShift, ExitCode, Timer}
 import cats.implicits._
+import h4sm.auth.domain.tokens._
+import h4sm.auth.domain._
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
 import h4sm.db.config.DatabaseConfig
 import h4sm.files.config._
@@ -14,23 +16,23 @@ import org.http4s.implicits._
 import tsec.passwordhashers.jca.BCrypt
 import infrastructure.backends._
 import org.http4s.server.Router
-import h4sm.auth.domain.tokens._
 
 import scala.concurrent.ExecutionContext
 
 class Server[
-  F[_] : ConcurrentEffect
-       : ConfigAsk
-       : ContextShift
-       : Timer
-       : ServerConfigAsk
-       : DBConfigAsk] {
+  F[_]: ConcurrentEffect
+      : ConfigAsk
+      : ContextShift
+      : Timer
+      : ServerConfigAsk
+      : DBConfigAsk] {
 
-  def app(xa: Transactor[F], serverConf : ServerConfig, ec : ExecutionContext): F[ExitCode] = {
+  def app(xa: Transactor[F], serverConf: ServerConfig, ec: ExecutionContext): F[ExitCode] = {
     implicit val e = ec
-    implicit val userService = new UserRepositoryInterpreter(xa)
+    implicit val userAlg = new UserRepositoryInterpreter(xa)
+    val userService = new UserService[F, BCrypt](BCrypt)
     implicit val tokenService = new TokenRepositoryInterpreter(xa)
-    val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer)
+    val authEndpoints = new AuthEndpoints(userService, Authenticators.bearer)
     implicit val fileMetaStorage = new FileMetaService(xa)(ConcurrentEffect[F])
     implicit val fileStorage = new LocalFileStoreService[F]
     val fileEndpoints = new FileEndpoints(authEndpoints.Auth)
@@ -48,8 +50,8 @@ class Server[
     .drain
     .as(ExitCode.Success)
   }
-///  F : Bracket[F, Throwable]
-  def run(implicit ec : ExecutionContext): F[ExitCode] = {
+
+  def run(implicit ec: ExecutionContext): F[ExitCode] = {
     for {
       db <- DBConfigAsk[F].ask
       serverConf <- ServerConfigAsk[F].ask

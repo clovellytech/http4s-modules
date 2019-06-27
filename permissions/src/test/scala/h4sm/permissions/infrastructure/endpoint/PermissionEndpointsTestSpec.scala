@@ -8,6 +8,7 @@ import cats.effect.{IO, Sync}
 import cats.implicits._
 import doobie.Transactor
 import auth.client.{AuthClient, IOTestAuthClientChecks, TestAuthClient}
+import auth.domain.UserService
 import auth.domain.tokens._
 import auth.domain.users.UserRepositoryAlgebra
 import auth.infrastructure.endpoint.arbitraries._
@@ -29,29 +30,29 @@ with IOTestAuthClientChecks {
 
   def schemaNames: Seq[String] = Seq("ct_auth", "ct_permissions")
 
-  case class Clients[F[_], T[_]](
+  case class Clients[F[_], Alg, T[_]](
     userRepo : UserRepositoryAlgebra[F],
     permRepo : PermissionAlgebra[F],
     userPermRepo : UserPermissionAlgebra[F],
-    testAuthClient : TestAuthClient[F, T],
-    permClient : PermissionClient[F, BCrypt, TSecBearerToken])
+    testAuthClient : TestAuthClient[F, Alg, T],
+    permClient : PermissionClient[F, Alg, TSecBearerToken])
 
-  def clients(xa : Transactor[IO]) : Clients[IO, TSecBearerToken] = {
-    implicit val userService = new UserRepositoryInterpreter(xa)
+  def clients(xa : Transactor[IO]) : Clients[IO, BCrypt, TSecBearerToken] = {
+    implicit val userRepo = new UserRepositoryInterpreter(xa)
+    val userService = new UserService[IO, BCrypt](BCrypt)
     implicit val tokenService = new TokenRepositoryInterpreter(xa)
-    val authEndpoints = new AuthEndpoints(BCrypt, Authenticators.bearer[IO])
+    val authEndpoints = new AuthEndpoints(userService, Authenticators.bearer[IO])
     implicit val permRepo = new PermissionRepository[IO](xa)
     implicit val userPermRepo = new UserPermissionRepository[IO](xa)
-    val userRepo = authEndpoints.userService
     val permissionEndpoints = new PermissionEndpoints[IO, BCrypt, TSecBearerToken](authEndpoints)
     val authenticator = Authenticators.bearer[IO]
-    val authClient = new AuthClient(authenticator)
+    val authClient = new AuthClient(userService, authenticator)
     val permissionClient = new PermissionClient(permissionEndpoints)
     val testAuthClient = new TestAuthClient(authClient)
     Clients(userRepo, permRepo, userPermRepo, testAuthClient, permissionClient)
   }
 
-  def permitUser[F[_]: Sync, T[_]](cs : Clients[F, T])(
+  def permitUser[F[_]: Sync, Alg, T[_]](cs : Clients[F, Alg, T])(
     ur : UserRequest,
     p : Permission
   ) : F[PermissionId] = for {
