@@ -15,16 +15,21 @@ import files.client.FilesClientRunner
 import files.domain.FileInfo
 import files.db.sql.{files => filesSql}
 import files.db.sql.arbitraries._
+import io.circe.generic.auto._
 import testutil.DbFixtureSuite
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import cats.mtl.ApplicativeAsk
+import h4sm.files.config.FileConfig
 
 class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks with IOTestAuthClientChecks {
   val schemaNames: Seq[String] = List("ct_auth", "ct_files")
 
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)
+
+  implicit val c: ApplicativeAsk[IO, FileConfig] = h4sm.db.config.getPureConfigAsk("files")
 
   test("A user with no files should be able to retrieve empty list of files") { p =>
     new FilesClientRunner[IO] {
