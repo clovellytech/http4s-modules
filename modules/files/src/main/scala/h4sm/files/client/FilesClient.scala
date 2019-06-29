@@ -1,13 +1,14 @@
 package h4sm
 package files
-package infrastructure.endpoint
+package client
 
 import java.io.File
 import java.util.UUID
 
 import cats.implicits._
 import cats.effect.{ContextShift, Sync}
-import h4sm.files.db.FileInfoId
+import files.db.FileInfoId
+import files.infrastructure.endpoint._
 import fs2.Stream
 import h4sm.files.domain.FileInfo
 import org.http4s._
@@ -55,7 +56,7 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])
     req <- GET(Uri.uri("/"))
     hreq = req.withHeaders(h)
     resp <- files.run(hreq)
-//    _ <- passOk(resp)
+    _ <- passOk(resp)
     fileInfo <- resp.as[SiteResult[List[(FileInfoId, FileInfo)]]]
   } yield fileInfo
 }

@@ -10,7 +10,7 @@ import doobie.scalatest.IOChecker
 
 class InvitationQueriesTestSpec extends DbFixtureSuite with IOChecker {
   def schemaNames = List("ct_auth", "ct_invitations")
-  def transactor = dbtesting.transactor.getTransactor[IO](cfg)
+  def transactor = testutil.transactor.getTransactor[IO](cfg)
 
   test("select query should typecheck")(_ => check(invitation.all))
   test("byId query should typecheck")(_ => check(applyArb(invitation.byId _)))

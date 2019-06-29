@@ -1,11 +1,12 @@
-package h4sm.files.infrastructure.endpoint
+package h4sm
+package files.client
 
-import h4sm.files.domain.FileInfo
+import files.domain.{Backend, FileInfo}
+import files.infrastructure.endpoint._
+import files.Unshow
 import io.circe.Decoder
 import org.http4s.EntityDecoder
 import cats.effect.Sync
-import h4sm.files.Unshow
-import h4sm.files.domain.{Backend, FileInfo}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.Decoder
 import org.http4s.circe.jsonOf

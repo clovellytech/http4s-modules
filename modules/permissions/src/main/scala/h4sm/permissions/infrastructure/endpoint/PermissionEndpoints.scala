@@ -4,17 +4,16 @@ package infrastructure.endpoint
 
 import cats.effect.Sync
 import cats.implicits._
-import h4sm.auth.{UserAuthService, UserId}
+import h4sm.auth.{UserAuthService, UserId, UserSecuredRequestHandler}
 import h4sm.auth.domain.tokens.AsBaseToken
-import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import h4sm.permissions.domain.{Permission, PermissionAlgebra, UserPermissionAlgebra}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import tsec.authentication._
 
-class PermissionEndpoints[
-  F[_] : Sync : UserPermissionAlgebra : PermissionAlgebra, A, T[_]
-](ae : AuthEndpoints[F, A, T])(implicit b: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
+class PermissionEndpoints[F[_] : Sync : UserPermissionAlgebra : PermissionAlgebra, T[_]](
+  auth: UserSecuredRequestHandler[F, T]
+)(implicit b: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
   val codecs = new Codecs[F]
   import codecs._
 
@@ -47,5 +46,5 @@ class PermissionEndpoints[
     selectByAppEndpoint
   ).reduce(_ <+> _)
 
-  def endpoints : HttpRoutes[F] = ae.Auth.liftService(authServices)
+  def endpoints : HttpRoutes[F] = auth.liftService(authServices)
 }

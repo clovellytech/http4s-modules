@@ -88,7 +88,7 @@ lazy val permissions = (project in file("./modules/permissions"))
     name := "h4sm-permissions",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
+  .dependsOn(auth % withTests, db % withTests, dbtesting % withTests)
 
 lazy val petstore = (project in file("./modules/petstore"))
   .settings(commonSettings)
