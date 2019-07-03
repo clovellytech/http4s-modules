@@ -79,7 +79,7 @@ lazy val features = (project in file("./modules/features"))
     mainClass in reStart := Some("h4sm.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, dbtesting % testOnly)
+  .dependsOn(auth % withTests, db % withTests, testUtil % testOnly)
 
 lazy val permissions = (project in file("./modules/permissions"))
   .settings(commonSettings)
@@ -89,7 +89,7 @@ lazy val permissions = (project in file("./modules/permissions"))
     name := "h4sm-permissions",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, dbtesting % withTests)
+  .dependsOn(auth % withTests, db % withTests, testUtil % withTests)
 
 lazy val petstore = (project in file("./modules/petstore"))
   .settings(commonSettings)
@@ -98,7 +98,7 @@ lazy val petstore = (project in file("./modules/petstore"))
     name := "h4sm-petstore",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, permissions, files, dbtesting % testOnly)
+  .dependsOn(auth % withTests, db % withTests, permissions, files, testUtil % testOnly)
 
 lazy val invitations = (project in file("./modules/invitations"))
   .settings(commonSettings)
@@ -108,7 +108,7 @@ lazy val invitations = (project in file("./modules/invitations"))
     name := "h4sm-invitations",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, dbtesting % withTests)
+  .dependsOn(auth % withTests, db % withTests, testUtil % withTests)
 
 lazy val docs = (project in file("./h4sm-docs"))
   .settings(
@@ -126,7 +126,7 @@ lazy val docs = (project in file("./h4sm-docs"))
   )
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
-  .dependsOn(auth, db, dbtesting, features, files, permissions, petstore)
+  .dependsOn(auth, db, testUtil, features, files, permissions, petstore)
 
 lazy val h4sm = (project in file("."))
   .settings(name := "h4sm")
