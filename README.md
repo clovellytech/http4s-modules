@@ -39,7 +39,7 @@ libraryDependencies ++= Seq(
 	"h4sm-files",
 	"h4sm-invitations",
 	"h4sm-permissions"
-).map("com.clovellytech" %% _ % "0.0.31")
+).map("com.clovellytech" %% _ % "0.0.32")
 ```
 
 

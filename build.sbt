@@ -39,9 +39,10 @@ lazy val db = (project in file("./modules/db"))
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDepsInTestOnly
   )
 
-lazy val dbtesting = (project in file("./modules/testutil"))
+lazy val testUtil = (project in file("./modules/testutil"))
   .settings(commonSettings)
   .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-testutil",
     libraryDependencies ++= commonDeps ++ httpDeps ++ dbDeps ++ testDeps
@@ -57,7 +58,7 @@ lazy val auth = (project in file("./modules/auth"))
     libraryDependencies ++= commonDeps ++ authDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(db)
-  .dependsOn(dbtesting % "test->test")
+  .dependsOn(testUtil % testOnly)
 
 lazy val files = (project in file("./modules/files"))
   .settings(commonSettings)
@@ -67,7 +68,7 @@ lazy val files = (project in file("./modules/files"))
     name := "h4sm-files",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(db % withTests, auth % withTests, dbtesting % withTests)
+  .dependsOn(db % withTests, auth % withTests, testUtil % withTests)
 
 lazy val features = (project in file("./modules/features"))
   .settings(commonSettings)
@@ -93,7 +94,6 @@ lazy val permissions = (project in file("./modules/permissions"))
 lazy val petstore = (project in file("./modules/petstore"))
   .settings(commonSettings)
   .settings(commonSettings)
-  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-petstore",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
@@ -135,5 +135,5 @@ lazy val h4sm = (project in file("."))
     skip in publish := true,
     aggregate in reStart := false
   )
-  .dependsOn(auth, db, files, features, permissions, dbtesting)
-  .aggregate(auth, db, files, features, permissions, dbtesting)
+  .dependsOn(auth, db, files, features, permissions, testUtil, invitations)
+  .aggregate(auth, db, files, features, permissions, testUtil, invitations)
