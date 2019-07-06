@@ -23,7 +23,7 @@ object dependencies {
   val cryptobits = "1.1"
   val doobie = "0.7.0"
   val flyway = "5.2.4"
-  val http4s = "0.20.3"
+  val http4s = "0.20.4"
   val logback = "1.2.3"
   val postgres = "42.2.6"
   val scalaCheck = "1.14.0"
