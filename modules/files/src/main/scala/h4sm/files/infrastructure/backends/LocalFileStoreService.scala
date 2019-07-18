@@ -12,12 +12,12 @@ import fs2.Stream
 
 import scala.concurrent.ExecutionContext
 
-class LocalFileStoreService[F[_] : Sync : ContextShift](
-  implicit C : ConfigAsk[F], ec : ExecutionContext
+class LocalFileStoreService[F[_]: Sync: ContextShift](
+  implicit C: ConfigAsk[F], ec: ExecutionContext
 ) extends FileStoreAlgebra[F]{
-  def retrieveFile(fileId : FileInfoId) : F[File] = C.ask.map(c => new java.io.File(c.basePath, fileId.toString))
+  def retrieveFile(fileId: FileInfoId): F[File] = C.ask.map(c => new java.io.File(c.basePath, fileId.toString))
 
-  def retrieve(fileId : FileInfoId): Stream[F, Byte] = Stream.eval(retrieveFile(fileId)).flatMap{ file =>
+  def retrieve(fileId: FileInfoId): Stream[F, Byte] = Stream.eval(retrieveFile(fileId)).flatMap{ file =>
     fs2.io.file.readAll(file.toPath, ec, 8196)()
   }
 

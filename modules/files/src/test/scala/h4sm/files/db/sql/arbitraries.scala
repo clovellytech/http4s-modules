@@ -9,13 +9,13 @@ import h4sm.testutil.arbitraries._
 import cats.syntax.option._
 
 object arbitraries {
-  implicit val backends : Gen[Backend] = Gen.oneOf(Seq(Backend.LocalBackend))
+  implicit val backends: Gen[Backend] = Gen.oneOf(Seq(Backend.LocalBackend))
 
-  implicit val backendArb : Arbitrary[Backend] = Arbitrary(backends)
+  implicit val backendArb: Arbitrary[Backend] = Arbitrary(backends)
 
   implicit val uuidArb: Arbitrary[UUID] = Arbitrary(Gen.uuid)
 
-  implicit val fileInfoArb  : Arbitrary[FileInfo] = Arbitrary {
+  implicit val fileInfoArb : Arbitrary[FileInfo] = Arbitrary {
     for {
       name <- nonEmptyString
       desc <- nonEmptyString

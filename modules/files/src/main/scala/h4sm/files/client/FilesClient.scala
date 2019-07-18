@@ -22,17 +22,17 @@ import scala.concurrent.ExecutionContext
 
 import testutil.infrastructure.endpoints._
 
-class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])(
-  implicit F : Sync[F],
-  ec : ExecutionContext
+class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
+  implicit F: Sync[F],
+  ec: ExecutionContext
 ) extends Http4sDsl[F] with Http4sClientDsl[F]{
   val codecs = new FileCodecs[F]
   import codecs._
 
   val files = fileEndpoints.endpoints.orNotFound
 
-  def postFile(fileInfo : FileInfo, file: File)(implicit h : Headers) : F[SiteResult[List[FileInfoId]]] = {
-    val mp : Multipart[F] = Multipart(
+  def postFile(fileInfo: FileInfo, file: File)(implicit h: Headers): F[SiteResult[List[FileInfoId]]] = {
+    val mp: Multipart[F] = Multipart(
       Vector(
         Part.fileData(fileInfo.name.getOrElse("file"), file, ec, `Content-Type`(MediaType.text.plain))
       )
@@ -45,14 +45,14 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints : FileEndpoints[F, T])
     } yield fileRes
   }
 
-  def getFile(uuid : UUID, name : String = "download")(implicit h : Headers) : F[Stream[F, Byte]] = for {
+  def getFile(uuid: UUID, name: String = "download")(implicit h: Headers): F[Stream[F, Byte]] = for {
     u <- Uri.fromString(s"/${uuid.toString}/$name").leftWiden[Throwable].raiseOrPure[F]
     req <- GET(u)
     resp <- files.run(req.withHeaders(h))
     _ <- passOk(resp)
   } yield resp.body
 
-  def listFiles()(implicit h : Headers) : F[SiteResult[List[(FileInfoId, FileInfo)]]] = for {
+  def listFiles()(implicit h: Headers): F[SiteResult[List[(FileInfoId, FileInfo)]]] = for {
     req <- GET(Uri.uri("/"))
     hreq = req.withHeaders(h)
     resp <- files.run(hreq)

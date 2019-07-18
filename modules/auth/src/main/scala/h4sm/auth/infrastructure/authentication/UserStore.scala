@@ -15,7 +15,7 @@ import domain.tokens.{AsBaseToken, BaseTokenReader, TokenRepositoryAlgebra}
 import domain.tokens.AsBaseToken.ops._
 
 trait FunctionKK[X[_[_]], Y[_[_]]] {
-  def apply[M[_]: Monad](xa: X[M]) : Y[M]
+  def apply[M[_]: Monad](xa: X[M]): Y[M]
 }
 
 object FunctionKK{
@@ -29,7 +29,7 @@ trait TokenBackingStore[F[_], T[_]] extends BackingStore[F, SecureRandomId, T[Us
 
 object TransBackingStore {
   def tokenTrans[T[_]](implicit b: AsBaseToken[T[UserId]], r: BaseTokenReader[T[UserId]]) = new (TokenRepositoryAlgebra ~~> TokenBackingStore[?[_], T]){
-    def apply[M[_] : Monad](xa: TokenRepositoryAlgebra[M]) : TokenBackingStore[M, T] =
+    def apply[M[_]: Monad](xa: TokenRepositoryAlgebra[M]): TokenBackingStore[M, T] =
       new TokenBackingStore[M, T] {
         override def put(elem: T[UserId]): M[T[UserId]] = xa.insert(elem.asBase).as(elem)
         override def update(v: T[UserId]): M[T[UserId]] = xa.update(v.asBase).as(v)

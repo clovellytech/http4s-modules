@@ -22,11 +22,11 @@ import tsec.cipher.symmetric.jca._
 /*
  * Build a server that uses every module in this project...
  */
-class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.ConfigAsk](implicit
-  C : ConfigAsk[F]
+class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.ConfigAsk](implicit
+  C: ConfigAsk[F]
 ) {
 
-  def router[A, T[_]](testMode: Boolean, auth: AuthEndpoints[F, A, T], files: FileEndpoints[F, T]) : HttpRoutes[F] = {
+  def router[A, T[_]](testMode: Boolean, auth: AuthEndpoints[F, A, T], files: FileEndpoints[F, T]): HttpRoutes[F] = {
     Router(
       "/users" -> {
         if (testMode) auth.testService <+> auth.endpoints
@@ -36,7 +36,7 @@ class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.C
     )
   }
 
-  def createServer : Resource[F, Server[F]] = {
+  def createServer: Resource[F, Server[F]] = {
     implicit val encryptor = AES128GCM.genEncryptor[F]
     implicit val gcmstrategy = AES128GCM.defaultIvStrategy[F]
     for {
@@ -63,14 +63,14 @@ class H4SMServer[F[_] : ContextShift : ConcurrentEffect : Timer : files.config.C
 
 object ServerMain extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
-    implicit val cfg : ConfigAsk[IO] = getConfigAsk[IO].map { (c : MainConfig) =>
+    implicit val cfg: ConfigAsk[IO] = getConfigAsk[IO].map { (c: MainConfig) =>
       args match {
-        case "test" :: _ => c.copy(test = true)
+        case "test":: _ => c.copy(test = true)
         case _ => c
       }
     }
 
-    implicit val fcfg : files.config.ConfigAsk[IO] = getFileConfigAsk
+    implicit val fcfg: files.config.ConfigAsk[IO] = getFileConfigAsk
 
     val server = new H4SMServer[IO]
 

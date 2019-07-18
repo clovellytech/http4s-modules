@@ -8,7 +8,7 @@ import doobie.implicits._
 import h4sm.permissions.domain.{Permission, PermissionId, PermissionAlgebra}
 import persistent.sql.permissions
 
-class PermissionRepository[F[_]: Bracket[?[_], Throwable]](xa : Transactor[F]) extends PermissionAlgebra[F] {
+class PermissionRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends PermissionAlgebra[F] {
   def insert(a: Permission): F[Unit] = permissions.insert(a).run.as(()).transact(xa)
 
   def insertGetId(a: Permission): OptionT[F, PermissionId] = OptionT.liftF(permissions.insertGetId(a).transact(xa))
@@ -32,5 +32,5 @@ class PermissionRepository[F[_]: Bracket[?[_], Throwable]](xa : Transactor[F]) e
     permissions.byAppName(appName).to[List].transact(xa)
 
   def selectByAttributes(appName: String, name: String): OptionT[F, (Permission, PermissionId)] =
-    OptionT(permissions.byAttributes(appName : String, name : String).option.transact(xa))
+    OptionT(permissions.byAttributes(appName: String, name: String).option.transact(xa))
 }

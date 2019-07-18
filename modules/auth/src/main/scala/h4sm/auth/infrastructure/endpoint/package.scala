@@ -8,15 +8,15 @@ import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
 
 package object endpoint {
-  implicit val userReqDecoder : Decoder[UserRequest] = deriveDecoder[UserRequest]
-  implicit def userReqEntityDecoder[F[_] : Sync] : EntityDecoder[F, UserRequest] = jsonOf
-  implicit val userReqEncoder : Encoder[UserRequest] = deriveEncoder
-  implicit def userReqEntityEncoder[F[_]: Sync] : EntityEncoder[F, UserRequest] = jsonEncoderOf
+  implicit val userReqDecoder: Decoder[UserRequest] = deriveDecoder[UserRequest]
+  implicit def userReqEntityDecoder[F[_]: Sync]: EntityDecoder[F, UserRequest] = jsonOf
+  implicit val userReqEncoder: Encoder[UserRequest] = deriveEncoder
+  implicit def userReqEntityEncoder[F[_]: Sync]: EntityEncoder[F, UserRequest] = jsonEncoderOf
 
-  implicit val userDetailDecoder : Decoder[UserDetail] = deriveDecoder
-  implicit def userDetailEntityDec[F[_] : Sync] : EntityDecoder[F, UserDetail] = jsonOf
-  implicit val userDetailEncoder : Encoder[UserDetail] = deriveEncoder
-  implicit def userDetailEntityEnc[F[_]: Sync] : EntityEncoder[F, UserDetail] = jsonEncoderOf
+  implicit val userDetailDecoder: Decoder[UserDetail] = deriveDecoder
+  implicit def userDetailEntityDec[F[_]: Sync]: EntityDecoder[F, UserDetail] = jsonOf
+  implicit val userDetailEncoder: Encoder[UserDetail] = deriveEncoder
+  implicit def userDetailEntityEnc[F[_]: Sync]: EntityEncoder[F, UserDetail] = jsonEncoderOf
 
   implicit def siteResultEnc1[A: Encoder]: Encoder[SiteResult[A]] = deriveEncoder
   implicit def siteResultEnc2[F[_]: Sync, A: Encoder]: EntityEncoder[F, SiteResult[A]] = jsonEncoderOf

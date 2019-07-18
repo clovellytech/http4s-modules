@@ -29,7 +29,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
 
   test("A user should login") { p =>
     val authClient = client(p.transactor)
-    forAll { u : UserRequest =>
+    forAll { u: UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
@@ -45,7 +45,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
   test("A duplicate registration should fail") { p =>
     val authClient = client(p.transactor)
     forAll { u: UserRequest =>
-      val test : IO[Assertion] = for {
+      val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
         post <- authClient.postUser(u)
         _ <- authClient.deleteUser(u.username)
@@ -59,7 +59,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
 
   test("A login create usable session") { p =>
     val authClient = client(p.transactor)
-    forAll { u : UserRequest =>
+    forAll { u: UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
@@ -77,7 +77,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
 
   test("A bad password return 400") { p =>
     val authClient = client(p.transactor)
-    forAll { (u : UserRequest) =>
+    forAll { (u: UserRequest) =>
       for {
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u.copy(password = u.password ++ u.password))

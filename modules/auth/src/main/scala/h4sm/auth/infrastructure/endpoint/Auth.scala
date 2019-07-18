@@ -49,14 +49,14 @@ object Authenticators {
 }
 
 
-class AuthEndpoints[F[_] : Sync : UserRepositoryAlgebra, A, T[_]](
+class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
   userService: UserService[F, A],
   authenticator: UserAuthenticator[F, T]
 )(implicit A: AsBaseToken[T[UserId]])
 extends Http4sDsl[F] {
   type Token = T[UserId]
 
-  implicit val boolEncoder : EntityEncoder[F, Boolean] = jsonEncoderOf
+  implicit val boolEncoder: EntityEncoder[F, Boolean] = jsonEncoderOf
 
   val Auth = SecuredRequestHandler(authenticator)
 
@@ -66,7 +66,7 @@ extends Http4sDsl[F] {
       )
     )
 
-  val unauthService : HttpRoutes[F] = HttpRoutes.of {
+  val unauthService: HttpRoutes[F] = HttpRoutes.of {
     case req @ POST -> Root / "user" => {
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
@@ -75,13 +75,13 @@ extends Http4sDsl[F] {
       } yield result
 
       res.recoverWith { 
-        case _ : Error.Duplicate => Conflict("Username already exists") 
+        case _: Error.Duplicate => Conflict("Username already exists") 
         case _ => BadRequest()
       }
     }
 
     case req @ POST -> Root / "login" => {
-      val res : F[Response[F]] = for {
+      val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
         (user, userId) <- userService.lookup(userRequest.username, userRequest.password)
         resp <- Ok(SiteResult(userRequest.username)) 
@@ -111,7 +111,7 @@ extends Http4sDsl[F] {
     } yield resp
   }
 
-  def testService : HttpRoutes[F] = HttpRoutes.of {
+  def testService: HttpRoutes[F] = HttpRoutes.of {
     case GET -> Root / "istest" => Ok("true")
     case DELETE -> Root / username => (for {
       u <- UserRepositoryAlgebra[F].byUsername(username)
@@ -120,7 +120,7 @@ extends Http4sDsl[F] {
     } yield resp).getOrElseF(BadRequest())
   }
 
-  def endpoints : HttpRoutes[F] = unauthService <+> Auth.liftService(authService)
+  def endpoints: HttpRoutes[F] = unauthService <+> Auth.liftService(authService)
 }
 
 

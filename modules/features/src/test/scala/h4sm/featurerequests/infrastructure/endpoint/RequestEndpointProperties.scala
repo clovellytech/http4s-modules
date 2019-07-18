@@ -18,7 +18,7 @@ class RequestEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureS
     import authTestEndpoints._
 
     forAll { (feat: FeatureRequest, u: UserRequest) =>
-      val test : IO[Boolean] = for {
+      val test: IO[Boolean] = for {
         _ <- postUser(u)
         login <- loginUser(u)
         _ <- addRequest(feat)(login)

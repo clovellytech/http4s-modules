@@ -23,19 +23,19 @@ import tsec.authentication._
 
 import scala.concurrent.ExecutionContext
 
-class FileEndpoints[F[_], T[_]](auth : UserSecuredRequestHandler[F, T])(implicit
-  S  : Sync[F],
-  F  : FileMetaAlgebra[F],
-  FS : FileStoreAlgebra[F],
-  CS : ContextShift[F],
-  C  : ConfigAsk[F],
-  ec : ExecutionContext,
+class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
+  S : Sync[F],
+  F : FileMetaAlgebra[F],
+  FS: FileStoreAlgebra[F],
+  CS: ContextShift[F],
+  C : ConfigAsk[F],
+  ec: ExecutionContext,
   baseToken: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] {
 
-  val fileNotExists : F[File] = Error.fileNotExistError("Requested file not found").raiseError[F, File]
+  val fileNotExists: F[File] = Error.fileNotExistError("Requested file not found").raiseError[F, File]
 
-  def getFile(uuid: String, allowPred : FileInfo => Boolean) : F[(FileInfo, FileInfoId, Stream[F, Byte])] = for {
+  def getFile(uuid: String, allowPred: FileInfo => Boolean): F[(FileInfo, FileInfoId, Stream[F, Byte])] = for {
     uuid <- S.delay(UUID.fromString(uuid))
     conf <- C.ask
     baseFile = new File(conf.basePath)
@@ -105,15 +105,15 @@ class FileEndpoints[F[_], T[_]](auth : UserSecuredRequestHandler[F, T])(implicit
     } yield resp
   }
 
-  def endpoints : HttpRoutes[F] = unAuthEndpoints.combineK(auth.liftService(authEndpoints))
+  def endpoints: HttpRoutes[F] = unAuthEndpoints.combineK(auth.liftService(authEndpoints))
 }
 
 object FileEndpoints {
-  def persistingEndpoints[F[_] : Sync : ContextShift : ConfigAsk, T[_]](
-    xa : Transactor[F],
+  def persistingEndpoints[F[_]: Sync: ContextShift: ConfigAsk, T[_]](
+    xa: Transactor[F],
     auth: UserSecuredRequestHandler[F, T],
-    ec : ExecutionContext
-  )(implicit b: AsBaseToken[T[UserId]]) : FileEndpoints[F, T] = {
+    ec: ExecutionContext
+  )(implicit b: AsBaseToken[T[UserId]]): FileEndpoints[F, T] = {
     implicit val fileMeta = new FileMetaService[F](xa)
     implicit val ex = ec
     implicit val fileStore = new LocalFileStoreService[F]()

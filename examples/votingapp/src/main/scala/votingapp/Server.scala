@@ -12,12 +12,12 @@ import org.http4s.server.blaze.BlazeBuilder
 
 import scala.concurrent.ExecutionContext
 
-class Server[F[_] : Effect] extends StreamApp[F] {
+class Server[F[_]: Effect] extends StreamApp[F] {
 
   override def stream(args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
     createStream(ExecutionContext.global)
 
-  def createStream(ec : ExecutionContext): Stream[F, ExitCode] = {
+  def createStream(ec: ExecutionContext): Stream[F, ExitCode] = {
     val conf = pureconfig.loadConfigOrThrow[DatabaseConfig]("db")
     for {
       xa <- Stream.eval(HikariTransactor.newHikariTransactor(conf.driver, conf.url, conf.user, conf.password))

@@ -15,7 +15,7 @@ import db.sql._
 
 class VoteRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](val xa: Transactor[M]) 
 extends VoteRepositoryAlgebra[M] {
-  def getVote(vote: Vote) : M[Option[(VoteId, Vote)]] = votes.select(vote).option.transact(xa)
+  def getVote(vote: Vote): M[Option[(VoteId, Vote)]] = votes.select(vote).option.transact(xa)
 
   def insert(a: Vote): M[Unit] =
     votes.insert(a).run.onUniqueViolation(votes.update(a).run).transact(xa).as(())

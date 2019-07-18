@@ -7,7 +7,7 @@ import h4sm.testutil.arbitraries._
 import domain._
 
 object arbitraries {
-  implicit val featureArb : Arbitrary[Feature] = Arbitrary {
+  implicit val featureArb: Arbitrary[Feature] = Arbitrary {
     for {
       uuid <- Gen.uuid
       title <- nonEmptyString
@@ -15,7 +15,7 @@ object arbitraries {
     } yield Feature(uuid.some, title, desc)
   }
 
-  implicit val voteArb : Arbitrary[Vote] = Arbitrary {
+  implicit val voteArb: Arbitrary[Vote] = Arbitrary {
     for {
       fid <- Gen.posNum[FeatureId]
       uid <- Gen.uuid

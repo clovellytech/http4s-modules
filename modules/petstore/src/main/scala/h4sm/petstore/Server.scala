@@ -24,13 +24,13 @@ import tsec.passwordhashers.jca._
 import tsec.cipher.symmetric.jca._
 import tsec.authentication.SecuredRequestHandler
 
-class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
+class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
 
   def router[A, T[_]](
     auth: AuthEndpoints[F, A, T], 
     pets: PetEndpoints[F, T], 
     orders: OrderEndpoints[F, T]
-  ) : HttpRoutes[F] = {
+  ): HttpRoutes[F] = {
     Router(
       "/users" -> auth.endpoints,
       "/pets" -> pets.endpoints,
@@ -38,7 +38,7 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
     )
   }
 
-  def createServer : Resource[F, Server[F]] = {
+  def createServer: Resource[F, Server[F]] = {
     implicit val encryptor = AES128GCM.genEncryptor[F]
     implicit val gcmstrategy = AES128GCM.defaultIvStrategy[F]
     for {

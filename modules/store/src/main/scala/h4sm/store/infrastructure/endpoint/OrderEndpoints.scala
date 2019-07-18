@@ -16,7 +16,7 @@ sealed abstract class OrderError extends Throwable
 final case class BadOrder() extends OrderError
 final case class NoOrder() extends OrderError
 
-class OrderEndpoints[F[_]: Sync: OrderAlgebra: ItemAlgebra, T[_]](auth : UserSecuredRequestHandler[F, T])(implicit 
+class OrderEndpoints[F[_]: Sync: OrderAlgebra: ItemAlgebra, T[_]](auth: UserSecuredRequestHandler[F, T])(implicit 
   baseToken: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] with Codecs[F] {
 

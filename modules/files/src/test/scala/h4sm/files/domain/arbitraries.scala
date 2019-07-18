@@ -8,13 +8,13 @@ import h4sm.testutil.arbitraries.nonEmptyString
 import h4sm.files.infrastructure.endpoint.FileUpload
 
 object arbitraries {
-  implicit val backends : Gen[Backend] = Gen.oneOf(Seq(Backend.LocalBackend))
+  implicit val backends: Gen[Backend] = Gen.oneOf(Seq(Backend.LocalBackend))
 
-  implicit val backendArb : Arbitrary[Backend] = Arbitrary(backends)
+  implicit val backendArb: Arbitrary[Backend] = Arbitrary(backends)
 
   implicit val uuidArb: Arbitrary[UUID] = Arbitrary(Gen.uuid)
 
-  implicit val fileInfoGen : Gen[FileInfo] = for {
+  implicit val fileInfoGen: Gen[FileInfo] = for {
     name <- nonEmptyString
     desc <- nonEmptyString
     filename <- nonEmptyString
@@ -24,9 +24,9 @@ object arbitraries {
     backend <- backends
   } yield FileInfo(name.some, desc.some, filename.some, url.some, uploadedBy, isPublic, backend)
 
-  implicit val fileInfoArb : Arbitrary[FileInfo] = Arbitrary(fileInfoGen)
+  implicit val fileInfoArb: Arbitrary[FileInfo] = Arbitrary(fileInfoGen)
 
-  implicit val fileUploadArb : Arbitrary[FileUpload] = Arbitrary(for {
+  implicit val fileUploadArb: Arbitrary[FileUpload] = Arbitrary(for {
     name <- nonEmptyString
     desc <- nonEmptyString
     isPublic <- Gen.oneOf(Seq(true, false))

@@ -27,7 +27,7 @@ package object auth {
   def BearerAuthService[M[_]: Monad](pf: PartialFunction[UserSecuredRequest[M, TSecBearerToken], M[Response[M]]]) =
     UserAuthService[M, TSecBearerToken](pf)
 
-  def UserAuthService[M[_] : Monad, T[_]](
+  def UserAuthService[M[_]: Monad, T[_]](
     pf: PartialFunction[UserSecuredRequest[M, T], M[Response[M]]]
   ): UserAuthService[M, T] = TSecAuthService(pf)
 }

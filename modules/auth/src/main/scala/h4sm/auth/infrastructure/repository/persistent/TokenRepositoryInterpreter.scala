@@ -9,7 +9,7 @@ import doobie.implicits._
 import domain.tokens.{BaseToken, TokenRepositoryAlgebra}
 import h4sm.auth.db.sql.tokens
 
-class TokenRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa : Transactor[M])
+class TokenRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transactor[M])
 extends TokenRepositoryAlgebra[M] {
   def insert(a: BaseToken): M[Unit] = tokens.insert(a).run.as(()).transact(xa)
 

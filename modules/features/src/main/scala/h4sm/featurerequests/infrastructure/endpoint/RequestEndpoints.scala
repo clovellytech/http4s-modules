@@ -15,7 +15,7 @@ import h4sm.featurerequests.db.domain.Feature
 import doobie.util.transactor.Transactor
 
 class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra] extends Http4sDsl[F] {
-  def unAuthEndpoints : HttpRoutes[F] = HttpRoutes.of[F] {
+  def unAuthEndpoints: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "request" => for {
       feats <- RequestRepositoryAlgebra[F].selectWithVoteCounts
       resp <- Ok(DefaultResult(feats).asJson)

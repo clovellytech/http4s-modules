@@ -9,5 +9,5 @@ import simulacrum.typeclass
 
 @typeclass
 trait UserPermissionAlgebra[F[_]] extends CRDAlgebra[F, UserPermissionId, UserPermission[PermissionId], Instant] {
-  def hasPermission(uid : UserId, appName : String, name : String) : F[Boolean]
+  def hasPermission(uid: UserId, appName: String, name: String): F[Boolean]
 }

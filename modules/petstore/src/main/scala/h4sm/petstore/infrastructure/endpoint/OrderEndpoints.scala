@@ -10,7 +10,7 @@ import tsec.authentication._
 import h4sm.auth.domain.tokens._
 import AsBaseToken.ops._
 
-class OrderEndpoints[F[_]: Sync: OrderAlgebra, T[_]](auth : UserSecuredRequestHandler[F, T])(implicit 
+class OrderEndpoints[F[_]: Sync: OrderAlgebra, T[_]](auth: UserSecuredRequestHandler[F, T])(implicit 
   baseToken: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] with Codecs[F] {
 

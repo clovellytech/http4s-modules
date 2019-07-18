@@ -9,11 +9,11 @@ import h4sm.db.config._
 package object h4sm {
   type ConfigAsk[F[_]] = MainConfig.ConfigAsk[F]
 
-  def getConfigAsk[F[_] : Sync] : ConfigAsk[F] = getPureConfigAsk[F, MainConfig]()
+  def getConfigAsk[F[_]: Sync]: ConfigAsk[F] = getPureConfigAsk[F, MainConfig]()
 
   /*
    * Given the ConfigAskFunctor, we can easily create child instances for the various
    * components of the system we're building.
    */
-  def getFileConfigAsk[F[_] : Sync] : ApplicativeAsk[F, FileConfig] = getConfigAsk[F].map(_.files)
+  def getFileConfigAsk[F[_]: Sync]: ApplicativeAsk[F, FileConfig] = getConfigAsk[F].map(_.files)
 }

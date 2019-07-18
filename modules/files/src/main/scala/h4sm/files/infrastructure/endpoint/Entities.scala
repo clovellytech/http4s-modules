@@ -4,7 +4,7 @@ package infrastructure.endpoint
 final case class FileUpload(
   name: String,
   description: Option[String],
-  isPublic : Boolean
+  isPublic: Boolean
 )
 
-final case class SiteResult[A](result : A)
+final case class SiteResult[A](result: A)

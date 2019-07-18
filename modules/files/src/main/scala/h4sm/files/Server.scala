@@ -21,11 +21,11 @@ import scala.concurrent.ExecutionContext
 
 class Server[
   F[_]: ConcurrentEffect
-      : ConfigAsk
-      : ContextShift
-      : Timer
-      : ServerConfigAsk
-      : DBConfigAsk] {
+     : ConfigAsk
+     : ContextShift
+     : Timer
+     : ServerConfigAsk
+     : DBConfigAsk] {
 
   def app(xa: Transactor[F], serverConf: ServerConfig, ec: ExecutionContext): F[ExitCode] = {
     implicit val e = ec

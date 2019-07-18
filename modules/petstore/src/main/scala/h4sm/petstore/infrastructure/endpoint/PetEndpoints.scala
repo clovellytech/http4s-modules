@@ -11,7 +11,7 @@ import org.http4s.dsl.Http4sDsl
 import tsec.authentication._
 
 
-class PetEndpoints[F[_]: Sync: PetAlgebra, T[_]](auth : UserSecuredRequestHandler[F, T])(implicit
+class PetEndpoints[F[_]: Sync: PetAlgebra, T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
   B: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] with Codecs[F] {
 
