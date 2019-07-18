@@ -116,16 +116,16 @@
 
 <span class="hljs-comment">// see petstore.ServerMain for a complete example of creating a server. </span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> cs = <span class="hljs-type">IO</span>.contextShift(global)
-<span class="hljs-comment">// cs: ContextShift[IO] = cats.effect.internals.IOContextShift@74982267</span>
+<span class="hljs-comment">// cs: ContextShift[IO] = cats.effect.internals.IOContextShift@6cbd3fb5</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> timer = <span class="hljs-type">IO</span>.timer(global)
-<span class="hljs-comment">// timer: Timer[IO] = cats.effect.internals.IOTimer@55dfbf03</span>
+<span class="hljs-comment">// timer: Timer[IO] = cats.effect.internals.IOTimer@6c4bc75d</span>
 
 <span class="hljs-keyword">val</span> codecs = <span class="hljs-keyword">new</span> <span class="hljs-type">Codecs</span>[<span class="hljs-type">IO</span>]
-<span class="hljs-comment">// codecs: Codecs[IO] = repl.Session$App$Codecs@3aa87cb3</span>
+<span class="hljs-comment">// codecs: Codecs[IO] = repl.Session$App$Codecs@32132190</span>
 <span class="hljs-keyword">import</span> codecs._
 
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> lstDec: <span class="hljs-type">EntityDecoder</span>[<span class="hljs-type">IO</span>, <span class="hljs-type">List</span>[(<span class="hljs-type">Pet</span>, <span class="hljs-type">PetId</span>, <span class="hljs-type">Instant</span>)]] = jsonOf
-<span class="hljs-comment">// lstDec: EntityDecoder[IO, List[(Pet, PetId, Instant)]] = org.http4s.EntityDecoder$$anon$2@6bb641f0</span>
+<span class="hljs-comment">// lstDec: EntityDecoder[IO, List[(Pet, PetId, Instant)]] = org.http4s.EntityDecoder$$anon$2@38d1eaaf</span>
 
 <span class="hljs-keyword">val</span> ur = <span class="hljs-type">UserRequest</span>(<span class="hljs-string">"demo"</span>, <span class="hljs-string">"demopassword"</span>)
 <span class="hljs-comment">// ur: UserRequest = UserRequest("demo", "demopassword")</span>
@@ -146,7 +146,7 @@
 <span class="hljs-comment">//     Suspend(</span>
 <span class="hljs-comment">//       Map(</span>
 <span class="hljs-comment">//         Pure(DatabaseConfig("127.0.0.1", 5432, "postgres", "", "h4sm_docs_gen")),</span>
-<span class="hljs-comment">//         cats.effect.Resource$$$Lambda$5837/0x0000000101bec040@114bb5d1,</span>
+<span class="hljs-comment">//         cats.effect.Resource$$$Lambda$5835/0x0000000101bf1840@39ad1c0d,</span>
 <span class="hljs-comment">//         0</span>
 <span class="hljs-comment">//       )</span>
 <span class="hljs-comment">//     ),</span>
