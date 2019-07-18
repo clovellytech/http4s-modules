@@ -29,7 +29,7 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
   def router[A, T[_]](testMode: Boolean, auth: AuthEndpoints[F, A, T], files: FileEndpoints[F, T]): HttpRoutes[F] = {
     Router(
       "/users" -> {
-        if (testMode) auth.testService <+> auth.endpoints
+        if (testMode) auth.testService <+> auth.unauthService <+> auth.Auth.liftService(auth.authService)
         else auth.endpoints
       },
       "/files" -> files.endpoints
@@ -45,14 +45,14 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       _ = if (test) println("DANGER, RUNNING IN TEST MODE!!")
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
       tranec <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
+      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, Blocker.liftExecutionContext(tranec))
       key <- Resource.liftF(AES128GCM.generateKey[F])
       implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
       userService = new UserService[F, BCrypt](BCrypt)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
       authEndpoints = new AuthEndpoints(userService, Authenticators.statelessCookie(key))
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files"))
-      files = FileEndpoints.persistingEndpoints(xa, authEndpoints.Auth, ExecutionContext.Implicits.global)
+      files = FileEndpoints.persistingEndpoints(xa, authEndpoints.Auth, Blocker.liftExecutionContext(ExecutionContext.Implicits.global))
       server <- BlazeServerBuilder[F]
                 .bindHttp(port, host)
                 .withHttpApp(router(cfg.test, authEndpoints, files).orNotFound)

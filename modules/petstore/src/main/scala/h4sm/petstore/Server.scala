@@ -46,7 +46,7 @@ class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
       MainConfig(db, ServerConfig(host, port, numThreads)) = cfg
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
       tranec <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
+      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, Blocker.liftExecutionContext(tranec))
       key <- Resource.liftF(AES128GCM.generateKey[F])
       implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)

@@ -12,7 +12,7 @@ import org.http4s._
 import org.http4s.dsl._
 import org.http4s.headers.Location
 import org.http4s.multipart._
-import cats.effect.{ContextShift, Sync}
+import cats.effect._
 import h4sm.auth._
 import h4sm.auth.domain.tokens.AsBaseToken.ops._
 import h4sm.auth.domain.tokens.AsBaseToken
@@ -20,15 +20,13 @@ import h4sm.files.domain._
 import h4sm.files.infrastructure.backends.{FileMetaService, LocalFileStoreService}
 import tsec.authentication._
 
-import scala.concurrent.ExecutionContext
-
 class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
   S : Sync[F],
   F : FileMetaAlgebra[F],
   FS: FileStoreAlgebra[F],
   CS: ContextShift[F],
   C : ConfigAsk[F],
-  ec: ExecutionContext,
+  blk: Blocker,
   baseToken: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] {
 
@@ -100,7 +98,7 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
       uuid <- S.delay(UUID.fromString(uuid))
       _ <- F.retrieveMeta(uuid)
       file <- FS.retrieveFile(uuid)
-      resp <- StaticFile.fromFile[F](file, ec, req.request.some).getOrElseF(BadRequest())
+      resp <- StaticFile.fromFile[F](file, blk, req.request.some).getOrElseF(BadRequest())
     } yield resp
   }
 
@@ -111,11 +109,11 @@ object FileEndpoints {
   def persistingEndpoints[F[_]: Sync: ContextShift: ConfigAsk, T[_]](
     xa: Transactor[F],
     auth: UserSecuredRequestHandler[F, T],
-    ec: ExecutionContext
+    blk: Blocker
   )(implicit b: AsBaseToken[T[UserId]]): FileEndpoints[F, T] = {
+    implicit val bk = blk
     implicit val fileMeta = new FileMetaService[F](xa)
-    implicit val ex = ec
     implicit val fileStore = new LocalFileStoreService[F]()
-    new FileEndpoints(auth)
+    new FileEndpoints[F, T](auth)
   }
 }
