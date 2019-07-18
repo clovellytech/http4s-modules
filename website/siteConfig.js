@@ -22,7 +22,7 @@ const users = [
 
 const siteConfig = {
   title: 'Http4s Modules Docs', // Title for your website.
-  tagline: 'A documenting http4s-modules',
+  tagline: '',
   url: 'https://clovellytech.github.io', // Your website URL
   baseUrl: '/http4s-modules/', // Base URL for your project */
   customDocsPath: "h4sm-docs/target/mdoc",
