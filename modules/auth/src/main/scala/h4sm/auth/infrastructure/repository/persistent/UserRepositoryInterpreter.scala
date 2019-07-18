@@ -2,7 +2,6 @@ package h4sm.auth
 package infrastructure.repository.persistent
 
 import cats.data.OptionT
-import cats.Monad
 import cats.implicits._
 import cats.effect.Bracket
 import doobie._
@@ -11,7 +10,7 @@ import db.domain.User
 import domain.users.UserRepositoryAlgebra
 import db.sql._
 
-class UserRepositoryInterpreter[M[_]: Monad: Bracket[?[_], Throwable]](xa : Transactor[M]) 
+class UserRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa : Transactor[M]) 
 extends UserRepositoryAlgebra[M] {
 
   def insert(a: User): M[Unit] = users.insert(a).run.as(()).exceptSomeSqlState{
