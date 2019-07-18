@@ -14,5 +14,5 @@ object arbitraries{
     } yield Instant.ofEpochMilli(millis).plusNanos(nanos)
   }
 
-  def applyArb[A: Arbitrary, B](f : A => B) : B = f(implicitly[Arbitrary[A]].arbitrary.sample.get)
+  def applyArb[A: Arbitrary, B](f: A => B): B = f(implicitly[Arbitrary[A]].arbitrary.sample.get)
 }

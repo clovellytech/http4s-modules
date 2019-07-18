@@ -17,7 +17,7 @@ class PetstoreClient[F[_]: Sync, T[_]](ps: PetEndpoints[F, T], os: OrderEndpoint
   val pets = ps.endpoints.orNotFound
   val orders = os.endpoints.orNotFound
 
-  def addPet(p : PetRequest)(implicit h : Headers) : F[Unit] = for {
+  def addPet(p: PetRequest)(implicit h: Headers): F[Unit] = for {
     req <- post(p, Uri.uri("/"))
     resp <- pets.run(req)
     _ <- passOk(resp)

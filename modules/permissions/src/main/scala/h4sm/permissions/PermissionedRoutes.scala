@@ -19,10 +19,10 @@ import org.http4s._
   */
 object PermissionedRoutes {
 
-  def apply[F[_] : UserPermissionAlgebra : Monad, T[_]](perm : (String, String))(
-    pf : PartialFunction[UserSecuredRequest[F, T], F[Response[F]]]
-  )(implicit a: AsBaseToken[T[UserId]]) : UserAuthService[F, T] = {
-    def hasPermission(id : UserId) : F[Boolean] = UserPermissionAlgebra[F].hasPermission(id, perm._1, perm._2)
+  def apply[F[_]: UserPermissionAlgebra: Monad, T[_]](perm: (String, String))(
+    pf: PartialFunction[UserSecuredRequest[F, T], F[Response[F]]]
+  )(implicit a: AsBaseToken[T[UserId]]): UserAuthService[F, T] = {
+    def hasPermission(id: UserId): F[Boolean] = UserPermissionAlgebra[F].hasPermission(id, perm._1, perm._2)
 
     Kleisli { (req: UserSecuredRequest[F, T]) =>
       for {

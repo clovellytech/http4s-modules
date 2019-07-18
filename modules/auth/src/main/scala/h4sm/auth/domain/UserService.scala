@@ -26,13 +26,13 @@ class UserService[F[_]: MonadError[?[_], Throwable]: UserRepositoryAlgebra, A](
   } yield (user, uid)
 
   def lookup(username: String, password: String): F[(User, UserId)] = for {
-    (user, uuid, joinTime) <- UserRepositoryAlgebra[F]
+    (user, userId, joinTime) <- UserRepositoryAlgebra[F]
         .byUsername(username)
         .toRight[Throwable](Error.NotFound())
         .rethrowT        
     hash = PasswordHash[A](new String(user.hash))
     status <- hasher.checkpw[F](password.getBytes, hash)
-    res <- if(status == Verified) (user, uuid).pure[F]
+    res <- if(status == Verified) (user, userId).pure[F]
             else MonadError[F, Throwable].raiseError(Error.BadLogin())
   } yield res
 

@@ -60,7 +60,7 @@ object dependencies {
     "cats-core" -> cats,
     "cats-effect" -> catsEffect,
     "cats-mtl-core" -> catsMtl
-  ).map(("org.typelevel" %% (_ : String) % (_: String)).tupled) ++ Seq(
+  ).map(("org.typelevel" %% (_: String) % (_: String)).tupled) ++ Seq(
     "org.apache.commons" % "commons-lang3" % apacheLang3,
     "ch.qos.logback" %  "logback-classic" % logback,
     "com.github.mpilquist" %% "simulacrum" % simulacrum

@@ -16,31 +16,31 @@ package object endpoint {
   implicit val dateTimeEncoder: Encoder[Instant] = Encoder.instance(a => a.toEpochMilli.asJson)
   implicit val dateTimeDecoder: Decoder[Instant] = Decoder.instance(a => a.as[Long].map(Instant.ofEpochMilli(_)))
 
-  implicit val featureReqDecoder : Decoder[FeatureRequest] = deriveDecoder[FeatureRequest]
-  implicit def featureReqEntityDecoder[F[_] : Sync] : EntityDecoder[F, FeatureRequest] = jsonOf
-  implicit val featureReqEncoder : Encoder[FeatureRequest] = deriveEncoder
-  implicit def featureReqEntityEncoder[F[_]: Sync] : EntityEncoder[F, FeatureRequest] = jsonEncoderOf
+  implicit val featureReqDecoder: Decoder[FeatureRequest] = deriveDecoder[FeatureRequest]
+  implicit def featureReqEntityDecoder[F[_]: Sync]: EntityDecoder[F, FeatureRequest] = jsonOf
+  implicit val featureReqEncoder: Encoder[FeatureRequest] = deriveEncoder
+  implicit def featureReqEntityEncoder[F[_]: Sync]: EntityEncoder[F, FeatureRequest] = jsonEncoderOf
 
-  implicit val voteRequestDecoder : Decoder[VoteRequest] = deriveDecoder[VoteRequest]
-  implicit def voteRequestEntityDecoder[F[_] : Sync] : EntityDecoder[F, VoteRequest] = jsonOf
-  implicit val voteRequestEncoder : Encoder[VoteRequest] = deriveEncoder
-  implicit def voteRequestEntityEncoder[F[_]: Sync] : EntityEncoder[F, VoteRequest] = jsonEncoderOf
+  implicit val voteRequestDecoder: Decoder[VoteRequest] = deriveDecoder[VoteRequest]
+  implicit def voteRequestEntityDecoder[F[_]: Sync]: EntityDecoder[F, VoteRequest] = jsonOf
+  implicit val voteRequestEncoder: Encoder[VoteRequest] = deriveEncoder
+  implicit def voteRequestEntityEncoder[F[_]: Sync]: EntityEncoder[F, VoteRequest] = jsonEncoderOf
 
-  implicit val featureEncoder : Encoder[Feature] = deriveEncoder
-  implicit def featureEntityEncoder[F[_] : Sync] : EntityEncoder[F, Feature] = jsonEncoderOf
+  implicit val featureEncoder: Encoder[Feature] = deriveEncoder
+  implicit def featureEntityEncoder[F[_]: Sync]: EntityEncoder[F, Feature] = jsonEncoderOf
 
-  implicit val featureDecoder : Decoder[Feature] = deriveDecoder
-  implicit def featureEntityDecoder[F[_] : Sync] : EntityDecoder[F, Feature] = jsonOf
+  implicit val featureDecoder: Decoder[Feature] = deriveDecoder
+  implicit def featureEntityDecoder[F[_]: Sync]: EntityDecoder[F, Feature] = jsonOf
 
-  implicit val votedFeatEncoder : Encoder[VotedFeature] = deriveEncoder
-  implicit def votedFeatEntityEncoder[F[_]: Sync] : EntityEncoder[F, VotedFeature] = jsonEncoderOf
+  implicit val votedFeatEncoder: Encoder[VotedFeature] = deriveEncoder
+  implicit def votedFeatEntityEncoder[F[_]: Sync]: EntityEncoder[F, VotedFeature] = jsonEncoderOf
 
-  implicit val votedFeatDecoder : Decoder[VotedFeature] = deriveDecoder[VotedFeature]
-  implicit def votedFeatEntityDecoder[F[_]: Sync] : EntityDecoder[F, VotedFeature] = jsonOf
+  implicit val votedFeatDecoder: Decoder[VotedFeature] = deriveDecoder[VotedFeature]
+  implicit def votedFeatEntityDecoder[F[_]: Sync]: EntityDecoder[F, VotedFeature] = jsonOf
 
-  implicit def defaultResultEncoder[A: Encoder] : Encoder[DefaultResult[A]] = deriveEncoder
-  implicit def defaultResultEntityEncoder[F[_]: Sync, A: Encoder] : EntityEncoder[F, DefaultResult[A]] = jsonEncoderOf[F, DefaultResult[A]]
+  implicit def defaultResultEncoder[A: Encoder]: Encoder[DefaultResult[A]] = deriveEncoder
+  implicit def defaultResultEntityEncoder[F[_]: Sync, A: Encoder]: EntityEncoder[F, DefaultResult[A]] = jsonEncoderOf[F, DefaultResult[A]]
 
-  implicit def defaultResultDecoder[A: Decoder] : Decoder[DefaultResult[A]] = deriveDecoder[DefaultResult[A]]
-  implicit def defaultResultEntityDecoder[F[_]: Sync, A: Decoder] : EntityDecoder[F, DefaultResult[A]] = jsonOf[F, DefaultResult[A]]
+  implicit def defaultResultDecoder[A: Decoder]: Decoder[DefaultResult[A]] = deriveDecoder[DefaultResult[A]]
+  implicit def defaultResultEntityDecoder[F[_]: Sync, A: Decoder]: EntityDecoder[F, DefaultResult[A]] = jsonOf[F, DefaultResult[A]]
 }

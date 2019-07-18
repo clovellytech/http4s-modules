@@ -19,7 +19,7 @@ import h4sm.auth.domain.UserService
 
 
 class AuthEndpointsTestSpec extends EndpointTestSpec {
-  val schemaNames : Seq[String] = List("ct_auth")
+  val schemaNames: Seq[String] = List("ct_auth")
 
   def client(tr: Transactor[IO]): AuthClient[IO, BCrypt, TSecBearerToken] = {
     implicit val userAlg = new UserRepositoryInterpreter(tr)

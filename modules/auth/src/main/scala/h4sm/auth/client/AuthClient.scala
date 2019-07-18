@@ -22,12 +22,12 @@ class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra, A, T
 )(implicit b: AsBaseToken[T[UserId]])
 extends Http4sDsl[F] with Http4sClientDsl[F] {
   type Token = T[UserId]
-  implicit val booldecoder : EntityDecoder[F, Boolean] = jsonOf
+  implicit val booldecoder: EntityDecoder[F, Boolean] = jsonOf
 
   val authEndpoints: AuthEndpoints[F, A, T] = new AuthEndpoints(userService, authenticator)
   val auth = authEndpoints.endpoints.orNotFound
 
-  def getAuthHeaders(from: Response[F]) : Headers =
+  def getAuthHeaders(from: Response[F]): Headers =
     from.headers.filter(_.name.toString.toLowerCase startsWith "authorization")
 
   def injectAuthHeader(from: Response[F])(to: Request[F]): Request[F] =
@@ -52,7 +52,7 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
   def getUser(username: String, continue: Response[F]): Either[ParseFailure, F[Response[F]]] =
     Uri.fromString(s"/user/$username").map(uri => GET(uri).flatMap(threadResponse(continue)(_)))
 
-  def userExists(username : String) : F[Boolean] = 
+  def userExists(username: String): F[Boolean] = 
     Uri.fromString(s"/exists/$username").fold(
       _ => false.pure[F],
       uri => for {
@@ -62,7 +62,7 @@ extends Http4sDsl[F] with Http4sClientDsl[F] {
       } yield result
     )
 
-  def getUser(headers : Headers) : F[UserDetail] = for {
+  def getUser(headers: Headers): F[UserDetail] = for {
     req <- GET(uri("/user"))
     res <- auth.run(req.withHeaders(headers))
     userDetail <- res.as[UserDetail]

@@ -2,7 +2,6 @@ package h4sm.auth
 package infrastructure.repository.persistent
 
 import cats.data.OptionT
-import cats.Monad
 import cats.implicits._
 import cats.effect.Bracket
 import doobie._
@@ -11,7 +10,7 @@ import db.domain.User
 import domain.users.UserRepositoryAlgebra
 import db.sql._
 
-class UserRepositoryInterpreter[M[_]: Monad: Bracket[?[_], Throwable]](xa : Transactor[M]) 
+class UserRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transactor[M]) 
 extends UserRepositoryAlgebra[M] {
 
   def insert(a: User): M[Unit] = users.insert(a).run.as(()).exceptSomeSqlState{
@@ -20,7 +19,7 @@ extends UserRepositoryAlgebra[M] {
 
 
   def insertGetId(a: User): OptionT[M, UserId] = OptionT {
-    val q : ConnectionIO[Option[UserId]] = users.insertGetId(a).map(_.some)
+    val q: ConnectionIO[Option[UserId]] = users.insertGetId(a).map(_.some)
     q.exceptSomeSqlState{
       case UNIQUE_VIOLATION => HC.rollback.as(none[UserId])
     }.transact(xa)

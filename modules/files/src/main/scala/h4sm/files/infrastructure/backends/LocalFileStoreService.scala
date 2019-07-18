@@ -6,18 +6,17 @@ import java.io.File
 import cats.effect.{ContextShift, Sync}
 import cats.implicits._
 import h4sm.files.config.ConfigAsk
-import h4sm.files.db.FileInfoId
-import h4sm.files.domain.{FileInfo, FileStoreAlgebra}
+import h4sm.files.domain._
 import fs2.Stream
 
 import scala.concurrent.ExecutionContext
 
-class LocalFileStoreService[F[_] : Sync : ContextShift](
-  implicit C : ConfigAsk[F], ec : ExecutionContext
+class LocalFileStoreService[F[_]: Sync: ContextShift](
+  implicit C: ConfigAsk[F], ec: ExecutionContext
 ) extends FileStoreAlgebra[F]{
-  def retrieveFile(fileId : FileInfoId) : F[File] = C.ask.map(c => new java.io.File(c.basePath, fileId.toString))
+  def retrieveFile(fileId: FileInfoId): F[File] = C.ask.map(c => new java.io.File(c.basePath, fileId.toString))
 
-  def retrieve(fileId : FileInfoId): Stream[F, Byte] = Stream.eval(retrieveFile(fileId)).flatMap{ file =>
+  def retrieve(fileId: FileInfoId): Stream[F, Byte] = Stream.eval(retrieveFile(fileId)).flatMap{ file =>
     fs2.io.file.readAll(file.toPath, ec, 8196)()
   }
 

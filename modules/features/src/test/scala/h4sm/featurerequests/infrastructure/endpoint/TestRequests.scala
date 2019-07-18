@@ -36,13 +36,13 @@ class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http
   implicit val vinterp = new VoteRepositoryInterpreter[F](xa)
   val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F].endpoints)
 
-  def addRequest(req: FeatureRequest)(resp : Response[F]): F[Response[F]] = for {
+  def addRequest(req: FeatureRequest)(resp: Response[F]): F[Response[F]] = for {
     addReq <- POST(req, Uri.uri("/request"))
     authReq = authTestEndpoints.injectAuthHeader(resp)(addReq)
     resp <- requestEndpoints.orNotFound.run(authReq)
   } yield resp
 
-  def addVote(vote : VoteRequest): F[Response[F]] = for {
+  def addVote(vote: VoteRequest): F[Response[F]] = for {
     voteReq <- POST(vote, Uri.uri("/vote"))
     resp <- voteEndpoints.orNotFound.run(voteReq)
   } yield resp

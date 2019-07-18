@@ -11,7 +11,7 @@ import h4sm.auth.UserId
 import h4sm.permissions.domain._
 import persistent.sql._
 
-class UserPermissionRepository[F[_] : Bracket[?[_], Throwable]](xa : Transactor[F]) 
+class UserPermissionRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) 
 extends UserPermissionAlgebra[F] {
   def hasPermission(uid: UserId, appName: String, name: String): F[Boolean] =
     OptionT(userPermissions.userPermission(uid, appName, name).option).isDefined.transact(xa)

@@ -16,16 +16,16 @@ import testutil.infrastructure.endpoints._
 class PermissionClient[F[_]: Sync, Alg, T[_]](es: PermissionEndpoints[F, T]) extends Http4sDsl[F] with Http4sClientDsl[F] with SessionClientDsl[F] {
 
   val endpoints: Kleisli[F, Request[F], Response[F]] = es.endpoints.orNotFound
-  val cs : Codecs[F] = new Codecs
+  val cs: Codecs[F] = new Codecs
   import cs._
 
-  def addPermission(p: Permission)(implicit h: Headers) : F[Unit] = for {
+  def addPermission(p: Permission)(implicit h: Headers): F[Unit] = for {
     req <- post(p, Uri.uri("/"))
     resp <- endpoints.run(req)
     _ <- passOk(resp)
   } yield ()
 
-  def getPermissions(appName : String): F[List[(Permission, PermissionId)]] = for {
+  def getPermissions(appName: String): F[List[(Permission, PermissionId)]] = for {
     u <- Uri.fromString(s"/$appName").leftWiden[Throwable].raiseOrPure[F]
     req <- GET(u)
     res <- endpoints.run(req)

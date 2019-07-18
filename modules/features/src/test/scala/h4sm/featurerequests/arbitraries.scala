@@ -14,7 +14,7 @@ object arbitraries {
     } yield FeatureRequest(s, s2)
   }
 
-  implicit val userRequest : Arbitrary[UserRequest] = Arbitrary {
+  implicit val userRequest: Arbitrary[UserRequest] = Arbitrary {
     for {
       s <- nonEmptyString
       s2 <- nonEmptyString

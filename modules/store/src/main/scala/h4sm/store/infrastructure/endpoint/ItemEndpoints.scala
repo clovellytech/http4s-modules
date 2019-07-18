@@ -12,7 +12,7 @@ import tsec.authentication._
 
 
 class ItemEndpoints[F[_]: Sync: ItemAlgebra: OrderAlgebra, T[_]](
-  auth : UserSecuredRequestHandler[F, T]
+  auth: UserSecuredRequestHandler[F, T]
 )(implicit
   B: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F] with Codecs[F] {

@@ -16,7 +16,7 @@ object arbitraries {
     } yield OrderItem0(item, quantity, orderPrice)
   }
 
-  implicit def orderArbitrary[A: Arbitrary, B: Arbitrary] : Arbitrary[Order0[A, B]] = Arbitrary {
+  implicit def orderArbitrary[A: Arbitrary, B: Arbitrary]: Arbitrary[Order0[A, B]] = Arbitrary {
     for {
       createBy <- implicitly[Arbitrary[A]].arbitrary
       // ItemId, quantity, price charged

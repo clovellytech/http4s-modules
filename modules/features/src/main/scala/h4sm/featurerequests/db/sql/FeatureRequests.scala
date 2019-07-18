@@ -12,17 +12,17 @@ import domain._
 
 
 trait RequestSQL {
-  def insert(feature: Feature) : Update0 = sql"""
+  def insert(feature: Feature): Update0 = sql"""
     insert into ct_feature_requests.feature_request (requesting_user_id, title, description)
     values (${feature.userId}, ${feature.title}, ${feature.description})
   """.update
 
-  def select : Query0[(Feature, FeatureId, Instant)] = sql"""
+  def select: Query0[(Feature, FeatureId, Instant)] = sql"""
     select requesting_user_id, title, description, feature_request_id, create_date
     from ct_feature_requests.feature_request
   """.query
 
-  def selectAllWithVoteCounts : Query0[VotedFeature] = sql"""
+  def selectAllWithVoteCounts: Query0[VotedFeature] = sql"""
     with upvotes as
       (select feature_request_id, vote_id as upvote_id
        from ct_feature_requests.vote
@@ -41,10 +41,10 @@ trait RequestSQL {
     order by fs.create_date
   """.query
 
-  def selectById(featureId : FeatureId) : Query0[(Feature, FeatureId, Instant)] = (select.toFragment ++ sql"""
+  def selectById(featureId: FeatureId): Query0[(Feature, FeatureId, Instant)] = (select.toFragment ++ sql"""
     where feature_request_id = $featureId
   """).query
 
-  def insertGetId(feature : Feature) : ConnectionIO[FeatureId] = insert(feature).withUniqueGeneratedKeys("feature_id")
+  def insertGetId(feature: Feature): ConnectionIO[FeatureId] = insert(feature).withUniqueGeneratedKeys("feature_id")
 
 }

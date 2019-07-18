@@ -10,13 +10,13 @@ import tsec.common.SecureRandomId
 
 object arbitraries {
 
-  implicit val userIdArb : Arbitrary[UserId] = Arbitrary(Gen.uuid)
+  implicit val userIdArb: Arbitrary[UserId] = Arbitrary(Gen.uuid)
 
-  implicit val secureRandomIdArb : Arbitrary[SecureRandomId] = Arbitrary {
+  implicit val secureRandomIdArb: Arbitrary[SecureRandomId] = Arbitrary {
     Gen.posNum[Int].map(num => SecureRandomId(num.toString))
   }
 
-  implicit val baseTokenArb : Arbitrary[BaseToken] = Arbitrary {
+  implicit val baseTokenArb: Arbitrary[BaseToken] = Arbitrary {
     for {
       sid <- secureRandomIdArb.arbitrary
       uuid <- Gen.uuid
@@ -25,7 +25,7 @@ object arbitraries {
     } yield BaseToken(sid, uuid, time, otherTime.some)
   }
 
-  implicit val userArb : Arbitrary[User] = Arbitrary {
+  implicit val userArb: Arbitrary[User] = Arbitrary {
     for {
       name <- nonEmptyString
       hash <- nonEmptyString

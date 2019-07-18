@@ -12,7 +12,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
 
-  test("vote can be submitted prop") { p : FixtureParam =>
+  test("vote can be submitted prop") { p: FixtureParam =>
     val reqs = new TestRequests[IO](p.transactor)
     import reqs._
     import authTestEndpoints._

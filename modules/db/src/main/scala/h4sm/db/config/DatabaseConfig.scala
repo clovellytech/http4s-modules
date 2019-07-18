@@ -15,14 +15,14 @@ final case class DatabaseConfig(
   databaseName: String
 ){
   def driver: String = "org.postgresql.Driver"
-  def url : String = s"jdbc:postgresql://$host:$port/$databaseName"
+  def url: String = s"jdbc:postgresql://$host:$port/$databaseName"
 }
 
 object DatabaseConfig {
   /**
     * Runs the flyway migrations against the target database
     */
-  def initializeDb[M[_] : Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] = Sync[M].delay {
+  def initializeDb[M[_]: Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] = Sync[M].delay {
     val fw = {
       Flyway.configure()
             .dataSource(ds)
@@ -34,7 +34,7 @@ object DatabaseConfig {
       fw.migrate()
       ()
     }.recoverWith{
-      case e : FlywayException =>
+      case e: FlywayException =>
         println("Got flyway exception")
         println(e)
         println("Attempting to recover.")
@@ -43,7 +43,7 @@ object DatabaseConfig {
           fw.migrate()
           ()
         }.recover{
-          case e : FlywayException =>
+          case e: FlywayException =>
             println("Recovery failed")
             println(e)
             ()
@@ -51,7 +51,7 @@ object DatabaseConfig {
     }
   }
 
-  def getDataSource(cfg : DatabaseConfig) : DataSource = {
+  def getDataSource(cfg: DatabaseConfig): DataSource = {
     val ds = new org.postgresql.ds.PGSimpleDataSource()
     ds.setURL(cfg.url)
     ds.setUser(cfg.user)
@@ -59,7 +59,7 @@ object DatabaseConfig {
     ds
   }
 
-  def initialize[F[_]](cfg : DatabaseConfig)(schemaNames : String*)(implicit F : Sync[F]) : F[Unit] = for {
+  def initialize[F[_]](cfg: DatabaseConfig)(schemaNames: String*)(implicit F: Sync[F]): F[Unit] = for {
     ds <- F.delay(getDataSource(cfg))
     _ <- schemaNames.toList.traverse(name => initializeDb(ds)(name))
     _ <- F.delay(ds.getConnection.close)

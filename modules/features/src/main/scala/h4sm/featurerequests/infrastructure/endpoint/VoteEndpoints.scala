@@ -12,8 +12,8 @@ import domain.votes.{VoteRepositoryAlgebra, VoteRequest}
 import doobie.util.transactor.Transactor
 import tsec.authentication._
 
-class VoteEndpoints[F[_]: Sync : VoteRepositoryAlgebra] extends Http4sDsl[F] {
-  def submitVote : BearerAuthService[F] = BearerAuthService {
+class VoteEndpoints[F[_]: Sync: VoteRepositoryAlgebra] extends Http4sDsl[F] {
+  def submitVote: BearerAuthService[F] = BearerAuthService {
     case req @ POST -> Root / "vote" asAuthed _ => for {
       voteReq <- req.request.as[VoteRequest]
       vote = Vote(voteReq.featureRequest, req.authenticator.identity.some, voteReq.vote, voteReq.comment)
@@ -22,7 +22,7 @@ class VoteEndpoints[F[_]: Sync : VoteRepositoryAlgebra] extends Http4sDsl[F] {
     } yield resp
   }
 
-  def endpoints : BearerAuthService[F] = submitVote
+  def endpoints: BearerAuthService[F] = submitVote
 }
 
 object VoteEndpoints {

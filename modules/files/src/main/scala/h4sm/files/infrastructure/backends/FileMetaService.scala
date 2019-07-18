@@ -3,13 +3,12 @@ package infrastructure.backends
 
 import cats.effect.Bracket
 import cats.implicits._
-import h4sm.files.db._
 import domain._
 import db.sql._
 import doobie._
 import doobie.implicits._
 
-class FileMetaService[F[_] : Bracket[?[_], Throwable]](xa : Transactor[F]) extends FileMetaAlgebra[F] {
+class FileMetaService[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends FileMetaAlgebra[F] {
 
   def storeMeta(fileInfo: FileInfo): F[FileInfoId] = files.insertGenId(fileInfo).transact(xa)
 

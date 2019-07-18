@@ -10,7 +10,7 @@ trait QueryFragment[A]{
 }
 
 trait QueryFragmentInstances {
-  implicit def qfragment[A] : QueryFragment[Query0[A]] = new QueryFragment[Query0[A]] {
+  implicit def qfragment[A]: QueryFragment[Query0[A]] = new QueryFragment[Query0[A]] {
     def toFragment(self: Query0[A]): Fragment = Fragment(self.sql, Nil, self.pos)
   }
 }

@@ -1,7 +1,5 @@
 package h4sm
 
-import java.util.UUID
-
 import cats.Monad
 import h4sm.auth.db.domain.User
 import org.http4s.Response
@@ -10,7 +8,7 @@ import tsec.authentication._
 package object auth {
 
   type Instant = java.time.Instant
-  type UserId = UUID
+  type UserId = java.util.UUID
 
   type SecureRandomId = tsec.common.SecureRandomId
 
@@ -27,7 +25,7 @@ package object auth {
   def BearerAuthService[M[_]: Monad](pf: PartialFunction[UserSecuredRequest[M, TSecBearerToken], M[Response[M]]]) =
     UserAuthService[M, TSecBearerToken](pf)
 
-  def UserAuthService[M[_] : Monad, T[_]](
+  def UserAuthService[M[_]: Monad, T[_]](
     pf: PartialFunction[UserSecuredRequest[M, T], M[Response[M]]]
   ): UserAuthService[M, T] = TSecAuthService(pf)
 }
