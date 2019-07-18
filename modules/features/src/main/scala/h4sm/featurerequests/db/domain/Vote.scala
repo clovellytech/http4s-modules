@@ -1,10 +1,11 @@
-package h4sm.featurerequests.db.domain
+package h4sm
+package featurerequests.db.domain
 
-import java.util.UUID
+import auth.UserId
 
 final case class Vote(
   featureRequestId: FeatureId,
-  userId: Option[UUID],
+  userId: Option[UserId],
   vote: Option[Short],
   comment: Option[String]
 )

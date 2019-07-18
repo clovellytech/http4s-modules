@@ -3,11 +3,10 @@ package files
 package client
 
 import java.io.File
-import java.util.UUID
 
 import cats.implicits._
 import cats.effect.{ContextShift, Sync}
-import files.db.FileInfoId
+import files.domain._
 import files.infrastructure.endpoint._
 import fs2.Stream
 import h4sm.files.domain.FileInfo
@@ -45,8 +44,8 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
     } yield fileRes
   }
 
-  def getFile(uuid: UUID, name: String = "download")(implicit h: Headers): F[Stream[F, Byte]] = for {
-    u <- Uri.fromString(s"/${uuid.toString}/$name").leftWiden[Throwable].raiseOrPure[F]
+  def getFile(fileId: FileInfoId, name: String = "download")(implicit h: Headers): F[Stream[F, Byte]] = for {
+    u <- Uri.fromString(s"/${fileId.toString}/$name").leftWiden[Throwable].raiseOrPure[F]
     req <- GET(u)
     resp <- files.run(req.withHeaders(h))
     _ <- passOk(resp)

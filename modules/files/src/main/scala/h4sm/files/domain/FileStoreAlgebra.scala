@@ -3,7 +3,6 @@ package domain
 
 import java.io.File
 
-import h4sm.files.db.FileInfoId
 import fs2.Stream
 
 trait FileStoreAlgebra[F[_]] {

@@ -2,8 +2,6 @@ package h4sm.auth
 package infrastructure
 package authentication
 
-import java.util.UUID
-
 import cats.Monad
 import cats.data.OptionT
 import cats.implicits._
@@ -24,7 +22,7 @@ object FunctionKK{
 
 import FunctionKK._
 
-trait UserBackingStore[F[_]] extends BackingStore[F, UUID, User]
+trait UserBackingStore[F[_]] extends BackingStore[F, UserId, User]
 trait TokenBackingStore[F[_], T[_]] extends BackingStore[F, SecureRandomId, T[UserId]]
 
 object TransBackingStore {
@@ -42,9 +40,9 @@ object TransBackingStore {
     def apply[M[_]: Monad](xa: UserRepositoryAlgebra[M]): UserBackingStore[M] =
       new UserBackingStore[M] {
         def put(elem: User): M[User] = xa.insert(elem).as(elem)
-        def get(id: UUID): OptionT[M, User] = xa.byId(id).map(_._1)
+        def get(id: UserId): OptionT[M, User] = xa.byId(id).map(_._1)
         def update(v: User): M[User] = xa.update(v).as(v)
-        def delete(id: UUID): M[Unit] = xa.delete(id)
+        def delete(id: UserId): M[Unit] = xa.delete(id)
       }
   }
 }

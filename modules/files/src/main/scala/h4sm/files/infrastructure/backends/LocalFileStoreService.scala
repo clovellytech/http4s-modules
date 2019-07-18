@@ -6,8 +6,7 @@ import java.io.File
 import cats.effect.{ContextShift, Sync}
 import cats.implicits._
 import h4sm.files.config.ConfigAsk
-import h4sm.files.db.FileInfoId
-import h4sm.files.domain.{FileInfo, FileStoreAlgebra}
+import h4sm.files.domain._
 import fs2.Stream
 
 import scala.concurrent.ExecutionContext

@@ -1,7 +1,5 @@
 package h4sm
 
-import java.util.UUID
-
 import cats.Monad
 import h4sm.auth.db.domain.User
 import org.http4s.Response
@@ -10,7 +8,7 @@ import tsec.authentication._
 package object auth {
 
   type Instant = java.time.Instant
-  type UserId = UUID
+  type UserId = java.util.UUID
 
   type SecureRandomId = tsec.common.SecureRandomId
 

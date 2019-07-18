@@ -4,7 +4,6 @@ package domain
 import cats.syntax.functor._
 import cats.Functor
 import h4sm.auth.UserId
-import db.FileInfoId
 
 trait FileMetaAlgebra[F[_]]{
   def storeMeta(fileInfo: FileInfo): F[FileInfoId]

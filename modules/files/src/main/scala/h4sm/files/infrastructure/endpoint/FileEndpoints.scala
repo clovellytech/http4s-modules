@@ -16,7 +16,6 @@ import cats.effect.{ContextShift, Sync}
 import h4sm.auth._
 import h4sm.auth.domain.tokens.AsBaseToken.ops._
 import h4sm.auth.domain.tokens.AsBaseToken
-import h4sm.files.db.FileInfoId
 import h4sm.files.domain._
 import h4sm.files.infrastructure.backends.{FileMetaService, LocalFileStoreService}
 import tsec.authentication._
