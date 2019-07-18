@@ -91,8 +91,18 @@ lazy val permissions = (project in file("./modules/permissions"))
   )
   .dependsOn(auth % withTests, db % withTests, testUtil % withTests)
 
-lazy val petstore = (project in file("./modules/petstore"))
+
+lazy val store = (project in file("./modules/store"))
   .settings(commonSettings)
+  .settings(publishSettings)
+  .settings(publishArtifact in Test := true)
+  .settings(
+    name := "h4sm-store",
+    libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
+  )
+  .dependsOn(auth % withTests, db % withTests, permissions, files, testUtil % testOnly)
+
+lazy val petstore = (project in file("./modules/petstore"))
   .settings(commonSettings)
   .settings(
     name := "h4sm-petstore",
@@ -135,5 +145,5 @@ lazy val h4sm = (project in file("."))
     skip in publish := true,
     aggregate in reStart := false
   )
-  .dependsOn(auth, db, files, features, permissions, testUtil, invitations)
-  .aggregate(auth, db, files, features, permissions, testUtil, invitations)
+  .dependsOn(auth, db, files, features, permissions, store, testUtil, invitations)
+  .aggregate(auth, db, files, features, permissions, store, testUtil, invitations)

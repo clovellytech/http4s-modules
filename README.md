@@ -17,7 +17,8 @@ To provide a library of production ready modules, complete with database schema,
 * files - A complete file upload and retrieval module. Only local file storage is implemented so far. AWS or other backends can be added by providing a typeclass instance.
 * invitations - Add the ability for users to invite new users.
 * permissions - Built on top of tsec-http4s, an easy way to create routes that are guarded by a user having certain permissions.
-* petstore - As a learning example, the scala-pet-store implemented with h4sm modules
+* petstore - As a learning example, the scala-pet-store implemented with h4sm modules (not released)
+* store - A store with items and orders. 
 * more to come! Something you would like to see here? Submit an issue! 
 
 Contributors and Recognition
@@ -30,7 +31,7 @@ PRs and issues are so welcome on this project. Generally contributors don't have
 
 Get Started
 ---
-Add any of the following dependencies to your build.sbt:
+Add any of the following dependencies to your build.sbt. There are interdependencies too, so you may consult `build.sbt` to see which modules depend on which, and thus may not need to be declared in your `build.sbt`.
 
 ```
 libraryDependencies ++= Seq(
@@ -38,6 +39,7 @@ libraryDependencies ++= Seq(
 	"h4sm-features",
 	"h4sm-files",
 	"h4sm-invitations",
+    "h4sm-store",
 	"h4sm-permissions"
 ).map("com.clovellytech" %% _ % "0.0.32")
 ```
