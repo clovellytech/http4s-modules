@@ -37,3 +37,10 @@ deploy:
   target-branch: gh-pages
   on:
     branch: master
+
+
+cache:
+  directories:
+    - "$HOME/.coursier/cache"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt/boot"
