@@ -21,8 +21,7 @@ class ItemRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends 
     def select: F[List[(Item, ItemId, Instant)]] = sql.item.select.to[List].transact(xa)
     
     // Members declared in h4sm.db.UAlgebra
-    def safeUpdate(id: ItemId,u: Item): F[Unit] = sql.item.safeUpdate(id, u).run.void.transact(xa)
-    def update(u: Item): F[Unit] = ???
+    def update(id: ItemId, u: Item): F[Unit] = sql.item.update(id, u).run.void.transact(xa)
 
     def byIds(ids: List[ItemId]): F[List[Annotated]] = sql.item.byIds(ids).to[List].transact(xa)
 }

@@ -34,7 +34,7 @@ trait ItemSql {
     where item_id = $itemId
   """.update
 
-  def safeUpdate(itemId: ItemId, item: Item): Update0 = sql"""
+  def update(itemId: ItemId, item: Item): Update0 = sql"""
     update ct_store.item
     set title = ${item.title},
         description = ${item.description},

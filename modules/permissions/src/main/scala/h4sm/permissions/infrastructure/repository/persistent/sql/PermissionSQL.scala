@@ -32,13 +32,19 @@ trait PermissionSQL {
     values (${p.name}, ${p.description}, ${p.appName})
   """.update
 
-  def safeUpdate(pid: PermissionId, p: Permission): Update0 = sql"""
+  def update(pid : PermissionId, p : Permission) : Update0 = sql"""
     update ct_permissions.permission
     set name = ${p.name}, description = ${p.description}
     where permission_id = $pid
   """.update
 
-  def delete(pid: PermissionId): Update0 = sql"""
+  def updateUnique(p: Permission): Update0 = sql"""
+    update ct_permissions.permission
+    set description = ${p.description}
+    where name = ${p.name} and app_name = ${p.appName}
+  """.update
+
+  def delete(pid : PermissionId) : Update0 = sql"""
     delete
     from ct_permissions.permission
     where permission_id = $pid

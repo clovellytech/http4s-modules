@@ -18,9 +18,9 @@ extends TokenRepositoryAlgebra[M] {
 
   def delete(i: SecureRandomId): M[Unit] = tokens.delete(i).run.as(()).transact(xa)
 
-  def safeUpdate(id: SecureRandomId, u: BaseToken): M[Unit] = tokens.update(id, u).run.as(()).transact(xa)
+  def update(id: SecureRandomId, u: BaseToken): M[Unit] = tokens.update(id, u).run.as(()).transact(xa)
 
-  def update(u: BaseToken): M[Unit] = safeUpdate(u.secureId, u)
+  def updateUnique(u: BaseToken): M[Unit] = update(u.secureId, u)
 
   def select: M[List[(BaseToken, SecureRandomId, Unit)]] = tokens.select.map(tok =>
     (tok, tok.secureId, ())

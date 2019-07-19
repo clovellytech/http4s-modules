@@ -15,6 +15,6 @@ class OrderQueriesTestSpec extends DbFixtureSuite with IOChecker {
   test("select query should typecheck")(_ => check(order.select))
   test("insert should typecheck")(_ => check(applyArb(order.insert _)))
   test("insert order item should typecheck")(_ => check(applyArb((order.insertOrderItem _).tupled)))
-  test("safeUpdate order should typecheck")(_ => check(applyArb((order.safeUpdate _).tupled)))
+  test("update order should typecheck")(_ => check(applyArb((order.update _).tupled)))
   test("setSubmitted should typecheck")(_ => check(applyArb(order.setSubmitted _)))
 }

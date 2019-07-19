@@ -28,8 +28,7 @@ class OrderRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends
   def delete(id: OrderId): F[Unit] = sql.order.delete(id).run.void.transact(xa)
 
   // Members declared in h4sm.db.UAlgebra
-  def safeUpdate(id: OrderId, u: Order): F[Unit] = sql.order.safeUpdate(id, u).run.void.transact(xa)
-  def update(u: Order): F[Unit] = ???
+  def update(id: OrderId, u: Order): F[Unit] = sql.order.update(id, u).run.void.transact(xa)
 
   // Members declared in h4sm.store.domain.OrderAlgebra
   def insertOrderItem(orderId: OrderId, orderItem: OrderItem): F[Unit] = 

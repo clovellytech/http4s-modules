@@ -21,6 +21,7 @@ class PermissionQueriesTestSpec extends DbFixtureSuite with IOChecker {
   test("select by app name should typecheck")(_ => check(applyArb(permissions.byAppName _)))
   test("select by atttributes should typecheck")(_ => check(applyArb((permissions.byAttributes _).tupled)))
   test("insert should typecheck")(_ => check(applyArb(permissions.insert _)))
-  test("safe update should typecheck")(_ => check(applyArb((permissions.safeUpdate _).tupled)))
+  test("update should typecheck")(_ => check(applyArb((permissions.update _).tupled)))
+  test("update unique should typecheck")(_ => check(applyArb((permissions.update _).tupled)))
   test("delete should typecheck")(_ => check(applyArb(permissions.delete _)))
 }

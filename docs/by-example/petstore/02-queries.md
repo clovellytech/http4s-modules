@@ -86,8 +86,7 @@ class PetRepositoryUnimplemented[F[_]] extends PetAlgebra[F]{
   def select: F[List[Annotated]] = ???
   
   // Members declared in h4sm.db.UAlgebra
-  def safeUpdate(id: UUID, u: Pet): F[Unit] = ???
-  def update(u: Pet): F[Unit] = ???
+  def update(id: UUID, u: Pet): F[Unit] = ???
 }
 ```
 
@@ -118,7 +117,7 @@ trait PetSql{
     where pet_id = $uuid
   """).query
 
-  def safeUpdate(id: UUID, pet: Pet): Update0 = sql"""
+  def update(id: UUID, pet: Pet): Update0 = sql"""
     update ct_petstore.pet
     set name = ${pet.name}, bio = ${pet.bio}, update_time = now(), status = ${pet.status}, photo_urls = ${pet.photoUrls}
     where pet_id = $id
@@ -175,7 +174,7 @@ class PetSqlTestSpec extends DbFixtureSuite with IOChecker {
   test("insert should typecheck")(_ => check(applyArb(PetSql.insert _)))
   test("select by id should typecheck")(_ => check(applyArb(PetSql.selectById _)))
   test("select user files should typecheck")(_ => check(applyArb(PetSql.selectByName _)))
-  test("update upload time should typecheck")(_ => check(applyArb((PetSql.safeUpdate _).tupled)))
+  test("update upload time should typecheck")(_ => check(applyArb((PetSql.update _).tupled)))
 }
 ```
 
@@ -219,12 +218,7 @@ class PetRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends P
   def select: F[List[Annotated]] = PetSql.select.to[List].transact(xa)
   
   // Members declared in h4sm.db.UAlgebra
-  def safeUpdate(id: UUID, u: Pet): F[Unit] = PetSql.safeUpdate(id, u).run.transact(xa).void
-  def update(u: Pet): F[Unit] = (for {
-    (pet, id, _) <- OptionT(PetSql.selectByName(u.name).option.transact(xa))
-    // If a pet with that name is not found, the following will not execute
-    _ <- OptionT.liftF(safeUpdate(id, u))
-  } yield ()).getOrElse(())
+  def update(id: UUID, u: Pet): F[Unit] = PetSql.update(id, u).run.transact(xa).void
 }
 ```
 

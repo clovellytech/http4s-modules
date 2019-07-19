@@ -27,22 +27,22 @@ trait TokenBackingStore[F[_], T[_]] extends BackingStore[F, SecureRandomId, T[Us
 
 object TransBackingStore {
   def tokenTrans[T[_]](implicit b: AsBaseToken[T[UserId]], r: BaseTokenReader[T[UserId]]) = new (TokenRepositoryAlgebra ~~> TokenBackingStore[?[_], T]){
-    def apply[M[_]: Monad](xa: TokenRepositoryAlgebra[M]): TokenBackingStore[M, T] =
+    def apply[M[_] : Monad](alg: TokenRepositoryAlgebra[M]) : TokenBackingStore[M, T] =
       new TokenBackingStore[M, T] {
-        override def put(elem: T[UserId]): M[T[UserId]] = xa.insert(elem.asBase).as(elem)
-        override def update(v: T[UserId]): M[T[UserId]] = xa.update(v.asBase).as(v)
-        override def delete(id: SecureRandomId): M[Unit] = xa.delete(id)
-        override def get(id: SecureRandomId): OptionT[M, T[UserId]] = xa.byId(id).map(x => r.read(x._1))
+        def put(elem: T[UserId]): M[T[UserId]] = alg.insert(elem.asBase).as(elem)
+        def update(v: T[UserId]): M[T[UserId]] = alg.updateUnique(v.asBase).as(v)
+        def delete(id: SecureRandomId): M[Unit] = alg.delete(id)
+        def get(id: SecureRandomId): OptionT[M, T[UserId]] = alg.byId(id).map(x => r.read(x._1))
       }
   }
 
   val userTrans = new (UserRepositoryAlgebra ~~> UserBackingStore) {
-    def apply[M[_]: Monad](xa: UserRepositoryAlgebra[M]): UserBackingStore[M] =
+    def apply[M[_]: Monad](alg: UserRepositoryAlgebra[M]): UserBackingStore[M] =
       new UserBackingStore[M] {
-        def put(elem: User): M[User] = xa.insert(elem).as(elem)
-        def get(id: UserId): OptionT[M, User] = xa.byId(id).map(_._1)
-        def update(v: User): M[User] = xa.update(v).as(v)
-        def delete(id: UserId): M[Unit] = xa.delete(id)
+        def put(elem: User): M[User] = alg.insert(elem).as(elem)
+        def get(id: UserId): OptionT[M, User] = alg.byId(id).map(_._1)
+        def update(v: User): M[User] = alg.updateUnique(v).as(v)
+        def delete(id: UserId): M[Unit] = alg.delete(id)
       }
   }
 }

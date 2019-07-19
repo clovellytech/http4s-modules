@@ -21,12 +21,7 @@ class PetRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends P
   def select: F[List[Annotated]] = pets.select.to[List].transact(xa)
   
   // Members declared in h4sm.db.UAlgebra
-  def safeUpdate(id: PetId, u: Pet): F[Unit] = pets.safeUpdate(id, u).run.transact(xa).void
-  def update(u: Pet): F[Unit] = (for {
-    (pet, id, _) <- OptionT(pets.selectByName(u.name).option.transact(xa))
-    // If a pet with that name is not found, the following will not execute
-    _ <- OptionT.liftF(safeUpdate(id, u))
-  } yield ()).getOrElse(())
+  def update(id: PetId, u: Pet): F[Unit] = pets.update(id, u).run.void.transact(xa)
 
   def delete(i: PetId): F[Unit] = pets.delete(i).run.transact(xa).void
 }

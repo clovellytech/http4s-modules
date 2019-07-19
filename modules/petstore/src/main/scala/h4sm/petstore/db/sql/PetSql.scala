@@ -25,7 +25,7 @@ trait PetSql{
     where pet_id = $id
   """).query
 
-  def safeUpdate(id: PetId, pet: Pet): Update0 = sql"""
+  def update(id: PetId, pet: Pet): Update0 = sql"""
     update ct_petstore.pet
     set name = ${pet.name}, bio = ${pet.bio}, update_time = now(), status = ${pet.status}, photo_urls = ${pet.photoUrls}
     where pet_id = $id
