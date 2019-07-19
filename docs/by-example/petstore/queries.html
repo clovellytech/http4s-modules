@@ -62,8 +62,7 @@
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">select</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">List</span>[<span class="hljs-type">Annotated</span>]] = ???
   
   <span class="hljs-comment">// Members declared in h4sm.db.UAlgebra</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">safeUpdate</span></span>(id: <span class="hljs-type">UUID</span>, u: <span class="hljs-type">Pet</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = ???
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span></span>(u: <span class="hljs-type">Pet</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = ???
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span></span>(id: <span class="hljs-type">UUID</span>, u: <span class="hljs-type">Pet</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = ???
 }
 </code></pre>
 <p>The members shown above show the base methods expected by <code>PetAlgebra</code>.</p>
@@ -90,7 +89,7 @@ trait PetSql{
     where pet_id = $uuid
   """).query
 
-  def safeUpdate(id: UUID, pet: Pet): Update0 = sql"""
+  def update(id: UUID, pet: Pet): Update0 = sql"""
     update ct_petstore.pet
     set name = ${pet.name}, bio = ${pet.bio}, update_time = now(), status = ${pet.status}, photo_urls = ${pet.photoUrls}
     where pet_id = $id
@@ -139,17 +138,17 @@ object PetSql extends PetSql
   test(<span class="hljs-string">"insert should typecheck"</span>)(_ =&gt; check(applyArb(<span class="hljs-type">PetSql</span>.insert _)))
   test(<span class="hljs-string">"select by id should typecheck"</span>)(_ =&gt; check(applyArb(<span class="hljs-type">PetSql</span>.selectById _)))
   test(<span class="hljs-string">"select user files should typecheck"</span>)(_ =&gt; check(applyArb(<span class="hljs-type">PetSql</span>.selectByName _)))
-  test(<span class="hljs-string">"update upload time should typecheck"</span>)(_ =&gt; check(applyArb((<span class="hljs-type">PetSql</span>.safeUpdate _).tupled)))
+  test(<span class="hljs-string">"update upload time should typecheck"</span>)(_ =&gt; check(applyArb((<span class="hljs-type">PetSql</span>.update _).tupled)))
 }
 </code></pre>
 <p>Note the use of <code>DbFixtureSuite</code>, which will automatically create and then destroy a test postgres database for us.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> t = <span class="hljs-keyword">new</span> <span class="hljs-type">PetSqlTestSpec</span>
-<span class="hljs-comment">// t: PetSqlTestSpec = repl.Session$App$PetSqlTestSpec@5e4316d5</span>
+<span class="hljs-comment">// t: PetSqlTestSpec = repl.Session$App$PetSqlTestSpec@1e4adbe5</span>
 t.execute(color = <span class="hljs-literal">false</span>)
 <span class="hljs-comment">// Session$App$PetSqlTestSpec:</span>
 <span class="hljs-comment">// - insert should typecheck</span>
 <span class="hljs-comment">// - select by id should typecheck *** FAILED ***</span>
-<span class="hljs-comment">//   Query0[(Session.App.Pet, UUID, Instant)] defined at 02-queries.md:110</span>
+<span class="hljs-comment">//   Query0[(Session.App.Pet, UUID, Instant)] defined at 02-queries.md:109</span>
 <span class="hljs-comment">//     select name, bio, created_by, status, photo_urls, update_time,</span>
 <span class="hljs-comment">//     pet_id, create_date</span>
 <span class="hljs-comment">//     from ct_petstore.pet</span>
@@ -168,7 +167,7 @@ t.execute(color = <span class="hljs-literal">false</span>)
 <span class="hljs-comment">//     ✓ C07 pet_id      OTHER     (uuid)        NOT NULL  →  UUID</span>
 <span class="hljs-comment">//     ✓ C08 create_date TIMESTAMP (timestamptz) NOT NULL  →  Timestamp (Checker.scala:56)</span>
 <span class="hljs-comment">// - select user files should typecheck *** FAILED ***</span>
-<span class="hljs-comment">//   Query0[(Session.App.Pet, UUID, Instant)] defined at 02-queries.md:110</span>
+<span class="hljs-comment">//   Query0[(Session.App.Pet, UUID, Instant)] defined at 02-queries.md:109</span>
 <span class="hljs-comment">//     select name, bio, created_by, status, photo_urls, update_time,</span>
 <span class="hljs-comment">//     pet_id, create_date</span>
 <span class="hljs-comment">//     from ct_petstore.pet</span>
@@ -215,12 +214,7 @@ t.execute(color = <span class="hljs-literal">false</span>)
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">select</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">List</span>[<span class="hljs-type">Annotated</span>]] = <span class="hljs-type">PetSql</span>.select.to[<span class="hljs-type">List</span>].transact(xa)
   
   <span class="hljs-comment">// Members declared in h4sm.db.UAlgebra</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">safeUpdate</span></span>(id: <span class="hljs-type">UUID</span>, u: <span class="hljs-type">Pet</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = <span class="hljs-type">PetSql</span>.safeUpdate(id, u).run.transact(xa).void
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span></span>(u: <span class="hljs-type">Pet</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = (<span class="hljs-keyword">for</span> {
-    (pet, id, _) &lt;- <span class="hljs-type">OptionT</span>(<span class="hljs-type">PetSql</span>.selectByName(u.name).option.transact(xa))
-    <span class="hljs-comment">// If a pet with that name is not found, the following will not execute</span>
-    _ &lt;- <span class="hljs-type">OptionT</span>.liftF(safeUpdate(id, u))
-  } <span class="hljs-keyword">yield</span> ()).getOrElse(())
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span></span>(id: <span class="hljs-type">UUID</span>, u: <span class="hljs-type">Pet</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = <span class="hljs-type">PetSql</span>.update(id, u).run.transact(xa).void
 }
 </code></pre>
 <p>In the petstore module, these implementations are also complete for managing orders.</p>
