@@ -16,8 +16,7 @@ trait RAlgebra[F[_], I, A, AA] extends Algebra[F, A] {
 }
 
 trait UAlgebra[F[_], I, A] extends Algebra[F, A] {
-  def safeUpdate(id: I, u: A): F[Unit]
-  def update(u: A): F[Unit]
+  def update(id: I, u: A): F[Unit]
 }
 
 trait DAlgebra[F[_], I, A] extends Algebra[F, A] {

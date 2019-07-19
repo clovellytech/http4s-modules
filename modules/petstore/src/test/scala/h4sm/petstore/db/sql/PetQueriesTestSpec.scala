@@ -21,5 +21,5 @@ class PetQueriesTestSpec extends DbFixtureSuite with IOChecker {
   test("select should typecheck")(_ => check(pets.select))
   test("select by id should typecheck")(_ => check(applyArb(pets.selectById _)))
   test("select by name typecheck")(_ => check(applyArb(pets.selectByName _)))
-  test("update upload time should typecheck")(_ => check(applyArb((pets.safeUpdate _).tupled)))
+  test("update should typecheck")(_ => check(applyArb((pets.update _).tupled)))
 }

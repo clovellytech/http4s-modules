@@ -21,12 +21,9 @@ class PermissionRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) ex
   def byId(id: PermissionId): OptionT[F, (Permission, PermissionId, Unit)] =
     OptionT(permissions.byId(id).option.transact(xa)).map((_, id, ()))
 
-  def safeUpdate(id: PermissionId, u: Permission): F[Unit] = permissions.safeUpdate(id, u).run.as(()).transact(xa)
+  def update(id: PermissionId, u: Permission): F[Unit] = permissions.update(id, u).run.as(()).transact(xa)
 
-  def update(u: Permission): F[Unit] = (for {
-    v <- permissions.byAttributes(u.appName, u.name).option
-    _ <- v.fold(permissions.insert(u).run.as(())){ case (_, pid) => permissions.safeUpdate(pid, u).run.as(()) }
-  } yield ()).transact(xa)
+  def updateUnique(u: Permission): F[Unit] = permissions.updateUnique(u).run.void.transact(xa)
 
   def selectByAppName(appName: String): F[List[(Permission, PermissionId)]] =
     permissions.byAppName(appName).to[List].transact(xa)

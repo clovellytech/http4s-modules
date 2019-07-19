@@ -70,7 +70,7 @@ trait OrderSql {
     where order_id = $orderId
   """).query[SelectInter].map(selectAdjust)
 
-  def safeUpdate(orderId: OrderId, order: Order): Update0 = sql"""
+  def update(orderId: OrderId, order: Order): Update0 = sql"""
     update ct_store.order
     set fulfilled_date = ${order.fulfilledDate},
         total_price = ${order.totalPrice}

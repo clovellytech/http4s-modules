@@ -18,5 +18,5 @@ class ItemSqlTestSpec extends DbFixtureSuite with IOChecker {
   test("byIds should typecheck")(_ => check(applyArb(item.byIds _)))
   test("delete should typecheck")(_ => check(applyArb(item.delete _)))
   test("insert should typecheck")(_ => check(applyArb(item.insert _)))
-  test("safeUpdate should typecheck")(_ => check(applyArb((item.safeUpdate _).tupled)))
+  test("update should typecheck")(_ => check(applyArb((item.update _).tupled)))
 }

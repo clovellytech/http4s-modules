@@ -34,11 +34,11 @@ extends UserRepositoryAlgebra[M] {
 
   def delete(i: UserId): M[Unit] = users.delete(i).run.as(()).transact(xa)
 
-  def safeUpdate(id: UserId, u: User): M[Unit] = users.update(id, u).run.as(()).transact(xa)
+  def update(id: UserId, u: User): M[Unit] = users.update(id, u).run.as(()).transact(xa)
 
-  def update(u: User): M[Unit] = (for {
+  def updateUnique(u: User): M[Unit] = (for {
     uq <- byUsername(u.username)
     (user, id, _) = uq
-    res <- OptionT(safeUpdate(id, user).map(_.some))
+    res <- OptionT(update(id, user).map(_.some))
   } yield res).value.map(_.getOrElse(()))
 }

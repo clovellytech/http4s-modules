@@ -9,5 +9,5 @@ import simulacrum.typeclass
 @typeclass
 trait UserRepositoryAlgebra[F[_]] extends CRUDAlgebra[F, UserId, User, Instant] {
   def byUsername(username: String): OptionT[F, Annotated]
+  def updateUnique(u: User): F[Unit]
 }
-
