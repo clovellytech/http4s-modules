@@ -12,7 +12,7 @@ Basic Idea
 ---
 To provide a library of production ready modules, complete with database schema, that can be composed and mounted as `HttpService`s. Modules included so far:
 
-* auth - A complete user authentication implementation using `tsec`. Only uses Bearer tokens for now.
+* auth - A complete user authentication implementation using `tsec`. Bearer and stateless cookie authentication schemes are available.
 * features - An example library that allows users to submit feature requests and vote on features.
 * files - A complete file upload and retrieval module. Only local file storage is implemented so far. AWS or other backends can be added by providing a typeclass instance.
 * invitations - Add the ability for users to invite new users.
@@ -39,7 +39,7 @@ libraryDependencies ++= Seq(
 	"h4sm-features",
 	"h4sm-files",
 	"h4sm-invitations",
-    "h4sm-store",
+    	"h4sm-store",
 	"h4sm-permissions"
 ).map("com.clovellytech" %% _ % "0.0.32")
 ```
