@@ -22,7 +22,7 @@ object dependencies {
   val circeConfig = "0.6.1"
   val cryptobits = "1.1"
   val doobie = "0.7.0"
-  val flyway = "5.2.4"
+  val flyway = "6.0.0"
   val http4s = "0.20.10"
   val logback = "1.2.3"
   val postgres = "42.2.6"
