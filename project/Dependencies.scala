@@ -6,7 +6,7 @@ object dependencies {
     "52north for postgis" at "http://52north.org/maven/repo/releases/",
     Resolver.sonatypeRepo("public")
   )
-
+  
   val apacheLang3 = "3.9"
   val bcrypt = "3.1"
   val betterMonadicFor = "0.3.1"
