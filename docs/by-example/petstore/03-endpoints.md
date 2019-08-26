@@ -75,7 +75,7 @@ So let's create our endpoints and throw some requests at them. First we'll need 
 
 
 ```scala mdoc
-import cats.effect.{Resource, ConcurrentEffect, ContextShift, Timer, Sync}
+import cats.effect._
 import doobie._
 import doobie.hikari.HikariTransactor
 import h4sm.auth.domain.tokens._
@@ -101,7 +101,8 @@ def petEndpoints[
   _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_petstore"))
   connec <- ExecutionContexts.fixedThreadPool[F](4)
   tranec <- ExecutionContexts.cachedThreadPool[F]
-  xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
+  blk = Blocker.liftExecutionContext(tranec)
+  xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, blk)
 
   // These 5 lines are the core of the approach of this project. Build up the interpreters
   // and other requirements of our endpoints, so that we can easily instantiate them.
@@ -123,7 +124,6 @@ import h4sm.auth.infrastructure.endpoint._
 import h4sm.petstore.infrastructure.endpoint._
 import h4sm.petstore.domain._
 import io.circe.generic.auto._
-import io.circe.java8.time._
 import org.http4s.dsl.io._
 import org.http4s.client.dsl.io._
 import org.http4s.circe._

@@ -21,8 +21,6 @@ import h4sm.petstore.infrastructure.repository.persistent._
 import doobie._
 import doobie.hikari.HikariTransactor
 import io.circe.config.parser
-import io.circe.generic.auto._
-import org.http4s.HttpRoutes
 import org.http4s.server.{Router, Server}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
@@ -43,7 +41,8 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
       db <- Resource.liftF(parser.decodePathF[F, DatabaseConfig]("db"))
       connec <- ExecutionContexts.fixedThreadPool[F](10)
       tranec <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, tranec)
+      blk = Blocker.liftExecutionContext(tranec)
+      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, blk)
 
       // Migrate the database, including all of our dependent schemas!
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_petstore"))
