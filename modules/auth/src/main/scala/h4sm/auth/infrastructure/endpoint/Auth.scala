@@ -3,7 +3,7 @@ package infrastructure.endpoint
 
 import scala.concurrent.duration._
 import cats.data.OptionT
-import cats.effect.Sync
+import cats.effect._
 import cats.implicits._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
@@ -24,11 +24,11 @@ object Authenticators {
 
   def statelessCookie[F[_]: Sync: UserRepositoryAlgebra, Alg: JAuthEncryptor[F, ?]: IvGen[F, ?]](
     key: SecretKey[Alg],
-    expiryDuration: FiniteDuration = 10.minutes, 
+    expiryDuration: FiniteDuration = 10.minutes,
     maxIdle: Option[FiniteDuration] = None,
     secure: Boolean = false,
     domain: Option[String] = None,
-  )(implicit a: AES[Alg]): UserAuthenticator[F, AuthEncryptedCookie[Alg, ?]] = 
+  )(implicit a: AES[Alg]): UserAuthenticator[F, AuthEncryptedCookie[Alg, ?]] =
     EncryptedCookieAuthenticator.stateless(
       TSecCookieSettings(
         cookieName = "ct-auth",
@@ -77,8 +77,8 @@ extends Http4sDsl[F] {
         result <- Ok()
       } yield result
 
-      res.recoverWith { 
-        case _: Error.Duplicate => Conflict("Username already exists") 
+      res.recoverWith {
+        case _: Error.Duplicate => Conflict("Username already exists")
         case _ => BadRequest()
       }
     }
@@ -87,14 +87,14 @@ extends Http4sDsl[F] {
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
         (user, userId) <- userService.lookup(userRequest.username, userRequest.password)
-        resp <- Ok(SiteResult(userRequest.username)) 
+        resp <- Ok(SiteResult(userRequest.username))
         tok <- authenticator.create(userId)
       } yield authenticator.embed(resp, tok)
 
       res.recoverWith {
         case _: Error.BadLogin => badResp
         case _: Error.NotFound => badResp
-        case _ => BadRequest("Not found") 
+        case _ => BadRequest("Not found")
       }
     }
 
@@ -123,7 +123,5 @@ extends Http4sDsl[F] {
     } yield resp).getOrElseF(BadRequest())
   }
 
-  def endpoints: HttpRoutes[F] = unauthService <+> Auth.liftService(authService)
+  def endpoints = unauthService <+> Auth.liftService(authService)
 }
-
-

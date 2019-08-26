@@ -42,7 +42,6 @@ import cats.effect.Sync
 import cats.implicits._
 import h4sm.db.config._
 import h4sm.files.config.FileConfig
-import io.circe.Decoder
 import io.circe.config.parser
 import io.circe.generic.auto._  // for parsing our configuration file.
 

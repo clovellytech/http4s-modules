@@ -3,7 +3,6 @@ package h4sm.auth.infrastructure
 import cats.effect.Sync
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
-import io.circe.java8.time._
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
 

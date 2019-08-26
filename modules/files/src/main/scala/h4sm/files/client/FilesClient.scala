@@ -5,7 +5,7 @@ package client
 import java.io.File
 
 import cats.implicits._
-import cats.effect.{ContextShift, Sync}
+import cats.effect._
 import files.domain._
 import files.infrastructure.endpoint._
 import fs2.Stream
@@ -17,13 +17,11 @@ import org.http4s.dsl._
 import org.http4s.client.dsl._
 import org.http4s.multipart._
 
-import scala.concurrent.ExecutionContext
-
 import testutil.infrastructure.endpoints._
 
 class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
   implicit F: Sync[F],
-  ec: ExecutionContext
+  blk: Blocker
 ) extends Http4sDsl[F] with Http4sClientDsl[F]{
   val codecs = new FileCodecs[F]
   import codecs._
@@ -33,7 +31,7 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
   def postFile(fileInfo: FileInfo, file: File)(implicit h: Headers): F[SiteResult[List[FileInfoId]]] = {
     val mp: Multipart[F] = Multipart(
       Vector(
-        Part.fileData(fileInfo.name.getOrElse("file"), file, ec, `Content-Type`(MediaType.text.plain))
+        Part.fileData(fileInfo.name.getOrElse("file"), file, blk, `Content-Type`(MediaType.text.plain))
       )
     )
     for {

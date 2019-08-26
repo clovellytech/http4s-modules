@@ -19,5 +19,6 @@ trait Configs[F[_]]{
 
 
 object IOServer extends IOApp with Configs[IO] {
+  implicit val blk = Blocker.liftExecutionContext(global)
   def run(args: List[String]): IO[ExitCode] = new Server[IO].run
 }

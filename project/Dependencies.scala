@@ -4,32 +4,43 @@ import sbt.librarymanagement.DependencyBuilders
 object dependencies {
   val addResolvers = Seq(
     "52north for postgis" at "http://52north.org/maven/repo/releases/",
-    Resolver.sonatypeRepo("releases")
+    Resolver.sonatypeRepo("public")
   )
-
-  val compilerPlugins = Seq(
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-  )
-
+  
   val apacheLang3 = "3.9"
   val bcrypt = "3.1"
-  val cats = "1.6.1"
+  val betterMonadicFor = "0.3.1"
+  val cats = "2.0.0-RC1"
   val catsMtl = "0.6.0"
-  val catsEffect = "1.4.0"
-  val circe = "0.11.1"
-  val circeConfig = "0.6.1"
+  val catsEffect = "2.0.0-RC1"
+  val circe = "0.12.0-RC3"
+  val circeConfig = "0.7.0-M1"
   val cryptobits = "1.1"
-  val doobie = "0.7.0"
+  val doobie = "0.8.0-RC1"
   val flyway = "6.0.0"
-  val http4s = "0.20.10"
+  val http4s = "0.21.0-M4"
+  val kindProjector = "0.10.3"
   val logback = "1.2.3"
+  val macroParadise = "2.1.0"
   val postgres = "42.2.6"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.8"
   val simulacrum = "0.19.0"
-  val tsec = "0.1.0"
+  val tsec = "0.2.0-M1"
+
+  val compilerPlugins = Seq(
+    compilerPlugin("org.typelevel" %% "kind-projector" % kindProjector),
+    compilerPlugin("com.olegpy" %% "better-monadic-for" % betterMonadicFor)
+  )
+
+  def compilerPluginsForVersion(version: String) = 
+    CrossVersion.partialVersion(version) match {
+      case Some((2, major)) if major < 13 =>
+        compilerPlugins ++ Seq(
+          compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+        )
+      case _ => compilerPlugins
+    }
 
   val httpDeps = Seq(
     "http4s-server",
@@ -68,7 +79,7 @@ object dependencies {
     "circe-core",
     "circe-generic",
     "circe-parser",
-    "circe-java8"
+//    "circe-java8"
   ).map("io.circe" %% _ % circe) ++ Seq(
     "io.circe" %% "circe-config" % circeConfig
   )
