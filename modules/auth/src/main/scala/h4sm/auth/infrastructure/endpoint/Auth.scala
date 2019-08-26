@@ -25,12 +25,15 @@ object Authenticators {
   def statelessCookie[F[_]: Sync: UserRepositoryAlgebra, Alg: JAuthEncryptor[F, ?]: IvGen[F, ?]](
     key: SecretKey[Alg],
     expiryDuration: FiniteDuration = 10.minutes, 
-    maxIdle: Option[FiniteDuration] = None
+    maxIdle: Option[FiniteDuration] = None,
+    secure: Boolean = false,
+    domain: Option[String] = None,
   )(implicit a: AES[Alg]): UserAuthenticator[F, AuthEncryptedCookie[Alg, ?]] = 
     EncryptedCookieAuthenticator.stateless(
       TSecCookieSettings(
         cookieName = "ct-auth",
-        secure = true,
+        secure,
+        domain = domain,
         expiryDuration = expiryDuration,
         maxIdle = maxIdle
       ),
