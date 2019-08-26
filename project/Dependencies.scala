@@ -8,7 +8,7 @@ object dependencies {
   )
 
   val compilerPlugins = Seq(
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.10"),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.0"),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
