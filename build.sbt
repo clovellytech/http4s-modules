@@ -1,8 +1,11 @@
 import dependencies._
 import xerial.sbt.Sonatype._
 
+val scala212 = "2.12.9"
+val scala213 = "2.13.0"
+
 val commonSettings = Seq(
-  crossScalaVersions  := Seq("2.12.8", "2.13.0"),
+  crossScalaVersions  := Seq(scala212, scala213),
   organization := "com.clovellytech",
   version := Version.version,
   scalaVersion := Version.scalaVersion,
@@ -135,6 +138,7 @@ lazy val docs = project
   .in(file("./h4sm-docs"))
   .settings(
     name := "h4sm-docs",
+    crossScalaVersions := Seq(scala212),
     moduleName := "h4sm-docs",
     mdocVariables := Map(
       "VERSION" -> version.value
