@@ -6,14 +6,14 @@ object dependencies {
     "52north for postgis" at "http://52north.org/maven/repo/releases/",
     Resolver.sonatypeRepo("public")
   )
-  
+
   val apacheLang3 = "3.9"
   val bcrypt = "3.1"
   val betterMonadicFor = "0.3.1"
   val cats = "2.0.0-RC2"
   val catsMtl = "0.6.0"
   val catsEffect = "2.0.0-RC2"
-  val circe = "0.12.0-RC3"
+  val circe = "0.12.0-RC4"
   val circeConfig = "0.7.0-M1"
   val cryptobits = "1.1"
   val doobie = "0.8.0-RC1"
@@ -33,7 +33,7 @@ object dependencies {
     compilerPlugin("com.olegpy" %% "better-monadic-for" % betterMonadicFor)
   )
 
-  def compilerPluginsForVersion(version: String) = 
+  def compilerPluginsForVersion(version: String) =
     CrossVersion.partialVersion(version) match {
       case Some((2, major)) if major < 13 =>
         compilerPlugins ++ Seq(
