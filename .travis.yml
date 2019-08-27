@@ -3,7 +3,7 @@ dist: xenial
 services:
   - postgresql
 
-language: scala
+#language: scala
 
 scala:
    - 2.12.9
