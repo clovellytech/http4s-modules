@@ -43,7 +43,7 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
   }
 
   def getFile(fileId: FileInfoId, name: String = "download")(implicit h: Headers): F[Stream[F, Byte]] = for {
-    u <- Uri.fromString(s"/${fileId.toString}/$name").leftWiden[Throwable].raiseOrPure[F]
+    u <- Uri.fromString(s"/${fileId.toString}/$name").leftWiden[Throwable].liftTo[F]
     req <- GET(u)
     resp <- files.run(req.withHeaders(h))
     _ <- passOk(resp)
