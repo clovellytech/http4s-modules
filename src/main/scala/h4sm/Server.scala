@@ -65,7 +65,7 @@ object ServerMain extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
     implicit val cfg: ConfigAsk[IO] = getConfigAsk[IO].map { (c: MainConfig) =>
       args match {
-        case "test":: _ => c.copy(test = true)
+        case "test" :: _ => c.copy(test = true)
         case _ => c
       }
     }

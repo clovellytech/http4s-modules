@@ -10,11 +10,11 @@ import io.circe.generic.auto._
 
 trait Configs[F[_]]{
   implicit def ca(implicit F: ApplicativeError[F, Throwable]): ConfigAsk[F] =
-    getPureConfigAsk[F, FileConfig]("files")
+    getPureConfigAskPath[F, FileConfig]("files")
   implicit def da(implicit F: ApplicativeError[F, Throwable]): DBConfigAsk[F] =
-    getPureConfigAsk[F, DatabaseConfig]("db")
+    getPureConfigAskPath[F, DatabaseConfig]("db")
   implicit def sa(implicit F: ApplicativeError[F, Throwable]): ServerConfigAsk[F] =
-    getPureConfigAsk[F, ServerConfig]("server")
+    getPureConfigAskPath[F, ServerConfig]("server")
 }
 
 

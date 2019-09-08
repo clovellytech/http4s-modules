@@ -3,7 +3,6 @@ import sbt.librarymanagement.DependencyBuilders
 
 object dependencies {
   val addResolvers = Seq(
-    "52north for postgis" at "http://52north.org/maven/repo/releases/",
     Resolver.sonatypeRepo("public")
   )
 
