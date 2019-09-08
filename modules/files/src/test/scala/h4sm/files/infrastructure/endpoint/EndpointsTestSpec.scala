@@ -29,7 +29,7 @@ class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckProp
 
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)
 
-  implicit val c: ApplicativeAsk[IO, FileConfig] = h4sm.db.config.getPureConfigAsk("files")
+  implicit val c: ApplicativeAsk[IO, FileConfig] = h4sm.db.config.getPureConfigAskPath("files")
   implicit val blk: Blocker = Blocker.liftExecutionContext(global)
 
   test("A user with no files should be able to retrieve empty list of files") { p =>
