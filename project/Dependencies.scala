@@ -11,7 +11,7 @@ object dependencies {
   val betterMonadicFor = "0.3.1"
   val cats = "2.0.0"
   val catsMtl = "0.6.0"
-  val catsEffect = "2.0.0-RC2"
+  val catsEffect = "2.0.0"
   val circe = "0.12.0-RC4"
   val circeConfig = "0.7.0-M1"
   val cryptobits = "1.1"
