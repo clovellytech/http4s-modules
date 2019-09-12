@@ -18,7 +18,7 @@ object dependencies {
 
   val bcrypt = "3.1"
   val cats = "1.4.0"
-  val catsMtl = "0.6.0"
+  val catsMtl = "0.7.0"
   val catsEffect = "0.10.1"
   val circe = "0.9.3"
   val cryptobits = "1.1"
