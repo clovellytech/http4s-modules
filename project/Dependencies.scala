@@ -13,7 +13,7 @@ object dependencies {
   val catsMtl = "0.7.0"
   val catsEffect = "2.0.0"
   val circe = "0.12.1"
-  val circeConfig = "0.7.0-M1"
+  val circeConfig = "0.7.0"
   val cryptobits = "1.1"
   val doobie = "0.8.0-RC1"
   val flyway = "6.0.2"
