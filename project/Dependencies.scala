@@ -24,7 +24,7 @@ object dependencies {
   val postgres = "42.2.8"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.8"
-  val simulacrum = "0.19.0"
+  val simulacrum = "1.0.0"
   val tsec = "0.2.0-M1"
 
   val compilerPlugins = Seq(
@@ -73,7 +73,7 @@ object dependencies {
   ).map(("org.typelevel" %% (_: String) % (_: String)).tupled) ++ Seq(
     "org.apache.commons" % "commons-lang3" % apacheLang3,
     "ch.qos.logback" %  "logback-classic" % logback,
-    "com.github.mpilquist" %% "simulacrum" % simulacrum
+    "org.typelevel" %% "simulacrum" % simulacrum
   ) ++ Seq(
     "circe-core",
     "circe-generic",
