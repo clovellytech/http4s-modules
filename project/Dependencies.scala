@@ -25,7 +25,7 @@ object dependencies {
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.8"
   val simulacrum = "1.0.0"
-  val tsec = "0.2.0-M1"
+  val tsec = "0.2.0-M2"
 
   val compilerPlugins = Seq(
     compilerPlugin("org.typelevel" %% "kind-projector" % kindProjector),
