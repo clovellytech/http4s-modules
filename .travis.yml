@@ -6,7 +6,7 @@ services:
 language: scala
 
 scala:
-   - 2.12.9
+   - 2.12.10
    - 2.13.0
 
 before_install:
@@ -24,11 +24,11 @@ before_script:
 
 jobs:
   include:
-    - script: sbt test
+    - script: sbt jvm:test
     - script:
       - sbt docs/mdoc
       - sbt docs/docusaurusCreateSite
-      if: TRAVIS_SCALA_VERSION == "2.12.9"
+      if: TRAVIS_SCALA_VERSION == "2.12.10"
 
 deploy:
   provider: pages

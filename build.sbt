@@ -6,6 +6,9 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 val scala212 = "2.12.9"
 val scala213 = "2.13.0"
 
+lazy val JsTest = config("js").extend(Test)
+lazy val JvmTest = config("jvm").extend(Test)
+
 val commonSettings = Seq(
   crossScalaVersions  := Seq(scala212, scala213),
   organization := "com.clovellytech",
@@ -22,6 +25,7 @@ lazy val copyFastOptJS = TaskKey[Unit]("copyFastOptJS", "Copy javascript files t
 
 
 def jsProject(id: String, in: String): CrossProject = CrossProject(id, file(in))(JSPlatform)
+  .configs(JsTest)
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalaJSBundlerPlugin)
   .settings(commonSettings)
@@ -74,6 +78,7 @@ val withTests : String = "compile->compile;test->test"
 val testOnly : String = "test->test"
 
 lazy val db = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/db"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -83,6 +88,8 @@ lazy val db = crossProject(JVMPlatform)
   )
 
 lazy val testUtilCommon = crossProject(JVMPlatform, JSPlatform)
+  .jsConfigure(_.configs(JsTest))
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/testutil/common"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -93,6 +100,7 @@ lazy val testUtilCommon = crossProject(JVMPlatform, JSPlatform)
   )
 
 lazy val testUtilDb = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/testutil/db"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -123,6 +131,8 @@ lazy val common = jsProject("common", "./modules/common")
   )
 
 lazy val authComm = crossProject(JSPlatform, JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
+  .jsConfigure(_.configs(JsTest))
   .in(file("./modules/auth/comm"))
   .settings(commonSettings)
   .settings(
@@ -139,6 +149,7 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
   )
 
 lazy val auth = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/auth/server"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -172,6 +183,7 @@ lazy val authClient = jsProject("authClient", "./modules/auth/client")
   .dependsOn(common, authComm, testUtilCommon % withTests)
 
 lazy val files = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/files"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -183,6 +195,7 @@ lazy val files = crossProject(JVMPlatform)
   .dependsOn(db % withTests, auth % withTests, testUtilDb % withTests)
 
 lazy val features = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/features"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -195,6 +208,7 @@ lazy val features = crossProject(JVMPlatform)
   .dependsOn(auth % withTests, db % withTests, testUtilDb % testOnly)
 
 lazy val permissions = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/permissions"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -207,6 +221,7 @@ lazy val permissions = crossProject(JVMPlatform)
 
 
 lazy val store = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/store"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -218,6 +233,7 @@ lazy val store = crossProject(JVMPlatform)
   .dependsOn(auth % withTests, db % withTests, permissions, files, testUtilDb % testOnly)
 
 lazy val petstore = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/petstore"))
   .settings(commonSettings)
   .settings(
@@ -227,6 +243,7 @@ lazy val petstore = crossProject(JVMPlatform)
   .dependsOn(auth % withTests, db % withTests, permissions, files, testUtilDb % testOnly)
 
 lazy val invitations = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/invitations"))
   .settings(commonSettings)
   .settings(publishSettings)
@@ -255,6 +272,7 @@ lazy val docs = crossProject(JVMPlatform)
   .dependsOn(auth, db, testUtilDb, features, files, permissions, petstore)
 
 lazy val exampleServer = crossProject(JVMPlatform)
+  .jvmConfigure(_.configs(JvmTest))
   .in(file("./example-server"))
   .settings(name := "example-server")
   .settings(commonSettings)
