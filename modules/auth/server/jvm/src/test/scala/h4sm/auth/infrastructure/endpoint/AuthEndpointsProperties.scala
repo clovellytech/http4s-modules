@@ -20,6 +20,7 @@ import tsec.authentication.TSecBearerToken
 import tsec.passwordhashers.jca.BCrypt
 import tsec.passwordhashers.PasswordHasher
 import h4sm.auth.domain.UserService
+import h4sm.auth.comm.SiteResult
 
 class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
   def schemaNames: Seq[String] = List("ct_auth")
@@ -61,18 +62,18 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
     }
   }
 
-  test("A login create usable session") { p =>
+  test("A login should create usable session") { p =>
     val authClient = client(p.transactor)
     forAll { u: UserRequest =>
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
         user <- authClient.getUser(u.username, login).getOrElse(fail)
-        detail <- user.as[UserDetail]
+        detail <- user.as[SiteResult[UserDetail]]
         _ <- authClient.deleteUser(u.username)
       } yield {
-        u.username should equal (detail.username)
-        Duration.between(detail.joinTime, Instant.now()).toMillis should be < 5000L
+        u.username should equal (detail.result.username)
+        Duration.between(detail.result.joinTime, Instant.now()).toMillis should be < 5000L
       }
 
       test.unsafeRunSync()
