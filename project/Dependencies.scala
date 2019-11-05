@@ -31,7 +31,7 @@ object dependencies {
     val macroParadise = "2.1.0"
     val notJavaTime = "0.2.0"
     val postgres = "42.2.8"
-    val scalaCheck = "1.14.2"
+    val scalaCheck = "1.15.0-51107b8-SNAPSHOT"
     val scalajs = "0.9.7"
     val scalaTest = "3.2.0-M1"
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
