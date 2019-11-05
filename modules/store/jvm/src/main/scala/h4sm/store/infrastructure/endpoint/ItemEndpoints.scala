@@ -7,15 +7,16 @@ import domain._
 import h4sm.auth._
 import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.tokens.AsBaseToken.ops._
+import h4sm.store.infrastructure.endpoint.codecs._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.circe.CirceEntityCodec._
 import tsec.authentication._
-
 
 class ItemEndpoints[F[_]: Sync: ItemAlgebra: OrderAlgebra, T[_]](
   auth: UserSecuredRequestHandler[F, T]
 )(implicit
   B: AsBaseToken[T[UserId]]
-) extends Http4sDsl[F] with Codecs[F] {
+) extends Http4sDsl[F] {
 
   def addItem = UserAuthService[F, T] {
     case req@POST -> Root asAuthed _ => for {

@@ -11,7 +11,9 @@ import cats.implicits._
 import domain._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.circe.CirceEntityCodec._
 import tsec.authentication._
+import h4sm.invitations.infrastructure.endpoint.codecs._
 
 class InvitationEndpoints[F[_]: Sync: InvitationAlgebra, A, T[_]](
   userService: UserService[F, A],
@@ -19,9 +21,6 @@ class InvitationEndpoints[F[_]: Sync: InvitationAlgebra, A, T[_]](
 )(implicit A: AsBaseToken[T[UserId]]) 
 extends Http4sDsl[F] {
   val srh = SecuredRequestHandler(authenticator)
-
-  val codecs = new Codecs[F] 
-  import codecs._
 
   def inviteFromCode(email: String, inviteCode: String): F[(Invitation[UserId], InvitationId, Instant)] = 
     InvitationAlgebra[F].fromCode(email, inviteCode).toRight[Throwable](InvitationError.invalid).rethrowT

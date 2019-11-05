@@ -3,22 +3,23 @@ package infrastructure.endpoint
 
 import cats.effect.{Sync, Bracket}
 import cats.implicits._
-import io.circe.syntax._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.circe._
 import tsec.authentication._
 import domain.requests._
 import h4sm.auth._
 import h4sm.featurerequests.infrastructure.repository.persistent.RequestRepositoryInterpreter
 import h4sm.featurerequests.db.domain.Feature
 import doobie.util.transactor.Transactor
+import h4sm.auth.comm.SiteResult
+import h4sm.auth.comm.codecs._
+import org.http4s.circe.CirceEntityCodec._
 
 class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra] extends Http4sDsl[F] {
   def unAuthEndpoints: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "request" => for {
       feats <- RequestRepositoryAlgebra[F].selectWithVoteCounts
-      resp <- Ok(DefaultResult(feats).asJson)
+      resp <- Ok(SiteResult(feats))
     } yield resp
   }
 

@@ -2,7 +2,6 @@ package h4sm
 package files.client
 
 import files.domain.{Backend, FileInfo}
-import files.infrastructure.endpoint._
 import files.Unshow
 import io.circe.Decoder
 import org.http4s.EntityDecoder
@@ -19,7 +18,4 @@ class FileCodecs[F[_]: Sync] {
 
   implicit val fileInfoDecoder: Decoder[FileInfo] = deriveDecoder
   implicit val fileInfoDec: EntityDecoder[F, FileInfo] = jsonOf
-
-  implicit def fileListDecoder[A: Decoder]: Decoder[SiteResult[A]] = deriveDecoder
-  implicit def fileListDec[A: Decoder]: EntityDecoder[F, SiteResult[A]] = jsonOf
 }

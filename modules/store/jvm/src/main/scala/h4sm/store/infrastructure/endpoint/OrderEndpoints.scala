@@ -7,9 +7,11 @@ import cats.implicits._
 import domain._
 import h4sm.auth._
 import h4sm.auth.domain.tokens._
+import h4sm.store.infrastructure.endpoint.codecs._
 import AsBaseToken.ops._
 import java.util.UUID
 import org.http4s.dsl.Http4sDsl
+import org.http4s.circe.CirceEntityCodec._
 import tsec.authentication._
 
 sealed abstract class OrderError extends Throwable
@@ -18,7 +20,7 @@ final case class NoOrder() extends OrderError
 
 class OrderEndpoints[F[_]: Sync: OrderAlgebra: ItemAlgebra, T[_]](auth: UserSecuredRequestHandler[F, T])(implicit 
   baseToken: AsBaseToken[T[UserId]]
-) extends Http4sDsl[F] with Codecs[F] {
+) extends Http4sDsl[F] {
 
   def createOrder = UserAuthService[F, T] {
     case req@POST -> Root asAuthed _ => 

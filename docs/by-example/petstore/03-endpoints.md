@@ -11,6 +11,8 @@ Eventually we will need to handle permissions, to allow only employees of the pe
 import cats.effect.Sync
 import cats.implicits._
 import h4sm.auth._
+import h4sm.auth.comm.SiteResult
+import h4sm.auth.comm.codecs._
 import h4sm.auth.domain._
 import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.tokens.AsBaseToken.ops._
@@ -19,27 +21,16 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.circe._
+import org.http4s.circe.CirceEntityCodec._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
 import tsec.authentication._
 
-
 final case class PetRequest(name: String, bio: Option[String], status: String)
-final case class SiteResult[A](result: A)
-
-class Codecs[F[_]: Sync]{
-  implicit val prDecoder: EntityDecoder[F, PetRequest] = jsonOf
-  implicit def siteResEnc[A: Encoder]: EntityEncoder[F, SiteResult[A]] = jsonEncoderOf
-  implicit val petEnc: EntityEncoder[F, PetRequest] = jsonEncoderOf
-  implicit def siteResultDec[A: Decoder]: EntityDecoder[F, SiteResult[A]] = jsonOf
-}
 
 class PetEndpoints[F[_]: Sync: PetAlgebra, T[_]](auth : UserSecuredRequestHandler[F, T])(implicit
   B: AsBaseToken[T[UserId]]
 ) extends Http4sDsl[F]{
-
-  val codecs = new Codecs[F]
-  import codecs._
 
   def addPet: UserAuthService[F, T] = UserAuthService {
     case req@POST -> Root asAuthed _ => for {
@@ -129,13 +120,11 @@ import org.http4s.client.dsl.io._
 import org.http4s.circe._
 import org.http4s.Uri.uri
 import scala.concurrent.ExecutionContext.Implicits.global
+import codecs._
 
 // see petstore.ServerMain for a complete example of creating a server. 
 implicit val cs = IO.contextShift(global)
 implicit val timer = IO.timer(global)
-
-val codecs = new Codecs[IO]
-import codecs._
 
 implicit val lstDec: EntityDecoder[IO, List[(Pet, PetId, Instant)]] = jsonOf
 
