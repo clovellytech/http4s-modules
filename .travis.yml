@@ -6,7 +6,7 @@ services:
 language: scala
 
 scala:
-   - 2.12.9
+   - 2.12.10
    - 2.13.0
 
 before_install:
@@ -22,13 +22,14 @@ before_script:
   npm i -g npm@8
   npm i -g yarn gulp-cli
 
+script: sbt ++$TRAVIS_SCALA_VERSION jvm:test
+
 jobs:
   include:
-    - script: sbt test
     - script:
       - sbt docs/mdoc
       - sbt docs/docusaurusCreateSite
-      if: TRAVIS_SCALA_VERSION == "2.12.9"
+      if: TRAVIS_SCALA_VERSION == "2.12.10"
 
 deploy:
   provider: pages

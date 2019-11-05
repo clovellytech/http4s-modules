@@ -1,42 +1,54 @@
-import sbt._
+import sbt._, Keys._
 import sbt.librarymanagement.DependencyBuilders
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSCrossVersion
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{crossProject => _, CrossType => _, _}
+import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
+import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
+
 
 object dependencies {
   val addResolvers = Seq(
     Resolver.sonatypeRepo("public")
   )
 
-  val apacheLang3 = "3.9"
-  val bcrypt = "3.1"
-  val betterMonadicFor = "0.3.1"
-  val cats = "2.0.0"
-  val catsMtl = "0.7.0"
-  val catsEffect = "2.0.0"
-  val circe = "0.12.3"
-  val circeConfig = "0.7.0"
-  val cryptobits = "1.1"
-  val doobie = "0.8.4"
-  val flyway = "6.0.8"
-  val http4s = "0.21.0-M5"
-  val kindProjector = "0.10.3"
-  val logback = "1.2.3"
-  val macroParadise = "2.1.0"
-  val postgres = "42.2.8"
-  val scalaCheck = "1.14.0"
-  val scalaTest = "3.0.8"
-  val simulacrum = "1.0.0"
-  val tsec = "0.2.0-M2"
+  object versions {
+    val apacheLang3 = "3.9"
+    val bcrypt = "3.1"
+    val betterMonadicFor = "0.3.1"
+    val cats = "2.0.0"
+    val catsMtl = "0.7.0"
+    val catsEffect = "2.0.0"
+    val circe = "0.12.3"
+    val circeConfig = "0.7.0"
+    val cryptobits = "1.1"
+    val doobie = "0.8.4"
+    val flyway = "6.0.8"
+    val http4s = "0.21.0-M5"
+    val kindProjector = "0.10.3"
+    val logback = "1.2.3"
+    val macroParadise = "2.1.0"
+    val notJavaTime = "0.2.0"
+    val postgres = "42.2.8"
+    val scalaCheck = "1.15.0-51107b8-SNAPSHOT"
+    val scalajs = "0.9.7"
+    val scalaTest = "3.2.0-M1"
+    val scalaTestPlusScalacheck = "3.1.0.0-RC2"
+    val simulacrum = "1.0.0"
+    val tsec = "0.2.0-M2"
+  }
 
   val compilerPlugins = Seq(
-    compilerPlugin("org.typelevel" %% "kind-projector" % kindProjector),
-    compilerPlugin("com.olegpy" %% "better-monadic-for" % betterMonadicFor)
+    compilerPlugin("org.typelevel" %% "kind-projector" % versions.kindProjector),
+    compilerPlugin("com.olegpy" %% "better-monadic-for" % versions.betterMonadicFor)
   )
 
   def compilerPluginsForVersion(version: String) =
     CrossVersion.partialVersion(version) match {
       case Some((2, major)) if major < 13 =>
         compilerPlugins ++ Seq(
-          compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+          compilerPlugin("org.scalamacros" % "paradise" % versions.macroParadise cross CrossVersion.full),
         )
       case _ => compilerPlugins
     }
@@ -47,40 +59,41 @@ object dependencies {
     "http4s-blaze-client",
     "http4s-circe",
     "http4s-dsl"
-  ).map("org.http4s" %% _ % http4s)
+  ).map("org.http4s" %% _ % versions.http4s)
 
   val testDeps = Seq(
-    "org.scalatest" %% "scalatest" % scalaTest,
-    "org.tpolecat" %% "doobie-scalatest" % doobie,
-    "org.scalacheck" %% "scalacheck" % scalaCheck
+    "org.scalatest" %% "scalatest" % versions.scalaTest,
+    "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
+    "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
+    "org.scalacheck" %% "scalacheck" % versions.scalaCheck
   )
 
   val testDepsInTestOnly = testDeps.map(_ % "test")
 
   val dbDeps = Seq(
-    "org.flywaydb" % "flyway-core" % flyway,
-    "org.postgresql" % "postgresql" % postgres
+    "org.flywaydb" % "flyway-core" % versions.flyway,
+    "org.postgresql" % "postgresql" % versions.postgres
   ) ++ Seq(
     "doobie-core",
     "doobie-postgres",
     "doobie-hikari"
-  ).map("org.tpolecat" %% _ % doobie)
+  ).map("org.tpolecat" %% _ % versions.doobie)
 
   val commonDeps = Seq(
-    "cats-core" -> cats,
-    "cats-effect" -> catsEffect,
-    "cats-mtl-core" -> catsMtl
+    "cats-core" -> versions.cats,
+    "cats-effect" -> versions.catsEffect,
+    "cats-mtl-core" -> versions.catsMtl,
   ).map(("org.typelevel" %% (_: String) % (_: String)).tupled) ++ Seq(
-    "org.apache.commons" % "commons-lang3" % apacheLang3,
-    "ch.qos.logback" %  "logback-classic" % logback,
-    "org.typelevel" %% "simulacrum" % simulacrum
+    "org.apache.commons" % "commons-lang3" % versions.apacheLang3,
+    "ch.qos.logback" %  "logback-classic" % versions.logback,
+    "org.typelevel" %% "simulacrum" % versions.simulacrum,
   ) ++ Seq(
     "circe-core",
     "circe-generic",
     "circe-parser",
 //    "circe-java8"
-  ).map("io.circe" %% _ % circe) ++ Seq(
-    "io.circe" %% "circe-config" % circeConfig
+  ).map("io.circe" %% _ % versions.circe) ++ Seq(
+    "io.circe" %% "circe-config" % versions.circeConfig
   )
 
   val authDeps = Seq(
@@ -93,5 +106,5 @@ object dependencies {
     "tsec-jwt-mac",
     "tsec-jwt-sig",
     "tsec-http4s"
-  ).map("io.github.jmcardon" %% _ % tsec)
+  ).map("io.github.jmcardon" %% _ % versions.tsec)
 }
