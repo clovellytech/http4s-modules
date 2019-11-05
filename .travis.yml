@@ -22,9 +22,10 @@ before_script:
   npm i -g npm@8
   npm i -g yarn gulp-cli
 
+script: sbt ++$TRAVIS_SCALA_VERSION jvm:test
+
 jobs:
   include:
-    - script: sbt jvm:test
     - script:
       - sbt docs/mdoc
       - sbt docs/docusaurusCreateSite
