@@ -17,6 +17,7 @@ val commonSettings = Seq(
   resolvers ++= addResolvers,
   scalacOptions ++= options.scalacOptionsForVersion(scalaVersion.value),
   scalacOptions in (Compile, console) ~= (_.diff(options.badScalacConsoleFlags)),
+  scalacOptions in (Test, console) ~= (_.diff(options.badScalacConsoleFlags)),
   updateOptions := updateOptions.value.withLatestSnapshots(false),
   libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
 )
