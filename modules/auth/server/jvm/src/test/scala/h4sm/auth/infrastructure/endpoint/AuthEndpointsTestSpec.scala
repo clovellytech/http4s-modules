@@ -5,7 +5,7 @@ package endpoint
 
 import cats.effect.IO
 import cats.implicits._
-import h4sm.auth.comm.{UserRequest, UserDetail}
+import h4sm.auth.comm.{UserRequest, SiteResult, UserDetail}
 import h4sm.auth.comm.codecs._ 
 import h4sm.auth.domain.UserService
 import org.http4s.circe.CirceEntityCodec._
@@ -81,14 +81,14 @@ class AuthEndpointsTestSpec extends EndpointTestSpec {
         IO.raiseError(_),
         identity
       )
-      detail <- handledResp.attemptAs[UserDetail].value
+      detail <- handledResp.attemptAs[SiteResult[UserDetail]].value
       _ <- deleteUser(user.username)
     } yield {
       login.status should equal (Status.Ok)
       handledResp.status should equal (Status.Ok)
       detail.fold[Assertion](
         e => fail(e),
-        _.username should equal(user.username)
+        _.result.username should equal(user.username)
       )
     }
   }
