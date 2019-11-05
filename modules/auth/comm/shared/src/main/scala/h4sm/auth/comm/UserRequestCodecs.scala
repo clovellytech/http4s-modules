@@ -1,5 +1,4 @@
-package h4sm.auth
-package comm
+package h4sm.auth.comm
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}

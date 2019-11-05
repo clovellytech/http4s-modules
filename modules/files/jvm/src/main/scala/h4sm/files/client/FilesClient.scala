@@ -9,6 +9,8 @@ import cats.effect._
 import files.domain._
 import files.infrastructure.endpoint._
 import fs2.Stream
+import h4sm.auth.comm.SiteResult
+import h4sm.auth.comm.codecs._
 import h4sm.files.domain.FileInfo
 import org.http4s._
 import org.http4s.implicits._
@@ -16,6 +18,7 @@ import org.http4s.headers._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
 import org.http4s.multipart._
+import org.http4s.circe.CirceEntityCodec._
 
 import testutil.infrastructure.endpoints._
 

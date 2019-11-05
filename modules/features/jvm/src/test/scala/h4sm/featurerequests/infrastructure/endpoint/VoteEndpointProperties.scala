@@ -4,10 +4,12 @@ package infrastructure.endpoint
 import arbitraries._
 import cats.effect.IO
 import domain.requests._
-import h4sm.auth.comm.UserRequest
+import h4sm.auth.comm.{SiteResult, UserRequest}
+import h4sm.auth.comm.codecs._
 import h4sm.testutil.DbFixtureSuite
 import h4sm.featurerequests.db.domain.VotedFeature
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.http4s.circe.CirceEntityCodec._
 
 class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuite {
   def schemaNames = Seq("ct_auth", "ct_feature_requests")
@@ -23,7 +25,7 @@ class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuit
         login <- loginUser(user)
         _ <- addRequest(feat)(login)
         featuresResp <- getRequests
-        allFeatures <- featuresResp.as[DefaultResult[List[VotedFeature]]]
+        allFeatures <- featuresResp.as[SiteResult[List[VotedFeature]]]
       } yield {
         allFeatures.result.exists(_.feature.title == feat.title)
       }

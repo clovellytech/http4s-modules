@@ -16,6 +16,7 @@ import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl._
 import org.http4s.client.dsl._
+import org.http4s.circe.CirceEntityCodec._
 import tsec.passwordhashers.jca.BCrypt
 
 class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {

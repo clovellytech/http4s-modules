@@ -6,5 +6,3 @@ final case class FileUpload(
   description: Option[String],
   isPublic: Boolean
 )
-
-final case class SiteResult[A](result: A)

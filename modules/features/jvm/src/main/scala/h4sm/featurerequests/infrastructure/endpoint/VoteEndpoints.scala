@@ -5,6 +5,7 @@ package endpoint
 import cats.effect.{Bracket, Sync}
 import cats.implicits._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.circe.CirceEntityCodec._
 import h4sm.auth.BearerAuthService
 import h4sm.featurerequests.infrastructure.repository.persistent.VoteRepositoryInterpreter
 import db.domain.Vote

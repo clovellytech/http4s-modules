@@ -14,6 +14,8 @@ import org.http4s.headers.Location
 import org.http4s.multipart._
 import cats.effect._
 import h4sm.auth._
+import h4sm.auth.comm.SiteResult
+import h4sm.auth.comm.codecs._
 import h4sm.auth.domain.tokens.AsBaseToken.ops._
 import h4sm.auth.domain.tokens.AsBaseToken
 import h4sm.files.domain._
@@ -51,7 +53,7 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
     case GET -> Root / "config" => C.ask.flatMap(c => Ok(c.uploadMax.toString))
   }
 
-  def authEndpoints: UserAuthService[F, T] = UserAuthService {
+  def authFileEndpoints: UserAuthService[F, T] = UserAuthService {
     case req@GET -> Root / uuidstr asAuthed _ => {
       val pred = (i: FileInfo) => i.isPublic || (i.uploadedBy.compareTo(req.authenticator.asBase.identity) == 0)
       for {
@@ -60,49 +62,58 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
         resp <- Ok(bytes)
       } yield resp
     }
-
-    case req@GET -> Root asAuthed _ => for {
-      infos <- F.retrieveUserMeta(req.authenticator.asBase.identity)
-      resp <- Ok(SiteResult(infos))
-    } yield resp
-
-    case req@POST -> Root asAuthed _ => {
-      val decoded = EntityDecoder[F, Multipart[F]].decode(req.request, true)
-      decoded.value.flatMap(_.fold(
-        df => {
-          println("Decode failure")
-          println(df)
-          BadRequest()
-        },
-        mp => for {
-          savedFileIds <- mp.parts.traverse { part =>
-            val finfo = FileInfo(part.name, none, part.filename, none, req.authenticator.asBase.identity, false)
-            for {
-              finfoId <- F.storeMeta(finfo)
-              _ <- FS.write(finfoId, finfo, part.body)
-            } yield finfoId
-          }
-          resp <- Ok(SiteResult(savedFileIds.toList))
-        } yield resp
-      ))
-    }
-
-    case POST -> Root / uuid asAuthed _ => for {
-      uuid <- S.delay(UUID.fromString(uuid))
-      fileInfo <- F.retrieveMeta(uuid)
-      url <- Uri.fromString(s"/$uuid/${fileInfo.filename.getOrElse("download")}").leftWiden[Throwable].liftTo[F]
-      resp <- TemporaryRedirect(Location(url))
-    } yield resp
-
-    case req@GET -> Root / uuid / _ asAuthed _ => for {
-      uuid <- S.delay(UUID.fromString(uuid))
-      _ <- F.retrieveMeta(uuid)
-      file <- FS.retrieveFile(uuid)
-      resp <- StaticFile.fromFile[F](file, blk, req.request.some).getOrElseF(BadRequest())
-    } yield resp
   }
 
-  def endpoints: HttpRoutes[F] = unAuthEndpoints.combineK(auth.liftService(authEndpoints))
+  def authInfoEndpoints: UserAuthService[F, T] = {
+    // I import this here to avoid clashing with the raw bytes in authFileEndpoints
+    // If this goes to the top of file, bytes in authFileEndpoints will have 
+    // an ambiguous implicit error.
+    import org.http4s.circe.CirceEntityCodec._
+
+    UserAuthService {
+      case req@GET -> Root asAuthed _ => for {
+        infos <- F.retrieveUserMeta(req.authenticator.asBase.identity)
+        resp <- Ok(SiteResult(infos))
+      } yield resp
+
+      case req@POST -> Root asAuthed _ => {
+        val decoded = EntityDecoder[F, Multipart[F]].decode(req.request, true)
+        decoded.value.flatMap(_.fold(
+          df => {
+            println("Decode failure")
+            println(df)
+            BadRequest()
+          },
+          mp => for {
+            savedFileIds <- mp.parts.traverse { part =>
+              val finfo = FileInfo(part.name, none, part.filename, none, req.authenticator.asBase.identity, false)
+              for {
+                finfoId <- F.storeMeta(finfo)
+                _ <- FS.write(finfoId, finfo, part.body)
+              } yield finfoId
+            }
+            resp <- Ok(SiteResult(savedFileIds.toList))
+          } yield resp
+        ))
+      }
+
+      case POST -> Root / uuid asAuthed _ => for {
+        uuid <- S.delay(UUID.fromString(uuid))
+        fileInfo <- F.retrieveMeta(uuid)
+        url <- Uri.fromString(s"/$uuid/${fileInfo.filename.getOrElse("download")}").leftWiden[Throwable].liftTo[F]
+        resp <- TemporaryRedirect(Location(url))
+      } yield resp
+
+      case req@GET -> Root / uuid / _ asAuthed _ => for {
+        uuid <- S.delay(UUID.fromString(uuid))
+        _ <- F.retrieveMeta(uuid)
+        file <- FS.retrieveFile(uuid)
+        resp <- StaticFile.fromFile[F](file, blk, req.request.some).getOrElseF(BadRequest())
+      } yield resp
+    }
+  }
+
+  def endpoints: HttpRoutes[F] = unAuthEndpoints <+> auth.liftService(authFileEndpoints <+> authInfoEndpoints)
 }
 
 object FileEndpoints {
