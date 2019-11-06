@@ -64,7 +64,7 @@ extends Http4sDsl[F] {
 
   val badResp = Unauthorized(
     `WWW-Authenticate`(
-      Challenge("Digest", "shedkey", Map("username" -> "bad username", "password" -> "bad password"))
+      Challenge("Digest", "ct_auth", Map("username" -> "bad username", "password" -> "bad password"))
       )
     )
 

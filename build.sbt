@@ -282,6 +282,7 @@ lazy val exampleServer = crossProject(JVMPlatform)
     aggregate in reStart := false,
     libraryDependencies ++= commonDeps,
   )
+  .enablePlugins(JavaAppPackaging)
   .dependsOn(auth, db, files, features, permissions, store, testUtilCommon, testUtilDb, invitations)
 
 lazy val root = crossProject(JVMPlatform)
