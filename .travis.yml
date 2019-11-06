@@ -21,8 +21,9 @@ before_script:
   ./script/travis_init.sh
   npm i -g npm@8
   npm i -g yarn gulp-cli
+  sbt exampleServerJVM/reStart &
 
-script: sbt ++$TRAVIS_SCALA_VERSION jvm:test
+script: sbt ++$TRAVIS_SCALA_VERSION test
 
 jobs:
   include:

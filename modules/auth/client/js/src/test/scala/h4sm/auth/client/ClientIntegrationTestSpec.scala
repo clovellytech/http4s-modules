@@ -33,8 +33,6 @@ class ClientIntegrationTestSpec extends AsyncFlatSpec with ScalaCheckPropertyChe
       p2 <- authClient.currentUser.map(_.some).recover{ case _ => none }
       _ <- StateT.liftF(authClient.delete(user.username))
     } yield {
-      println("Got session")
-      println(p)
       p.username should equal (user.username)
       p2 should equal (none)
     }

@@ -11,7 +11,7 @@ import db.config._
 import doobie._
 import doobie.hikari.HikariTransactor
 import files.infrastructure.endpoint.FileEndpoints
-import org.http4s.HttpRoutes
+import org.http4s.{Header, HttpRoutes}
 import org.http4s.server.{Router, Server}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
@@ -55,18 +55,24 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       withCors = if(allowCors){
         import org.http4s.server.middleware.{CORS, CORSConfig}
         import scala.concurrent.duration._
-  
+
         val methodConfig = CORSConfig(
           anyOrigin = true,
           anyMethod = true,
           allowCredentials = true,
           maxAge = 1.day.toSeconds,
+          exposedHeaders = Set("Authorization").some
         )
-        CORS(service, methodConfig)
+        CORS(service, methodConfig).map{ resp =>
+          resp.putHeaders(
+            Header.apply("Access-Control-Expose-Headers", "Authorization"),
+            Header.apply("Access-Control-Allow-Headers", "Authorization"),
+          )
+        }
       } else {
         service
       }
-      withMiddleware = if(logging) {        
+      withMiddleware = if(logging) {
         import org.http4s.server.middleware.Logger
 
         Logger.httpApp(true, true, redactHeadersWhen = _ => false)(withCors)
