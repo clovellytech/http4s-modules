@@ -24,9 +24,8 @@ before_script:
 
 script:
   - echo "Running jvm tests"
-  - sbt ++$TRAVIS_SCALA_VERSION jvm:test
   - echo "Starting integration test script"
-  - ./integration_test.sh
+  - ./all_tests.sh
 
 jobs:
   include:

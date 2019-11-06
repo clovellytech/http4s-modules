@@ -30,9 +30,9 @@ while [ $RETRY -gt 0 ]; do
     fi
 done
 
-echo "Server started, running scala-js tests"
+echo "Server started, running all tests"
 
-sbt ++$TRAVIS_SCALA_VERSION js:test
+sbt ++$TRAVIS_SCALA_VERSION test
 
 echo "Scala js tests completed with status $FUNC_TEST_RESULT, stopping server with PID $SERVER_PID, PPID $PARENT_PID"
 
