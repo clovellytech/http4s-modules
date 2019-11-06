@@ -18,12 +18,16 @@ install:
   - gem install sass
 
 before_script:
-  ./script/travis_init.sh
-  npm i -g npm@8
-  npm i -g yarn gulp-cli
-  sbt exampleServerJVM/reStart &
+  - ./script/travis_init.sh
+  - npm i -g npm@8
+  - npm i -g yarn gulp-cli
+  - sbt exampleServerJVM/stage
 
-script: sbt ++$TRAVIS_SCALA_VERSION test
+script:
+  - echo "Running jvm tests"
+  - sbt ++$TRAVIS_SCALA_VERSION jvm:test"
+  - echo "Starting integration test script"
+  - ./integration_test.sh
 
 jobs:
   include:
