@@ -3,6 +3,23 @@ import xerial.sbt.Sonatype._
 import sbtcrossproject.CrossProject
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
+inThisBuild(
+  Seq(
+    organization := "com.clovellytech",
+    homepage := Some(url("https://github.com/clovellytech/http4s-modules")),
+    licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+    developers := List(
+      Developer(
+        "zakpatterson",
+        "Zak Patterson",
+        "pattersonzak@gmail.com",
+        url("https://github.com/zakpatterson")
+      )
+    )
+  )
+)
+
+
 val scala212 = "2.12.9"
 val scala213 = "2.13.0"
 
@@ -12,7 +29,6 @@ lazy val JvmTest = config("jvm").extend(Test)
 val commonSettings = Seq(
   crossScalaVersions  := Seq(scala212, scala213),
   organization := "com.clovellytech",
-  version := Version.version,
   scalaVersion := Version.scalaVersion,
   resolvers ++= addResolvers,
   scalacOptions ++= options.scalacOptionsForVersion(scalaVersion.value),
@@ -60,21 +76,6 @@ def jsProject(id: String, in: String): CrossProject = CrossProject(id, file(in))
   )
 
 
-lazy val publishSettings = Seq(
-  publishMavenStyle := true,
-  publishTo := sonatypePublishTo.value,
-  publishArtifact in Test := false,
-  homepage := Some(url("https://github.com/clovellytech/http4s-modules")),
-  pomIncludeRepository := Function.const(false),
-  sonatypeProfileName := "com.clovellytech",
-
-  // License of your choice
-  licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
-
-  // Where is the source code hosted
-  sonatypeProjectHosting := Some(GitHubHosting("clovellytech", "http4s-modules", "pattersonzak@gmail.com"))
-)
-
 val withTests : String = "compile->compile;test->test"
 val testOnly : String = "test->test"
 
@@ -82,7 +83,6 @@ lazy val db = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/db"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(
     name := "h4sm-db",
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDepsInTestOnly
@@ -93,7 +93,6 @@ lazy val testUtilCommon = crossProject(JVMPlatform, JSPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/testutil/common"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-testutil-common",
@@ -104,7 +103,6 @@ lazy val testUtilDb = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/testutil/db"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-testutil-db",
@@ -116,7 +114,7 @@ lazy val common = jsProject("common", "./modules/common")
   .settings(name := "h4sm-common")
   .settings(commonSettings)
   .settings(
-    publishSettings,
+    skip in publish := true,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
@@ -138,6 +136,7 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
   .settings(commonSettings)
   .settings(
     name := "h4sm-shared",
+    skip in publish := true,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
@@ -153,7 +152,6 @@ lazy val auth = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/auth/server"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-auth",
@@ -167,7 +165,6 @@ lazy val authClient = jsProject("authClient", "./modules/auth/client")
   .settings(name := "auth-client")
   .settings(commonSettings)
   .settings(
-    publishSettings,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
@@ -187,7 +184,6 @@ lazy val files = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/files"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-files",
@@ -199,7 +195,6 @@ lazy val features = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/features"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-features",
@@ -212,7 +207,6 @@ lazy val permissions = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/permissions"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-permissions",
@@ -225,7 +219,6 @@ lazy val store = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/store"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-store",
@@ -247,7 +240,6 @@ lazy val invitations = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/invitations"))
   .settings(commonSettings)
-  .settings(publishSettings)
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-invitations",
@@ -266,7 +258,6 @@ lazy val docs = crossProject(JVMPlatform)
     ),
     cancelable in Global := true
   )
-  .settings(publishSettings)
   .settings(commonSettings)
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
