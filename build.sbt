@@ -173,6 +173,7 @@ lazy val authClient = jsProject("authClient", "./modules/auth/client")
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.scala-js" %%% "scalajs-dom" % versions.scalajs,
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
     ) ++ Seq(
       "circe-core",
       "circe-generic",
