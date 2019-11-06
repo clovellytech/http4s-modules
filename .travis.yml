@@ -19,7 +19,6 @@ install:
 
 before_script:
   - ./script/travis_init.sh
-  - npm i -g npm@8
   - npm i -g yarn gulp-cli
   - sbt exampleServerJVM/stage
 
