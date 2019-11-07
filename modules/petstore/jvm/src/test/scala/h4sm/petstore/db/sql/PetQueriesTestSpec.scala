@@ -11,7 +11,8 @@ import doobie.Transactor
 import domain.arbitraries._
 
 class PetQueriesTestSpec extends DbFixtureSuite with IOChecker {
-  override def testConfig: DatabaseConfig = config.copy(databaseName = "petstoretest") // only needed for documentation
+  override def testConfig: DatabaseConfig =
+    config.copy(databaseName = "petstoretest") // only needed for documentation
   override def colors = doobie.util.Colors.None // only needed for documentation
   def schemaNames = List("ct_auth", "ct_files", "ct_permissions", "ct_petstore")
   def transactor: Transactor[IO] = getTransactor[IO](cfg)

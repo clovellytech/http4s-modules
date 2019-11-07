@@ -16,14 +16,22 @@ import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.BCrypt
 import java.time.Instant
 
-
-abstract class InvitationClientRunner[F[_]: Sync: Bracket[?[_], Throwable]] extends AuthClientRunner[F] {
+abstract class InvitationClientRunner[F[_]: Sync: Bracket[?[_], Throwable]]
+    extends AuthClientRunner[F] {
   implicit lazy val invitationAlg: InvitationAlgebra[F] = new InvitationRepository[F](xa)
-  def invitationEndpoints(implicit P: PasswordHasher[F, BCrypt]) = new InvitationEndpoints[F, BCrypt, TSecBearerToken](userService, auth)
-  def invitationClient(implicit P: PasswordHasher[F, BCrypt]) = new InvitationsClient[F, BCrypt, TSecBearerToken](invitationEndpoints)
+  def invitationEndpoints(implicit P: PasswordHasher[F, BCrypt]) =
+    new InvitationEndpoints[F, BCrypt, TSecBearerToken](userService, auth)
+  def invitationClient(implicit P: PasswordHasher[F, BCrypt]) =
+    new InvitationsClient[F, BCrypt, TSecBearerToken](invitationEndpoints)
 
-  def createInvite(toName: String, toUser: UserRequest)(implicit h: Headers, P: PasswordHasher[F, BCrypt]): F[(Invitation[UserId], InvitationId, Instant)] = for {
-    _ <- invitationClient.sendInvite(InvitationRequest(toName, toUser.username))
-    res <- invitationAlg.fromToEmail(toUser.username).getOrElseF(Sync[F].raiseError(new Exception("Invitation not found")))
-  } yield res
+  def createInvite(toName: String, toUser: UserRequest)(
+      implicit h: Headers,
+      P: PasswordHasher[F, BCrypt],
+  ): F[(Invitation[UserId], InvitationId, Instant)] =
+    for {
+      _ <- invitationClient.sendInvite(InvitationRequest(toName, toUser.username))
+      res <- invitationAlg
+        .fromToEmail(toUser.username)
+        .getOrElseF(Sync[F].raiseError(new Exception("Invitation not found")))
+    } yield res
 }
