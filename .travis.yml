@@ -24,26 +24,24 @@ install:
 jobs: 
   include: 
     - 
-      name: Init
+      stage: Init
       script: 
         - ./script/travis_init.sh
         - "npm i -g yarn gulp-cli"
         - "sbt exampleServerJVM/stage"
-      stage: Tests
     - 
+      stage: Tests
       script: 
         - "echo \"Starting integration test script\""
         - ./all_tests.sh
     - 
       stage: Docs
-    - 
-      if: "TRAVIS_SCALA_VERSION == \"2.12.10\""
       script: 
         - "sbt docs/mdoc"
         - "sbt docs/docusaurusCreateSite"
     - 
-      script: "sbt ci-release"
       stage: Release
+      script: "sbt ci-release"
 language: scala
 scala: 
   - "2.12.10"
@@ -51,9 +49,11 @@ scala:
 services: 
   - postgresql
 stages: 
-  - init
-  - test
-  - docs
-  -
+  - Init
+  - Tests
+  - 
+    name: Docs
+    if: "TRAVIS_SCALA_VERSION == \"2.12.10\""
+  - 
     if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
-    name: release
+    name: Release
