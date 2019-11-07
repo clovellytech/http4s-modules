@@ -20,7 +20,6 @@ install:
 
 before_script:
 
-
 stages:
   - name: init
   - name: test
