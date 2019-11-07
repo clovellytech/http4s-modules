@@ -46,7 +46,7 @@ jobs:
       env: TEST="all_tests 2.13"
       scala: *scala_213
     - env: TEST="docs"
-      script: sbt docs/mdoc && sbt docs/docusaurusCreateSite
+      script: sbt docsJVM/mdoc && sbt docsJVM/docusaurusCreateSite
     - stage: "release"
       script: sbt ci-release
     
