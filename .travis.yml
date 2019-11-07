@@ -1,64 +1,53 @@
-dist: xenial
+--- 
+before_install: 
+  - "git fetch --tags"
+  - "export PATH=${PATH}:./vendor/bundle"
 
-services:
-  - postgresql
+scala_212: &scala_212 2.12.10
+scala_213: &scala_213 2.13.0
 
 language: scala
+services: 
+  - postgresql
 
-scala:
-   - 2.12.10
-   - 2.13.0
-
-before_install:
-  - get fetch --tags
-  - export PATH=${PATH}:./vendor/bundle
-
-install:
-  - rvm use 2.3.0 --install --fuzzy
-  - gem update --system
-  - gem install sass
-
-before_script:
-
-stages:
-  - name: init
-  - name: test
-  - name: docs
-  - name: release
-    if: ((branch = master AND type = push) OR (tag IS present)) AND NOT fork
-
-jobs:
-  include:
-    - stage: init
-      script:
-        - ./script/travis_init.sh
-        - npm i -g yarn gulp-cli
-        - sbt exampleServerJVM/stage
-    - stage: test
-      script:
-        - echo "Starting integration test script"
-        - ./all_tests.sh
-    - stage: docs
-      script:
-        - sbt docs/mdoc
-        - sbt docs/docusaurusCreateSite
-        if: TRAVIS_SCALA_VERSION == "2.12.10"
-    - stage: release
-      script: sbt ci-release
-
-deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+cache: 
+  directories: 
+    - $HOME/.coursier/cache
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+deploy: 
+  github-token: $GITHUB_TOKEN
   keep-history: true
   local-dir: ./website/build/http4s-modules
+  provider: pages
+  skip-cleanup: true
   target-branch: gh-pages
-  on:
+  true: 
     branch: master
+dist: xenial
+install: 
+  - "rvm use 2.3.0 --install --fuzzy"
+  - "gem update --system"
+  - "gem install sass"
 
+stages: 
+  - name: test
+  - name: release
+    if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
 
-cache:
-  directories:
-    - "$HOME/.coursier/cache"
-    - "$HOME/.ivy2/cache"
-    - "$HOME/.sbt/boot"
+jobs: 
+  include: 
+    - &all_tests
+      stage: test
+      env: TEST="all_tests"
+      script: ./all_tests.sh
+      scala: *scala_212
+    - <<: *all_tests
+      env: TEST="all_tests"
+      scala: *scala_213
+    - env: TEST="docs"
+      script: sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
+      scala: *scala_212
+    - stage: "release"
+      script: sbt ci-release
+    
