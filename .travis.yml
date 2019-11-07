@@ -31,6 +31,7 @@ jobs:
   include:
     - stage: init
       script:
+        - sbt scalafmtCheckAll
         - ./script/travis_init.sh
         - npm i -g yarn gulp-cli
         - sbt exampleServerJVM/stage
