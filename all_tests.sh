@@ -1,6 +1,12 @@
 #!/bin/bash
 # Adapted from pauljamescleary/scala-petstore functional test script
 
+./script/travis_init.sh
+
+npm i -g yarn gulp-cli
+
+sbt ++$TRAVIS_SCALA_VERSION exampleServerJVM/stage
+
 echo "Starting server"
 
 trap 'kill -TERM $SERVER_PID' TERM INT
