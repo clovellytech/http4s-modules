@@ -142,6 +142,7 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
     ) ++ Seq(
       "circe-core",
       "circe-generic",
