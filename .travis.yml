@@ -2,6 +2,14 @@
 before_install: 
   - "git fetch --tags"
   - "export PATH=${PATH}:./vendor/bundle"
+
+scala_212: 2.12.10
+scala_213: 2.13.0
+
+language: scala
+services: 
+  - postgresql
+
 cache: 
   directories: 
     - $HOME/.coursier/cache
@@ -21,39 +29,24 @@ install:
   - "rvm use 2.3.0 --install --fuzzy"
   - "gem update --system"
   - "gem install sass"
+
+stages: 
+  - name: test
+  - name: release
+    if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
+
 jobs: 
   include: 
-    - 
-      stage: Init
-      script: 
-        - ./script/travis_init.sh
-        - "npm i -g yarn gulp-cli"
-        - "sbt exampleServerJVM/stage"
-    - 
-      stage: Tests
-      script: 
-        - "echo \"Starting integration test script\""
-        - ./all_tests.sh
-    - 
-      stage: Docs
-      script: 
-        - "sbt docs/mdoc"
-        - "sbt docs/docusaurusCreateSite"
-    - 
-      stage: Release
-      script: "sbt ci-release"
-language: scala
-scala: 
-  - "2.12.10"
-  - "2.13.0"
-services: 
-  - postgresql
-stages: 
-  - Init
-  - Tests
-  - 
-    name: Docs
-    if: "TRAVIS_SCALA_VERSION == \"2.12.10\""
-  - 
-    if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
-    name: Release
+    - &all_tests
+      stage: test
+      env: TEST="all_tests 2.12"
+      script: ./all_tests.sh
+      scala: *scala_212
+    - <<: *all_tests
+      env: TEST="all_tests 2.13"
+      scala: *scala_213
+    - env: TEST="docs"
+      script: sbt docs/mdoc && sbt docs/docusaurusCreateSite
+    - stage: "release"
+      script: sbt ci-release
+    
