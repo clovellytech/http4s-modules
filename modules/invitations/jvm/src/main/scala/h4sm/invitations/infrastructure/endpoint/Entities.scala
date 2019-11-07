@@ -1,20 +1,20 @@
 package h4sm.invitations.infrastructure.endpoint
 
 final case class InvitationRequest(
-  toName: String, 
-  toEmail: String
+    toName: String,
+    toEmail: String,
 )
 
 final case class InviteSignup(
-  email: String,
-  password: String,
-  name: String,
-  inviteCode: String
+    email: String,
+    password: String,
+    name: String,
+    inviteCode: String,
 )
 
 final case class InvitationByCodeRequest(
-  toEmail: String,
-  code: String
+    toEmail: String,
+    code: String,
 )
 
 sealed abstract class InvitationError extends Throwable with Product with Serializable {
@@ -27,4 +27,3 @@ object InvitationError {
 
   def invalid: InvitationError = InvalidInvitation
 }
-

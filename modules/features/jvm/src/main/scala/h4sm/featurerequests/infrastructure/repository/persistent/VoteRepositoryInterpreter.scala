@@ -2,7 +2,6 @@ package h4sm
 package featurerequests
 package infrastructure.repository.persistent
 
-
 import domain.votes._
 import cats.data.OptionT
 import cats.effect.Bracket
@@ -13,8 +12,8 @@ import doobie.postgres.syntax.monaderror._
 import db.domain._
 import db.sql._
 
-class VoteRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](val xa: Transactor[M]) 
-extends VoteRepositoryAlgebra[M] {
+class VoteRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](val xa: Transactor[M])
+    extends VoteRepositoryAlgebra[M] {
   def getVote(vote: Vote): M[Option[(VoteId, Vote)]] = votes.select(vote).option.transact(xa)
 
   def insert(a: Vote): M[Unit] =

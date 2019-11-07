@@ -17,20 +17,24 @@ import h4sm.auth.comm.SiteResult
 import h4sm.auth.comm.codecs._
 import h4sm.permissions.infrastructure.endpoint.codecs._
 
-class PermissionClient[F[_]: Sync, Alg, T[_]](es: PermissionEndpoints[F, T]) extends Http4sDsl[F] with Http4sClientDsl[F] with SessionClientDsl[F] {
-
+class PermissionClient[F[_]: Sync, Alg, T[_]](es: PermissionEndpoints[F, T])
+    extends Http4sDsl[F]
+    with Http4sClientDsl[F]
+    with SessionClientDsl[F] {
   val endpoints: Kleisli[F, Request[F], Response[F]] = es.endpoints.orNotFound
 
-  def addPermission(p: Permission)(implicit h: Headers): F[Unit] = for {
-    req <- post(p, Uri.uri("/"))
-    resp <- endpoints.run(req)
-    _ <- passOk(resp)
-  } yield ()
+  def addPermission(p: Permission)(implicit h: Headers): F[Unit] =
+    for {
+      req <- post(p, Uri.uri("/"))
+      resp <- endpoints.run(req)
+      _ <- passOk(resp)
+    } yield ()
 
-  def getPermissions(appName: String): F[List[(Permission, PermissionId)]] = for {
-    u <- Uri.fromString(s"/$appName").leftWiden[Throwable].liftTo[F]
-    req <- GET(u)
-    res <- endpoints.run(req)
-    perms <- res.as[SiteResult[List[(Permission, PermissionId)]]]
-  } yield perms.result
+  def getPermissions(appName: String): F[List[(Permission, PermissionId)]] =
+    for {
+      u <- Uri.fromString(s"/$appName").leftWiden[Throwable].liftTo[F]
+      req <- GET(u)
+      res <- endpoints.run(req)
+      perms <- res.as[SiteResult[List[(Permission, PermissionId)]]]
+    } yield perms.result
 }

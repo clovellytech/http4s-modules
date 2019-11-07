@@ -16,9 +16,10 @@ trait InvitationSQL {
     values (${a.fromUser}, ${a.toName}, ${a.toEmail}, ${a.code}, ${a.sendDate}, ${a.openDate}, ${a.acceptDate}, ${a.rejectDate})
   """.update
 
-  def insertGetId(a: Invitation[UserId]): ConnectionIO[InvitationId] = insert(a).withUniqueGeneratedKeys("invitation_id")
+  def insertGetId(a: Invitation[UserId]): ConnectionIO[InvitationId] =
+    insert(a).withUniqueGeneratedKeys("invitation_id")
 
-  def insertGetAnnotation(a: Invitation[UserId]): ConnectionIO[(UserId, Instant)] = 
+  def insertGetAnnotation(a: Invitation[UserId]): ConnectionIO[(UserId, Instant)] =
     insert(a).withUniqueGeneratedKeys("invitation_id", "create_time")
 
   def all: Query0[(Invitation[UserId], InvitationId, Instant)] = sql"""
@@ -26,7 +27,8 @@ trait InvitationSQL {
     from ct_invitations.invitation
   """.query
 
-  def byId(id: InvitationId): Query0[(Invitation[UserId], InvitationId, Instant)] = (all.toFragment ++ fr"""
+  def byId(id: InvitationId): Query0[(Invitation[UserId], InvitationId, Instant)] =
+    (all.toFragment ++ fr"""
     where invitation_id = $id
   """).query
 
@@ -35,7 +37,8 @@ trait InvitationSQL {
     where invitation_id = $id
   """.update
 
-  def byCode(toEmail: String, code: String): Query0[(Invitation[UserId], InvitationId, Instant)] = (all.toFragment ++ fr"""
+  def byCode(toEmail: String, code: String): Query0[(Invitation[UserId], InvitationId, Instant)] =
+    (all.toFragment ++ fr"""
     where to_email = $toEmail and code = $code
   """).query
 
@@ -45,7 +48,8 @@ trait InvitationSQL {
     where invitation_id = $invitationId
   """.update
 
-  def fromToEmail(toEmail: String): Query0[(Invitation[UserId], InvitationId, Instant)] = (all.toFragment ++ fr"""
+  def fromToEmail(toEmail: String): Query0[(Invitation[UserId], InvitationId, Instant)] =
+    (all.toFragment ++ fr"""
     where to_email = $toEmail
   """).query
 }

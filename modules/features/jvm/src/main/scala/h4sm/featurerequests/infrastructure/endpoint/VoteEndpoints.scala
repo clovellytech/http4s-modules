@@ -15,19 +15,27 @@ import tsec.authentication._
 
 class VoteEndpoints[F[_]: Sync: VoteRepositoryAlgebra] extends Http4sDsl[F] {
   def submitVote: BearerAuthService[F] = BearerAuthService {
-    case req @ POST -> Root / "vote" asAuthed _ => for {
-      voteReq <- req.request.as[VoteRequest]
-      vote = Vote(voteReq.featureRequest, req.authenticator.identity.some, voteReq.vote, voteReq.comment)
-      _ <- VoteRepositoryAlgebra[F].insert(vote)
-      resp <- Ok()
-    } yield resp
+    case req @ POST -> Root / "vote" asAuthed _ =>
+      for {
+        voteReq <- req.request.as[VoteRequest]
+        vote = Vote(
+          voteReq.featureRequest,
+          req.authenticator.identity.some,
+          voteReq.vote,
+          voteReq.comment,
+        )
+        _ <- VoteRepositoryAlgebra[F].insert(vote)
+        resp <- Ok()
+      } yield resp
   }
 
   def endpoints: BearerAuthService[F] = submitVote
 }
 
 object VoteEndpoints {
-  def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable]](xa: Transactor[F]): VoteEndpoints[F] = {
+  def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable]](
+      xa: Transactor[F],
+  ): VoteEndpoints[F] = {
     implicit val voteRepo = new VoteRepositoryInterpreter(xa)
     new VoteEndpoints[F]
   }

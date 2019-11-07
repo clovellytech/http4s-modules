@@ -4,7 +4,7 @@ import cats.data.OptionT
 
 trait Algebra[F[_], A]
 
-trait CAlgebra[F[_], I, A] extends Algebra[F, A]{
+trait CAlgebra[F[_], I, A] extends Algebra[F, A] {
   def insert(a: A): F[Unit]
   def insertGetId(a: A): OptionT[F, I]
 }

@@ -8,7 +8,7 @@ import java.time.Instant
 import simulacrum.typeclass
 
 @typeclass
-trait InvitationAlgebra[F[_]] extends CRDAlgebra[F, InvitationId, Invitation[UserId], Instant]{
+trait InvitationAlgebra[F[_]] extends CRDAlgebra[F, InvitationId, Invitation[UserId], Instant] {
   def fromToEmail(toEmail: String): OptionT[F, Annotated]
   def fromCode(toEmail: String, code: String): OptionT[F, Annotated]
   def opened(invitationId: InvitationId): F[Unit]

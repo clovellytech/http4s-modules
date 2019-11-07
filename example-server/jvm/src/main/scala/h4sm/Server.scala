@@ -3,7 +3,10 @@ package h4sm
 import cats.effect._
 import cats.implicits._
 import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
-import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import auth.infrastructure.repository.persistent.{
+  TokenRepositoryInterpreter,
+  UserRepositoryInterpreter,
+}
 import auth.domain._
 import auth.domain.tokens._
 import auth.domain.users.UserRepositoryAlgebra
@@ -21,21 +24,25 @@ import tsec.passwordhashers.jca._
 /*
  * Build a server that uses every module in this project...
  */
-class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.ConfigAsk](implicit
-  C: ConfigAsk[F]
+class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.ConfigAsk](
+    implicit
+    C: ConfigAsk[F],
 ) {
-
-  def router[A, T[_]](testMode: Boolean, auth: AuthEndpoints[F, A, T], files: FileEndpoints[F, T]): HttpRoutes[F] = {
+  def router[A, T[_]](
+      testMode: Boolean,
+      auth: AuthEndpoints[F, A, T],
+      files: FileEndpoints[F, T],
+  ): HttpRoutes[F] =
     Router(
       "/users" -> {
-        if (testMode) auth.testService <+> auth.unauthService <+> auth.Auth.liftService(auth.authService)
+        if (testMode)
+          auth.testService <+> auth.unauthService <+> auth.Auth.liftService(auth.authService)
         else auth.endpoints
       },
-      "/files" -> files.endpoints
+      "/files" -> files.endpoints,
     )
-  }
 
-  def createServer: Resource[F, Server[F]] = {
+  def createServer: Resource[F, Server[F]] =
     for {
       cfg <- Resource.liftF(C.ask)
       _ = println("Config:")
@@ -44,15 +51,26 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       _ = if (test) println("DANGER, RUNNING IN TEST MODE!!")
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
       tranec <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, Blocker.liftExecutionContext(tranec))
+      xa <- HikariTransactor.newHikariTransactor[F](
+        db.driver,
+        db.url,
+        db.user,
+        db.password,
+        connec,
+        Blocker.liftExecutionContext(tranec),
+      )
       implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
       userService = new UserService[F, BCrypt](BCrypt)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
       authEndpoints = new AuthEndpoints(userService, Authenticators.bearer)
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files"))
-      files = FileEndpoints.persistingEndpoints(xa, authEndpoints.Auth, Blocker.liftExecutionContext(ExecutionContext.Implicits.global))
+      files = FileEndpoints.persistingEndpoints(
+        xa,
+        authEndpoints.Auth,
+        Blocker.liftExecutionContext(ExecutionContext.Implicits.global),
+      )
       service = router(test, authEndpoints, files).orNotFound
-      withCors = if(allowCors){
+      withCors = if (allowCors) {
         import org.http4s.server.middleware.{CORS, CORSConfig}
         import scala.concurrent.duration._
 
@@ -61,9 +79,9 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
           anyMethod = true,
           allowCredentials = true,
           maxAge = 1.day.toSeconds,
-          exposedHeaders = Set("Authorization").some
+          exposedHeaders = Set("Authorization").some,
         )
-        CORS(service, methodConfig).map{ resp =>
+        CORS(service, methodConfig).map { resp =>
           resp.putHeaders(
             Header.apply("Access-Control-Expose-Headers", "Authorization"),
             Header.apply("Access-Control-Allow-Headers", "Authorization"),
@@ -72,7 +90,7 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       } else {
         service
       }
-      withMiddleware = if(logging) {
+      withMiddleware = if (logging) {
         import org.http4s.server.middleware.Logger
 
         Logger.httpApp(true, true, redactHeadersWhen = _ => false)(withCors)
@@ -80,11 +98,10 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
         withCors
       }
       server <- BlazeServerBuilder[F]
-                .bindHttp(port, host)
-                .withHttpApp(withMiddleware)
-                .resource
+        .bindHttp(port, host)
+        .withHttpApp(withMiddleware)
+        .resource
     } yield server
-  }
 }
 
 object ServerMain extends IOApp {

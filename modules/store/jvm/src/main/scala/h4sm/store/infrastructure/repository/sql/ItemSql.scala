@@ -9,7 +9,6 @@ import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
 
-
 trait ItemSql {
   type Annotated = (Item, ItemId, Instant)
 
@@ -18,7 +17,8 @@ trait ItemSql {
     values (${item.title}, ${item.description}, ${item.createBy}, ${item.price})
   """.update
 
-  def insertGetId(item: Item): ConnectionIO[ItemId] = insert(item).withUniqueGeneratedKeys("item_id")
+  def insertGetId(item: Item): ConnectionIO[ItemId] =
+    insert(item).withUniqueGeneratedKeys("item_id")
 
   def select: Query0[Annotated] = sql"""
     select title, description, create_by, price, item_id, create_date
@@ -43,7 +43,7 @@ trait ItemSql {
     where item_id = $itemId
   """.update
 
-  def byIds(itemIds: List[ItemId]): Query0[Annotated] = (select.toFragment ++ 
-    Fragments.whereAndOpt(itemIds.toNel.map(ids => Fragments.in(fr"item_id", ids)))
-  ).query
+  def byIds(itemIds: List[ItemId]): Query0[Annotated] =
+    (select.toFragment ++
+      Fragments.whereAndOpt(itemIds.toNel.map(ids => Fragments.in(fr"item_id", ids)))).query
 }
