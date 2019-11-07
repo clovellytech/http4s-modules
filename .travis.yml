@@ -1,6 +1,6 @@
 --- 
 before_install: 
-  - "get fetch --tags"
+  - "git fetch --tags"
   - "export PATH=${PATH}:./vendor/bundle"
 cache: 
   directories: 
