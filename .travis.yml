@@ -23,7 +23,6 @@ before_script:
   - sbt exampleServerJVM/stage
 
 script:
-  - echo "Running jvm tests"
   - echo "Starting integration test script"
   - ./all_tests.sh
 
