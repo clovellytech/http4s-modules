@@ -17,7 +17,6 @@ import h4sm.auth.domain._
 import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.tokens.AsBaseToken.ops._
 import h4sm.petstore.domain._
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.circe._
@@ -26,7 +25,7 @@ import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
 import tsec.authentication._
 
-final case class PetRequest(name: String, bio: Option[String], status: String)
+case class PetRequest(name: String, bio: Option[String], status: String)
 
 class PetEndpoints[F[_]: Sync: PetAlgebra, T[_]](auth : UserSecuredRequestHandler[F, T])(implicit
   B: AsBaseToken[T[UserId]]
@@ -71,7 +70,6 @@ import doobie._
 import doobie.hikari.HikariTransactor
 import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.users._
-import h4sm.auth.infrastructure.endpoint._
 import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.auth.client._
 import h4sm.db.config._
@@ -112,6 +110,7 @@ At this point we will switch into `IO`:
 ```scala mdoc
 import cats.effect.IO
 import h4sm.auth.infrastructure.endpoint._
+import h4sm.auth.comm.UserRequest
 import h4sm.petstore.infrastructure.endpoint._
 import h4sm.petstore.domain._
 import io.circe.generic.auto._
@@ -120,7 +119,6 @@ import org.http4s.client.dsl.io._
 import org.http4s.circe._
 import org.http4s.Uri.uri
 import scala.concurrent.ExecutionContext.Implicits.global
-import codecs._
 
 // see petstore.ServerMain for a complete example of creating a server. 
 implicit val cs = IO.contextShift(global)
