@@ -10,7 +10,8 @@ scala:
    - 2.13.0
 
 before_install:
- - export PATH=${PATH}:./vendor/bundle
+  - get fetch --tags
+  - export PATH=${PATH}:./vendor/bundle
 
 install:
   - rvm use 2.3.0 --install --fuzzy
@@ -18,20 +19,32 @@ install:
   - gem install sass
 
 before_script:
-  - ./script/travis_init.sh
-  - npm i -g yarn gulp-cli
-  - sbt exampleServerJVM/stage
 
-script:
-  - echo "Starting integration test script"
-  - ./all_tests.sh
+stages:
+  - name: init
+  - name: test
+  - name: docs
+  - name: release
+    if: ((branch = master AND type = push) OR (tag IS present)) AND NOT fork
 
 jobs:
   include:
-    - script:
-      - sbt docs/mdoc
-      - sbt docs/docusaurusCreateSite
-      if: TRAVIS_SCALA_VERSION == "2.12.10"
+    - stage: init
+      script:
+        - ./script/travis_init.sh
+        - npm i -g yarn gulp-cli
+        - sbt exampleServerJVM/stage
+    - stage: test
+      script:
+        - echo "Starting integration test script"
+        - ./all_tests.sh
+    - stage: docs
+      script:
+        - sbt docs/mdoc
+        - sbt docs/docusaurusCreateSite
+        if: TRAVIS_SCALA_VERSION == "2.12.10"
+    - stage: release
+      script: sbt ci-release
 
 deploy:
   provider: pages

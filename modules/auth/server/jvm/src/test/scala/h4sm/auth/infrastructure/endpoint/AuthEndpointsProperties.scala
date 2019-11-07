@@ -10,7 +10,6 @@ import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.auth.comm.{UserRequest, UserDetail}
 import h4sm.auth.comm.codecs._
 import h4sm.testutil.DbFixtureSuite
-import java.time.{Duration, Instant}
 import org.http4s.Status
 import org.http4s.circe.CirceEntityCodec._
 import org.scalatest._
@@ -73,7 +72,6 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         _ <- authClient.deleteUser(u.username)
       } yield {
         u.username should equal (detail.result.username)
-        Duration.between(detail.result.joinTime, Instant.now()).toMillis should be < 5000L
       }
 
       test.unsafeRunSync()
