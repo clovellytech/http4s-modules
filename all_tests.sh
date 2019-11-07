@@ -5,7 +5,7 @@
 
 npm i -g yarn gulp-cli
 
-sbt exampleServerJVM/stage
+sbt ++$TRAVIS_SCALA_VERSION exampleServerJVM/stage
 
 echo "Starting server"
 
