@@ -34,14 +34,14 @@ echo "Server started, running all tests"
 
 sbt ++$TRAVIS_SCALA_VERSION test
 
-echo "Scala js tests completed with status $FUNC_TEST_RESULT, stopping server with PID $SERVER_PID, PPID $PARENT_PID"
+TEST_RES=$?
+
+echo "Scala js tests completed with status $TEST_RES"
 
 kill $SERVER_PID
 wait $SERVER_PID
 trap - TERM INT
 wait $SERVER_PID
-# kill -9 $PARENT_PID
 
 echo "DONE!"
-exit $FUNC_TEST_RESULT
-
+exit $TEST_RES
