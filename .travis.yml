@@ -39,14 +39,15 @@ jobs:
   include: 
     - &all_tests
       stage: test
-      env: TEST="all_tests 2.12"
+      env: TEST="all_tests"
       script: ./all_tests.sh
       scala: *scala_212
     - <<: *all_tests
-      env: TEST="all_tests 2.13"
+      env: TEST="all_tests"
       scala: *scala_213
     - env: TEST="docs"
-      script: sbt docsJVM/mdoc && sbt docsJVM/docusaurusCreateSite
+      script: sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
+      scala: *scala_212
     - stage: "release"
       script: sbt ci-release
     
