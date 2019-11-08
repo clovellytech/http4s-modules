@@ -4,7 +4,7 @@ import doobie._
 import simulacrum._
 
 @typeclass
-trait QueryFragment[A]{
+trait QueryFragment[A] {
   @op("toFragment")
   def toFragment(self: A): Fragment
 }

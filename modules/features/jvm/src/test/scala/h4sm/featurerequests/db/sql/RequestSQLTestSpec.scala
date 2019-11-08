@@ -7,7 +7,6 @@ import testutil.arbitraries._
 import testutil.TypeCheckTestSpec
 import requests._
 
-
 class RequestSQLTestSpec extends TypeCheckTestSpec {
   val schemaNames = List("ct_auth", "ct_feature_requests")
 

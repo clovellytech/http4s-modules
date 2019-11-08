@@ -4,7 +4,10 @@ package petstore
 import cats.effect._
 import cats.implicits._
 import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
-import auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import auth.infrastructure.repository.persistent.{
+  TokenRepositoryInterpreter,
+  UserRepositoryInterpreter,
+}
 import auth.domain.tokens._
 import auth.domain.UserService
 import auth.domain.users.UserRepositoryAlgebra
@@ -25,18 +28,16 @@ import tsec.cipher.symmetric.jca._
 import tsec.authentication.SecuredRequestHandler
 
 class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
-
   def router[A, T[_]](
-    auth: AuthEndpoints[F, A, T], 
-    pets: PetEndpoints[F, T], 
-    orders: OrderEndpoints[F, T]
-  ): HttpRoutes[F] = {
+      auth: AuthEndpoints[F, A, T],
+      pets: PetEndpoints[F, T],
+      orders: OrderEndpoints[F, T],
+  ): HttpRoutes[F] =
     Router(
       "/users" -> auth.endpoints,
       "/pets" -> pets.endpoints,
-      "/orders" -> orders.endpoints
+      "/orders" -> orders.endpoints,
     )
-  }
 
   def createServer: Resource[F, Server[F]] = {
     implicit val encryptor = AES128GCM.genEncryptor[F]
@@ -46,7 +47,14 @@ class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
       MainConfig(db, ServerConfig(host, port, numThreads)) = cfg
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
       tranec <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](db.driver, db.url, db.user, db.password, connec, Blocker.liftExecutionContext(tranec))
+      xa <- HikariTransactor.newHikariTransactor[F](
+        db.driver,
+        db.url,
+        db.user,
+        db.password,
+        connec,
+        Blocker.liftExecutionContext(tranec),
+      )
       key <- Resource.liftF(AES128GCM.generateKey[F])
       implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
@@ -60,9 +68,9 @@ class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
       orderEndpoints = new OrderEndpoints(auth)
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_petstore"))
       server <- BlazeServerBuilder[F]
-                .bindHttp(port, host)
-                .withHttpApp(router(authEndpoints, petEndpoints, orderEndpoints).orNotFound)
-                .resource
+        .bindHttp(port, host)
+        .withHttpApp(router(authEndpoints, petEndpoints, orderEndpoints).orNotFound)
+        .resource
     } yield server
   }
 }

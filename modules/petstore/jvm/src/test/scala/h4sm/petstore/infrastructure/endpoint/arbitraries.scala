@@ -9,6 +9,6 @@ object arbitraries {
       name <- nonEmptyString
       bio <- Gen.option(nonEmptyString)
       status <- nonEmptyString
-    } yield PetRequest(name, bio, status)
+    } yield PetRequest(name, bio, status),
   )
 }

@@ -5,7 +5,10 @@ import cats.implicits._
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
 import h4sm.auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
-import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import h4sm.auth.infrastructure.repository.persistent.{
+  TokenRepositoryInterpreter,
+  UserRepositoryInterpreter,
+}
 import h4sm.auth.domain.tokens._
 import h4sm.auth.domain.UserService
 import h4sm.db.config._
@@ -28,11 +31,13 @@ class Server[F[_]: ConcurrentEffect: Timer: ContextShift] {
     val authService = authEndpoints.Auth
     val requestEndpoints = RequestEndpoints.persistingEndpoints(xa)
     val voteEndpoints = VoteEndpoints.persistingEndpoints(xa)
-    val requestApp = requestEndpoints.unAuthEndpoints <+> authService.liftService(requestEndpoints.authEndpoints)
+    val requestApp = requestEndpoints.unAuthEndpoints <+> authService.liftService(
+      requestEndpoints.authEndpoints,
+    )
     val httpApp = Router(
       "/auth" -> authEndpoints.endpoints,
       "/" -> requestApp,
-      "/vote" -> authService.liftService(voteEndpoints.endpoints)
+      "/vote" -> authService.liftService(voteEndpoints.endpoints),
     ).orNotFound
     BlazeServerBuilder[F]
       .bindHttp(port, host)
@@ -43,12 +48,15 @@ class Server[F[_]: ConcurrentEffect: Timer: ContextShift] {
       .as(ExitCode.Success)
   }
 
-  def run(connEc: ExecutionContext, blk: Blocker): F[ExitCode] = for {
-    cfg <- parser.decodeF[F, FeatureRequestConfig]
-    FeatureRequestConfig(host, port, db) = cfg
-    _ <- ConcurrentEffect[F].delay(DatabaseConfig.initialize(db)("ct_auth", "ct_feature_requests"))
-    exitCode <- HikariTransactor
-                  .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
-                  .use(app(_, port, host))
-  } yield exitCode
+  def run(connEc: ExecutionContext, blk: Blocker): F[ExitCode] =
+    for {
+      cfg <- parser.decodeF[F, FeatureRequestConfig]
+      FeatureRequestConfig(host, port, db) = cfg
+      _ <- ConcurrentEffect[F].delay(
+        DatabaseConfig.initialize(db)("ct_auth", "ct_feature_requests"),
+      )
+      exitCode <- HikariTransactor
+        .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
+        .use(app(_, port, host))
+    } yield exitCode
 }

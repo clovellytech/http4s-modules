@@ -11,7 +11,10 @@ import cats.implicits._
 import doobie.util.transactor.Transactor
 import featurerequests.domain.requests._
 import featurerequests.domain.votes._
-import infrastructure.repository.persistent.{RequestRepositoryInterpreter, VoteRepositoryInterpreter}
+import infrastructure.repository.persistent.{
+  RequestRepositoryInterpreter,
+  VoteRepositoryInterpreter,
+}
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl._
@@ -37,16 +40,19 @@ class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http
   implicit val vinterp = new VoteRepositoryInterpreter[F](xa)
   val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F].endpoints)
 
-  def addRequest(req: FeatureRequest)(resp: Response[F]): F[Response[F]] = for {
-    addReq <- POST(req, Uri.uri("/request"))
-    authReq = authTestEndpoints.injectAuthHeader(resp)(addReq)
-    resp <- requestEndpoints.orNotFound.run(authReq)
-  } yield resp
+  def addRequest(req: FeatureRequest)(resp: Response[F]): F[Response[F]] =
+    for {
+      addReq <- POST(req, Uri.uri("/request"))
+      authReq = authTestEndpoints.injectAuthHeader(resp)(addReq)
+      resp <- requestEndpoints.orNotFound.run(authReq)
+    } yield resp
 
-  def addVote(vote: VoteRequest): F[Response[F]] = for {
-    voteReq <- POST(vote, Uri.uri("/vote"))
-    resp <- voteEndpoints.orNotFound.run(voteReq)
-  } yield resp
+  def addVote(vote: VoteRequest): F[Response[F]] =
+    for {
+      voteReq <- POST(vote, Uri.uri("/vote"))
+      resp <- voteEndpoints.orNotFound.run(voteReq)
+    } yield resp
 
-  def getRequests: F[Response[F]] = GET(Uri.uri("/request")).flatMap(requestEndpoints.orNotFound run _)
+  def getRequests: F[Response[F]] =
+    GET(Uri.uri("/request")).flatMap(requestEndpoints.orNotFound.run(_))
 }

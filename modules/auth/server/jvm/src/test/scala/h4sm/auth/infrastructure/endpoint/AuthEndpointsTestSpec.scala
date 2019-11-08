@@ -5,8 +5,8 @@ package endpoint
 
 import cats.effect.IO
 import cats.implicits._
-import h4sm.auth.comm.{UserRequest, SiteResult, UserDetail}
-import h4sm.auth.comm.codecs._ 
+import h4sm.auth.comm.{SiteResult, UserDetail, UserRequest}
+import h4sm.auth.comm.codecs._
 import h4sm.auth.domain.UserService
 import org.http4s.circe.CirceEntityCodec._
 import testutil.EndpointTestSpec
@@ -20,7 +20,6 @@ import auth.client.AuthClient
 import tsec.authentication.TSecBearerToken
 import tsec.passwordhashers.jca.BCrypt
 
-
 class AuthEndpointsTestSpec extends EndpointTestSpec {
   val schemaNames: Seq[String] = List("ct_auth")
 
@@ -33,31 +32,31 @@ class AuthEndpointsTestSpec extends EndpointTestSpec {
 
   val user = UserRequest("zak", "password")
 
-  testIO("a signup request should return 200 status"){ p =>
+  testIO("a signup request should return 200 status") { p =>
     val authClient = client(p.transactor)
     for {
       post <- authClient.postUser(user)
       _ <- authClient.deleteUser(user.username)
     } yield {
-      post.status should equal (Status.Ok)
+      post.status should equal(Status.Ok)
     }
   }
 
-  testIO("a user exists request should return false for no user"){ p =>
+  testIO("a user exists request should return false for no user") { p =>
     val authClient = client(p.transactor)
-    authClient.userExists(user.username).map(_ should equal (false))
+    authClient.userExists(user.username).map(_ should equal(false))
   }
 
-  testIO("a signed up user should show user exists"){ p => 
+  testIO("a signed up user should show user exists") { p =>
     val authClient = client(p.transactor)
     for {
       _ <- authClient.postUser(user)
       exists <- authClient.userExists(user.username)
       _ <- authClient.deleteUser(user.username)
-    } yield exists should equal (true)
+    } yield exists should equal(true)
   }
 
-  testIO("a login request should return 200"){ p =>
+  testIO("a login request should return 200") { p =>
     val authClient = client(p.transactor)
     import authClient._
     for {
@@ -70,7 +69,7 @@ class AuthEndpointsTestSpec extends EndpointTestSpec {
     }
   }
 
-  testIO("a user should get a usable session on login"){ p =>
+  testIO("a user should get a usable session on login") { p =>
     val authClient = client(p.transactor)
     import authClient._
     for {
@@ -79,16 +78,16 @@ class AuthEndpointsTestSpec extends EndpointTestSpec {
       userResp <- getUser(user.username, login).pure[IO]
       handledResp <- userResp.fold(
         IO.raiseError(_),
-        identity
+        identity,
       )
       detail <- handledResp.attemptAs[SiteResult[UserDetail]].value
       _ <- deleteUser(user.username)
     } yield {
-      login.status should equal (Status.Ok)
-      handledResp.status should equal (Status.Ok)
+      login.status should equal(Status.Ok)
+      handledResp.status should equal(Status.Ok)
       detail.fold[Assertion](
         e => fail(e),
-        _.result.username should equal(user.username)
+        _.result.username should equal(user.username),
       )
     }
   }

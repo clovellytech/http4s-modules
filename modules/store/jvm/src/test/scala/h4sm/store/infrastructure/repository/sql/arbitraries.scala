@@ -7,7 +7,6 @@ import org.scalacheck._
 import java.time.Instant
 
 object arbitraries {
-
   implicit def orderItemArbitrary[A: Arbitrary]: Arbitrary[OrderItem0[A]] = Arbitrary {
     for {
       item <- implicitly[Arbitrary[A]].arbitrary

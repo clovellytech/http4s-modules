@@ -10,7 +10,6 @@ import doobie.implicits._
 import doobie.postgres.implicits._
 import domain._
 
-
 trait RequestSQL {
   def insert(feature: Feature): Update0 = sql"""
     insert into ct_feature_requests.feature_request (requesting_user_id, title, description)
@@ -41,10 +40,11 @@ trait RequestSQL {
     order by fs.create_date
   """.query
 
-  def selectById(featureId: FeatureId): Query0[(Feature, FeatureId, Instant)] = (select.toFragment ++ sql"""
+  def selectById(featureId: FeatureId): Query0[(Feature, FeatureId, Instant)] =
+    (select.toFragment ++ sql"""
     where feature_request_id = $featureId
   """).query
 
-  def insertGetId(feature: Feature): ConnectionIO[FeatureId] = insert(feature).withUniqueGeneratedKeys("feature_id")
-
+  def insertGetId(feature: Feature): ConnectionIO[FeatureId] =
+    insert(feature).withUniqueGeneratedKeys("feature_id")
 }

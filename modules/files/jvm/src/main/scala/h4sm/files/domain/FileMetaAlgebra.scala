@@ -5,7 +5,7 @@ import cats.syntax.functor._
 import cats.Functor
 import h4sm.auth.UserId
 
-trait FileMetaAlgebra[F[_]]{
+trait FileMetaAlgebra[F[_]] {
   def storeMeta(fileInfo: FileInfo): F[FileInfoId]
 
   def retrieveMeta(fileId: FileInfoId): F[FileInfo]
@@ -14,7 +14,8 @@ trait FileMetaAlgebra[F[_]]{
 
   def updateFileSaveTime(fileId: FileInfoId): F[Unit]
 
-  def isOwner(fileId: FileInfoId, ownerId: UserId)(implicit F: Functor[F]): F[Boolean] = retrieveMeta(fileId).map{
-    fi => fi.uploadedBy.compareTo(ownerId) == 0
-  }
+  def isOwner(fileId: FileInfoId, ownerId: UserId)(implicit F: Functor[F]): F[Boolean] =
+    retrieveMeta(fileId).map { fi =>
+      fi.uploadedBy.compareTo(ownerId) == 0
+    }
 }

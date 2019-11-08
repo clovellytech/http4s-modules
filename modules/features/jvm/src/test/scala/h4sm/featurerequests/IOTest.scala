@@ -6,4 +6,3 @@ import org.scalatest.funsuite.AnyFunSuite
 trait IOTest { this: AnyFunSuite =>
   def testIO(name: String)(t: => IO[Any]) = test(name)(t.unsafeRunSync())
 }
-

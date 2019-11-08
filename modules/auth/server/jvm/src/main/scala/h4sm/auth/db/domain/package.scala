@@ -7,5 +7,3 @@ import tsec.authentication.AuthenticatedCookie
 package object domain {
   type Cookie[Alg] = AuthenticatedCookie[Alg, UUID]
 }
-
-

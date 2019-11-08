@@ -3,11 +3,11 @@ package auth.infrastructure
 package endpoint
 
 import arbitraries._
-import cats.effect.{IO, Bracket, Sync}
+import cats.effect.{Bracket, IO, Sync}
 import doobie.util.transactor.Transactor
 import h4sm.auth.client.AuthClient
 import h4sm.auth.infrastructure.repository.persistent._
-import h4sm.auth.comm.{UserRequest, UserDetail}
+import h4sm.auth.comm.{UserDetail, UserRequest}
 import h4sm.auth.comm.codecs._
 import h4sm.testutil.DbFixtureSuite
 import org.http4s.Status
@@ -24,7 +24,9 @@ import h4sm.auth.comm.SiteResult
 class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks {
   def schemaNames: Seq[String] = List("ct_auth")
 
-  def client[F[_]: Sync: Bracket[?[_], Throwable]: PasswordHasher[?[_], BCrypt]](tr: Transactor[F]): AuthClient[F, BCrypt, TSecBearerToken] = {
+  def client[F[_]: Sync: Bracket[?[_], Throwable]: PasswordHasher[?[_], BCrypt]](
+      tr: Transactor[F],
+  ): AuthClient[F, BCrypt, TSecBearerToken] = {
     implicit val userAlg = new UserRepositoryInterpreter(tr)
     val userService = new UserService[F, BCrypt](BCrypt)
     implicit val tokenService = new TokenRepositoryInterpreter(tr)
@@ -39,7 +41,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         login <- authClient.loginUser(u)
         _ <- authClient.deleteUser(u.username)
       } yield {
-        login.status should equal (Status.Ok)
+        login.status should equal(Status.Ok)
       }
 
       test.unsafeRunSync()
@@ -71,7 +73,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         detail <- user.as[SiteResult[UserDetail]]
         _ <- authClient.deleteUser(u.username)
       } yield {
-        u.username should equal (detail.result.username)
+        u.username should equal(detail.result.username)
       }
 
       test.unsafeRunSync()
@@ -86,7 +88,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         login <- authClient.loginUser(u.copy(password = u.password ++ u.password))
         _ <- authClient.deleteUser(u.username)
       } yield {
-        login.status should equal (Status.BadRequest)
+        login.status should equal(Status.BadRequest)
       }
     }
   }

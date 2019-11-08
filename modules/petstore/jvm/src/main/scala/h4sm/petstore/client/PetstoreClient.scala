@@ -13,19 +13,24 @@ import h4sm.petstore.infrastructure.endpoint._
 import h4sm.petstore.infrastructure.endpoint.codecs._
 import org.http4s.Uri
 
-class PetstoreClient[F[_]: Sync, T[_]](ps: PetEndpoints[F, T], os: OrderEndpoints[F, T]) extends Http4sDsl[F] with Http4sClientDsl[F] with SessionClientDsl[F] {
+class PetstoreClient[F[_]: Sync, T[_]](ps: PetEndpoints[F, T], os: OrderEndpoints[F, T])
+    extends Http4sDsl[F]
+    with Http4sClientDsl[F]
+    with SessionClientDsl[F] {
   val pets = ps.endpoints.orNotFound
   val orders = os.endpoints.orNotFound
 
-  def addPet(p: PetRequest)(implicit h: Headers): F[Unit] = for {
-    req <- post(p, Uri.uri("/"))
-    resp <- pets.run(req)
-    _ <- passOk(resp)
-  } yield ()
+  def addPet(p: PetRequest)(implicit h: Headers): F[Unit] =
+    for {
+      req <- post(p, Uri.uri("/"))
+      resp <- pets.run(req)
+      _ <- passOk(resp)
+    } yield ()
 
-  def orderPet(order: OrderRequest)(implicit h: Headers): F[Unit] = for {
-    req <- post(order, Uri.uri("/"))
-    resp <- orders.run(req)
-    _ <- passOk(resp)
-  } yield ()
+  def orderPet(order: OrderRequest)(implicit h: Headers): F[Unit] =
+    for {
+      req <- post(order, Uri.uri("/"))
+      resp <- orders.run(req)
+      _ <- passOk(resp)
+    } yield ()
 }

@@ -27,5 +27,6 @@ trait VoteSQL {
           by_user_id = ${vote.userId}
   """.update
 
-  def insertGetId(vote: Vote): ConnectionIO[VoteId] = insert(vote).withUniqueGeneratedKeys("vote_id")
+  def insertGetId(vote: Vote): ConnectionIO[VoteId] =
+    insert(vote).withUniqueGeneratedKeys("vote_id")
 }

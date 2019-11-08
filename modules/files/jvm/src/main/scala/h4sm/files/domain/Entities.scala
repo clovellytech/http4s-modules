@@ -6,14 +6,14 @@ import h4sm.auth.UserId
 import h4sm.files.Unshow
 
 trait Backend
-object Backend{
+object Backend {
   case object LocalBackend extends Backend
   case object NoBackend extends Backend
 
   val LOCAL = "local"
   val NONE = "none"
 
-  implicit val backendShow: Show[Backend] = Show.show{
+  implicit val backendShow: Show[Backend] = Show.show {
     case LocalBackend => LOCAL
     case _ => NONE
   }
@@ -27,13 +27,13 @@ object Backend{
 }
 
 final case class FileInfo(
-  name: Option[String],
-  description: Option[String],
-  filename: Option[String],
-  uri: Option[String],
-  uploadedBy: UserId,
-  isPublic: Boolean,
-  backend: Backend = Backend.LocalBackend
+    name: Option[String],
+    description: Option[String],
+    filename: Option[String],
+    uri: Option[String],
+    uploadedBy: UserId,
+    isPublic: Boolean,
+    backend: Backend = Backend.LocalBackend,
 )
 
 sealed abstract class Error(val message: String) extends Throwable with Product with Serializable
@@ -54,4 +54,3 @@ object Error {
   type IOError[F[_]] = ApplicativeAsk[F, Error]
   val IOError = ApplicativeAsk
 }
-

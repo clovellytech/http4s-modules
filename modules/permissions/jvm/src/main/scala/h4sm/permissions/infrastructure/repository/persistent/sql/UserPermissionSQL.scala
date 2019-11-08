@@ -12,7 +12,6 @@ import doobie.implicits._
 import doobie.postgres.implicits._
 import domain._
 
-
 trait UserPermissionSQL {
   def insert(up: UserPermission[PermissionId]): Update0 = sql"""
     insert
@@ -25,10 +24,16 @@ trait UserPermissionSQL {
     from ct_permissions.user_permission
   """.query
 
-  def byId(id: UserPermissionId): Query0[(UserPermission[PermissionId], UserPermissionId, Instant)] =
+  def byId(
+      id: UserPermissionId,
+  ): Query0[(UserPermission[PermissionId], UserPermissionId, Instant)] =
     (select.toFragment ++ fr"where user_permission_id = $id").query
 
-  def userPermission(userId: UserId, appName: String, name: String): Query0[(Permission, PermissionId)] = sql"""
+  def userPermission(
+      userId: UserId,
+      appName: String,
+      name: String,
+  ): Query0[(Permission, PermissionId)] = sql"""
     select name, description, app_name, permission_id
     from ct_permissions.permission
          inner join ct_permissions.user_permission using (permission_id)

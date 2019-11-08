@@ -10,7 +10,10 @@ import h4sm.files.config._
 import h4sm.files.infrastructure.endpoint.FileEndpoints
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
-import h4sm.auth.infrastructure.repository.persistent.{TokenRepositoryInterpreter, UserRepositoryInterpreter}
+import h4sm.auth.infrastructure.repository.persistent.{
+  TokenRepositoryInterpreter,
+  UserRepositoryInterpreter,
+}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import tsec.passwordhashers.jca.BCrypt
@@ -19,14 +22,7 @@ import org.http4s.server.Router
 
 import scala.concurrent.ExecutionContext
 
-class Server[
-  F[_]: ConcurrentEffect
-     : ConfigAsk
-     : ContextShift
-     : Timer
-     : ServerConfigAsk
-     : DBConfigAsk] {
-
+class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfigAsk: DBConfigAsk] {
   def app(xa: Transactor[F], serverConf: ServerConfig, blk: Blocker): F[ExitCode] = {
     implicit val b = blk
     implicit val userAlg = new UserRepositoryInterpreter(xa)
@@ -39,27 +35,26 @@ class Server[
 
     val httpApp = Router(
       "/auth" -> authEndpoints.endpoints,
-      "/files" -> fileEndpoints.endpoints
+      "/files" -> fileEndpoints.endpoints,
     ).orNotFound
 
     BlazeServerBuilder[F]
-    .bindHttp(serverConf.port, serverConf.host)
-    .withHttpApp(httpApp)
-    .serve
-    .compile
-    .drain
-    .as(ExitCode.Success)
+      .bindHttp(serverConf.port, serverConf.host)
+      .withHttpApp(httpApp)
+      .serve
+      .compile
+      .drain
+      .as(ExitCode.Success)
   }
 
-  def run(implicit connEc: ExecutionContext, blk: Blocker): F[ExitCode] = {
+  def run(implicit connEc: ExecutionContext, blk: Blocker): F[ExitCode] =
     for {
       db <- DBConfigAsk[F].ask
       serverConf <- ServerConfigAsk[F].ask
       _ <- ConfigAsk[F].ask
       _ <- ConcurrentEffect[F].delay(DatabaseConfig.initialize(db)("ct_auth", "ct_files"))
       exitCode <- HikariTransactor
-                    .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
-                    .use(app(_, serverConf, blk))
+        .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
+        .use(app(_, serverConf, blk))
     } yield exitCode
-  }
 }
