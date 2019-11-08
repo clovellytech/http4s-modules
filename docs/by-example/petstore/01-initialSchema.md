@@ -45,8 +45,8 @@ import h4sm.files.config.FileConfig
 import io.circe.config.parser
 import io.circe.generic.auto._  // for parsing our configuration file.
 
-final case class ServerConfig(port: Int, host: String, numThreads: Int)
-final case class MainConfig(db: DatabaseConfig, files: FileConfig, server: ServerConfig)
+case class ServerConfig(port: Int, host: String, numThreads: Int)
+case class MainConfig(db: DatabaseConfig, files: FileConfig, server: ServerConfig)
 
 class Server[F[_]: Sync] {
   // I require a Sync for F, because DatabaseConfig.initialize requires a Sync for F, below...

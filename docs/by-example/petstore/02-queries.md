@@ -14,7 +14,7 @@ First, a pet in our application will have a few attributes, mirroring what we de
 import java.util.UUID
 import java.time.Instant
 
-final case class PetA(
+case class PetA(
   petId: UUID,
   createTime: Option[Instant],
   updateTime: Option[Instant],
@@ -48,7 +48,7 @@ Let us try another way.
 
 
 ```scala mdoc
-final case class Pet(
+case class Pet(
   name: String,
   bio: String,
   createdBy: Option[UUID],
@@ -190,7 +190,7 @@ Doobie's typechecking has alerted us that there is a mismatch between our querie
 We can handle a null bio by simply making that field optional in our domain object:
 
 ```scala
-final case class Pet(
+case class Pet(
   name: String,
   bio: Option[String],
   createdBy: Option[UUID],
