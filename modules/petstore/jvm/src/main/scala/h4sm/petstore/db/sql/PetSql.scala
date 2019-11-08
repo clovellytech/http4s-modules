@@ -8,7 +8,7 @@ import doobie.postgres.implicits._
 import h4sm.db.implicits._
 import java.time.Instant
 
-trait PetSql{
+trait PetSql {
   def insert(a: Pet): Update0 = sql"""
     insert into ct_petstore.pet (name, bio, status, created_by, photo_urls)
     values (${a.name}, ${a.bio}, ${a.status}, ${a.createdBy}, ${a.photoUrls})

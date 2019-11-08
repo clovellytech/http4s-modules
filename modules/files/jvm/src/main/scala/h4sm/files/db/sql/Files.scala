@@ -9,19 +9,27 @@ import doobie.implicits._
 import doobie.postgres.implicits._
 
 final case class InterFileInfo(
-  name: Option[String],
-  description: Option[String],
-  filename: Option[String],
-  uri: Option[String],
-  uploadedBy: UserId,
-  isPublic: Boolean,
-  backend: Option[String]
-){
+    name: Option[String],
+    description: Option[String],
+    filename: Option[String],
+    uri: Option[String],
+    uploadedBy: UserId,
+    isPublic: Boolean,
+    backend: Option[String],
+) {
   def toFileInfo(implicit unshow: Unshow[Backend]): FileInfo =
-    FileInfo(name, description, filename, uri, uploadedBy, isPublic, backend.map(unshow.unshow _).getOrElse(Backend.LocalBackend))
+    FileInfo(
+      name,
+      description,
+      filename,
+      uri,
+      uploadedBy,
+      isPublic,
+      backend.map(unshow.unshow _).getOrElse(Backend.LocalBackend),
+    )
 }
 
-trait FilesSQL{
+trait FilesSQL {
   def selectById(fileInfoId: FileInfoId): Query0[FileInfo] = sql"""
     select f.name, f.description, f.user_filename, f.uri, f.uploaded_by, f.is_public, backend
     from ct_files.file_meta f
@@ -32,7 +40,7 @@ trait FilesSQL{
     select f.file_meta_id, f.name, f.description, f.user_filename, f.uri, f.uploaded_by, f.is_public, backend
     from ct_files.file_meta f
     where f.uploaded_by = $ownerId
-  """.query[(FileInfoId, InterFileInfo)].map{ case (id, info) => (id, info.toFileInfo) }
+  """.query[(FileInfoId, InterFileInfo)].map { case (id, info) => (id, info.toFileInfo) }
 
   def insert(fileInfo: FileInfo): Update0 = {
     val FileInfo(name, description, filename, uri, uploadedBy, isPublic, backend) = fileInfo

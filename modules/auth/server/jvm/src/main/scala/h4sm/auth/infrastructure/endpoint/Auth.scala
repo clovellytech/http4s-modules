@@ -5,7 +5,7 @@ import scala.concurrent.duration._
 import cats.data.OptionT
 import cats.effect._
 import cats.implicits._
-import comm.{UserRequest, UserDetail, SiteResult}
+import comm.{SiteResult, UserDetail, UserRequest}
 import comm.codecs._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
@@ -22,13 +22,12 @@ import tsec.cipher.symmetric.{AES, IvGen}
 import tsec.cipher.symmetric.jca._
 
 object Authenticators {
-
   def statelessCookie[F[_]: Sync: UserRepositoryAlgebra, Alg: JAuthEncryptor[F, ?]: IvGen[F, ?]](
-    key: SecretKey[Alg],
-    expiryDuration: FiniteDuration = 10.minutes,
-    maxIdle: Option[FiniteDuration] = None,
-    secure: Boolean = false,
-    domain: Option[String] = None,
+      key: SecretKey[Alg],
+      expiryDuration: FiniteDuration = 10.minutes,
+      maxIdle: Option[FiniteDuration] = None,
+      secure: Boolean = false,
+      domain: Option[String] = None,
   )(implicit a: AES[Alg]): UserAuthenticator[F, AuthEncryptedCookie[Alg, ?]] =
     EncryptedCookieAuthenticator.stateless(
       TSecCookieSettings(
@@ -36,37 +35,41 @@ object Authenticators {
         secure,
         domain = domain,
         expiryDuration = expiryDuration,
-        maxIdle = maxIdle
+        maxIdle = maxIdle,
       ),
       userTrans(UserRepositoryAlgebra[F]),
-      key
+      key,
     )
 
-  def bearer[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]: UserAuthenticator[F, TSecBearerToken] = BearerTokenAuthenticator(
+  def bearer[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]
+      : UserAuthenticator[F, TSecBearerToken] = BearerTokenAuthenticator(
     tokenTrans[TSecBearerToken].apply(TokenRepositoryAlgebra[F]),
     userTrans(UserRepositoryAlgebra[F]),
     TSecTokenSettings(
       expiryDuration = 10.minutes,
-      maxIdle = None
-    )
+      maxIdle = None,
+    ),
   )
 }
 
-
 class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
-  userService: UserService[F, A],
-  authenticator: UserAuthenticator[F, T]
+    userService: UserService[F, A],
+    authenticator: UserAuthenticator[F, T],
 )(implicit A: AsBaseToken[T[UserId]])
-extends Http4sDsl[F] {
+    extends Http4sDsl[F] {
   type Token = T[UserId]
 
   val Auth = SecuredRequestHandler(authenticator)
 
   val badResp = Unauthorized(
     `WWW-Authenticate`(
-      Challenge("Digest", "ct_auth", Map("username" -> "bad username", "password" -> "bad password"))
-      )
-    )
+      Challenge(
+        "Digest",
+        "ct_auth",
+        Map("username" -> "bad username", "password" -> "bad password"),
+      ),
+    ),
+  )
 
   val unauthService: HttpRoutes[F] = HttpRoutes.of {
     case req @ POST -> Root / "user" => {
@@ -98,31 +101,34 @@ extends Http4sDsl[F] {
     }
 
     case GET -> Root / "exists" / username =>
-      UserRepositoryAlgebra[F].byUsername(username).isDefined.flatMap(Ok apply _)
+      UserRepositoryAlgebra[F].byUsername(username).isDefined.flatMap(Ok.apply(_))
   }
 
   val authService: UserAuthService[F, T] = UserAuthService {
-    case req@GET -> Root / "user" asAuthed _ => for {
-      (user, _, joinTime) <- userService.byUserId(req.authenticator.asBase.identity)
-      resp <- Ok(SiteResult(UserDetail(user.username, joinTime)))
-    } yield resp
+    case req @ GET -> Root / "user" asAuthed _ =>
+      for {
+        (user, _, joinTime) <- userService.byUserId(req.authenticator.asBase.identity)
+        resp <- Ok(SiteResult(UserDetail(user.username, joinTime)))
+      } yield resp
 
-    case GET -> Root / "user" / name asAuthed _ => for {
-      (user, _, joinTime) <- userService.byUsername(name)
-      resp <- Ok(SiteResult(UserDetail(user.username, joinTime)))
-    } yield resp
+    case GET -> Root / "user" / name asAuthed _ =>
+      for {
+        (user, _, joinTime) <- userService.byUsername(name)
+        resp <- Ok(SiteResult(UserDetail(user.username, joinTime)))
+      } yield resp
 
-    case req@POST -> Root / "logout" asAuthed _ => 
+    case req @ POST -> Root / "logout" asAuthed _ =>
       authenticator.discard(req.authenticator) *> Ok()
   }
 
   def testService: HttpRoutes[F] = HttpRoutes.of {
     case GET -> Root / "istest" => Ok("true")
-    case DELETE -> Root / username => (for {
-      u <- UserRepositoryAlgebra[F].byUsername(username)
-      _ <- OptionT.liftF(UserRepositoryAlgebra[F].delete(u._2))
-      resp <- OptionT.liftF(Ok())
-    } yield resp).getOrElseF(BadRequest())
+    case DELETE -> Root / username =>
+      (for {
+        u <- UserRepositoryAlgebra[F].byUsername(username)
+        _ <- OptionT.liftF(UserRepositoryAlgebra[F].delete(u._2))
+        resp <- OptionT.liftF(Ok())
+      } yield resp).getOrElseF(BadRequest())
   }
 
   def endpoints = unauthService <+> Auth.liftService(authService)

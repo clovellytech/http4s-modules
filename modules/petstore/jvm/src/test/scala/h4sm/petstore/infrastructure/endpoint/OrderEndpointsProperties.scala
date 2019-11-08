@@ -11,10 +11,14 @@ import org.scalatest.matchers.should.Matchers
 import petstore.infrastructure.endpoint.arbitraries._
 import petstore.client.PetstoreClientRunner
 
-class OrderEndpointsProperties extends DbFixtureSuite with IOTestAuthClientChecks with ScalaCheckPropertyChecks with Matchers {
+class OrderEndpointsProperties
+    extends DbFixtureSuite
+    with IOTestAuthClientChecks
+    with ScalaCheckPropertyChecks
+    with Matchers {
   def schemaNames: Seq[String] = List("ct_auth", "ct_permissions", "ct_files", "ct_petstore")
 
-  test("Create order endpoint"){ p =>
+  test("Create order endpoint") { p =>
     new PetstoreClientRunner[IO] {
       val xa = p.transactor
 
@@ -27,7 +31,7 @@ class OrderEndpointsProperties extends DbFixtureSuite with IOTestAuthClientCheck
           allorders <- orders.select
           _ <- pets.delete(insertedPetId)
         } yield {
-          allorders.map(_._1.petId) should contain (insertedPetId)
+          allorders.map(_._1.petId) should contain(insertedPetId)
         }
       }
     }

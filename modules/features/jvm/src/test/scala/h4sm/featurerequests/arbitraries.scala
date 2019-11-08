@@ -5,7 +5,6 @@ import h4sm.featurerequests.domain.requests.FeatureRequest
 import org.scalacheck.Arbitrary
 import h4sm.testutil.arbitraries._
 
-
 object arbitraries {
   implicit val featureRequest: Arbitrary[FeatureRequest] = Arbitrary {
     for {

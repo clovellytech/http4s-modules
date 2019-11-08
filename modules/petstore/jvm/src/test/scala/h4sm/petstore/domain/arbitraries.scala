@@ -13,7 +13,7 @@ object arbitraries {
       status <- nonEmptyString
       photoUrls <- Gen.listOf(nonEmptyString)
       updateTime <- Gen.option(arbInstant.arbitrary)
-    } yield Pet(name, bio, createdBy, status, photoUrls, updateTime)
+    } yield Pet(name, bio, createdBy, status, photoUrls, updateTime),
   )
 
   implicit val arbOrder: Arbitrary[Order] = Arbitrary(
@@ -21,6 +21,6 @@ object arbitraries {
       petId <- Gen.uuid
       userId <- Gen.uuid
       shipTime <- Gen.option(arbInstant.arbitrary)
-    } yield Order(petId, userId, shipTime)
+    } yield Order(petId, userId, shipTime),
   )
 }

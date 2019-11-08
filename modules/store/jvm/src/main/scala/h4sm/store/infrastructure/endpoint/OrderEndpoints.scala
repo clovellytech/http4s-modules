@@ -18,17 +18,18 @@ sealed abstract class OrderError extends Throwable
 final case class BadOrder() extends OrderError
 final case class NoOrder() extends OrderError
 
-class OrderEndpoints[F[_]: Sync: OrderAlgebra: ItemAlgebra, T[_]](auth: UserSecuredRequestHandler[F, T])(implicit 
-  baseToken: AsBaseToken[T[UserId]]
+class OrderEndpoints[F[_]: Sync: OrderAlgebra: ItemAlgebra, T[_]](
+    auth: UserSecuredRequestHandler[F, T],
+)(
+    implicit
+    baseToken: AsBaseToken[T[UserId]],
 ) extends Http4sDsl[F] {
-
   def createOrder = UserAuthService[F, T] {
-    case req@POST -> Root asAuthed _ => 
-    
+    case req @ POST -> Root asAuthed _ =>
       val result = for {
         orderReq <- req.request.as[OrderRequest]
         items <- ItemAlgebra[F].byIds(orderReq.items.map(_._1).toList)
-        orderItems = items.map{
+        orderItems = items.map {
           case (Item(_, _, _, price), itemId, _) => OrderItem(itemId, orderReq.items(itemId), price)
         }
         order = Order(req.authenticator.asBase.identity, orderItems, None, None, 100)
@@ -37,32 +38,37 @@ class OrderEndpoints[F[_]: Sync: OrderAlgebra: ItemAlgebra, T[_]](auth: UserSecu
         res <- Ok()
       } yield res
 
-      result.recoverWith{
+      result.recoverWith {
         case BadOrder() => Conflict("Conflicting order")
       }
   }
 
   val viewOrder = UserAuthService[F, T] {
-    case req@GET -> Root / uuidStr asAuthed _ => 
+    case req @ GET -> Root / uuidStr asAuthed _ =>
       val result = for {
         orderId <- EitherT.fromEither[F](Either.catchNonFatal(UUID.fromString(uuidStr))).rethrowT
         order <- OrderAlgebra[F].byId(orderId).toRight[Throwable](NoOrder()).rethrowT
-        _ <- if (order._1.createBy.compareTo(req.authenticator.asBase.identity) == 0) ().pure[F] else NoOrder().raiseError[F, Unit]
+        _ <- if (order._1.createBy.compareTo(req.authenticator.asBase.identity) == 0) ().pure[F]
+        else NoOrder().raiseError[F, Unit]
         res <- Ok()
       } yield res
 
-    result.recoverWith{
-      case NoOrder() => NotFound()
-    }
+      result.recoverWith {
+        case NoOrder() => NotFound()
+      }
   }
-  
+
   val submitOrder = UserAuthService[F, T] {
-    case req@POST -> Root / "submit" asAuthed _ => for {
-      orderReq <- req.request.as[ViewOrderRequest]
-      (_, orderId, _) <- OrderAlgebra[F].byId(orderReq.orderId).toRight[Throwable](NoOrder()).rethrowT
-      _ <- OrderAlgebra[F].submitOrder(orderId)
-      res <- Ok()
-    } yield res
+    case req @ POST -> Root / "submit" asAuthed _ =>
+      for {
+        orderReq <- req.request.as[ViewOrderRequest]
+        (_, orderId, _) <- OrderAlgebra[F]
+          .byId(orderReq.orderId)
+          .toRight[Throwable](NoOrder())
+          .rethrowT
+        _ <- OrderAlgebra[F].submitOrder(orderId)
+        res <- Ok()
+      } yield res
   }
 
   val authService = createOrder <+> viewOrder <+> submitOrder

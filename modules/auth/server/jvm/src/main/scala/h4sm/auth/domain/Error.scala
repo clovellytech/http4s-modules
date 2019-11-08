@@ -1,6 +1,5 @@
 package h4sm.auth.domain
 
-
 sealed abstract class Error(val msg: String) extends Throwable
 object Error {
   case class BadLogin(override val msg: String = "Bad login") extends Error(msg)

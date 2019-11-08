@@ -1,5 +1,3 @@
 package h4sm
 
-package object permissions {
-
-}
+package object permissions {}

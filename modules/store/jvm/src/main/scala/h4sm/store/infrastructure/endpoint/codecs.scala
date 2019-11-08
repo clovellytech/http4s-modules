@@ -2,7 +2,7 @@ package h4sm.store
 package infrastructure.endpoint
 
 import domain._
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 
 object codecs {

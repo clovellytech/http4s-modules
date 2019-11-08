@@ -13,18 +13,15 @@ trait BaseTokenSql {
     from ct_auth.token
   """.query
 
-  def byUserId(userId: UserId): Query0[BaseToken] = (
-    select.toFragment ++ sql"""
+  def byUserId(userId: UserId): Query0[BaseToken] = (select.toFragment ++ sql"""
     where user_id = $userId
   """).query
 
-  def byId(secureId: SecureRandomId): Query0[BaseToken] = (
-    select.toFragment ++ sql"""
+  def byId(secureId: SecureRandomId): Query0[BaseToken] = (select.toFragment ++ sql"""
     where secure_id = $secureId
   """).query
 
-  def byUsername(userId: String): Query0[BaseToken] = (
-    select.toFragment ++ sql"""
+  def byUsername(userId: String): Query0[BaseToken] = (select.toFragment ++ sql"""
     where user_id = $userId
   """).query
 

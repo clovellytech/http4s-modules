@@ -24,7 +24,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import cats.mtl.ApplicativeAsk
 import h4sm.files.config.FileConfig
 
-class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckPropertyChecks with IOTestAuthClientChecks {
+class EndpointsTestSpec
+    extends DbFixtureSuite
+    with Matchers
+    with ScalaCheckPropertyChecks
+    with IOTestAuthClientChecks {
   val schemaNames: Seq[String] = List("ct_auth", "ct_files")
 
   val textFile = new File(getClass.getResource("/testUpload.txt").toURI)
@@ -37,7 +41,7 @@ class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckProp
       val xa = p.transactor
 
       forAnyUser(testAuthClient) { implicit headers => _ =>
-        fileClient.listFiles().map(_.result should be (empty))
+        fileClient.listFiles().map(_.result should be(empty))
       }
     }
   }
@@ -66,12 +70,12 @@ class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckProp
           _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(p.transactor)
         } yield {
           fs.result should not be empty
-        }  
+        }
       }
     }
   }
 
-  test("A user should get a specific file"){ p =>
+  test("A user should get a specific file") { p =>
     new FilesClientRunner[IO] {
       def xa = p.transactor
       forAnyUser2(testAuthClient) { implicit headers => (_: UserRequest, fi: FileInfo) =>
@@ -87,14 +91,18 @@ class EndpointsTestSpec extends DbFixtureSuite with Matchers with ScalaCheckProp
             val bytes = f
             val bs = new ByteArrayOutputStream()
             val ps = new PrintStream(bs)
-            bytes.chunks.through(_.evalMap(c => IO(ps.write(c.toArray)))).compile.drain.unsafeRunSync()
+            bytes.chunks
+              .through(_.evalMap(c => IO(ps.write(c.toArray))))
+              .compile
+              .drain
+              .unsafeRunSync()
             bs
           }
           _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(p.transactor)
         } yield {
           bs.toString should not be empty
         }
-      }  
+      }
     }
   }
 }

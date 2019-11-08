@@ -5,8 +5,8 @@ import h4sm.db.CRUDAlgebra
 import simulacrum.typeclass
 
 @typeclass
-trait PermissionAlgebra[F[_]] extends CRUDAlgebra[F, PermissionId, Permission, Unit]{
-  def selectByAppName(appName : String) : F[List[(Permission, PermissionId)]]
-  def selectByAttributes(appName : String, name : String) : OptionT[F, (Permission, PermissionId)]
+trait PermissionAlgebra[F[_]] extends CRUDAlgebra[F, PermissionId, Permission, Unit] {
+  def selectByAppName(appName: String): F[List[(Permission, PermissionId)]]
+  def selectByAttributes(appName: String, name: String): OptionT[F, (Permission, PermissionId)]
   def updateUnique(a: Permission): F[Unit]
 }

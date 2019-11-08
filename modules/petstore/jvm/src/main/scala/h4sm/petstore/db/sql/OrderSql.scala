@@ -8,7 +8,7 @@ import doobie.postgres.implicits._
 import h4sm.db.implicits._
 import java.time.Instant
 
-trait OrderSql{
+trait OrderSql {
   def insert(a: Order): Update0 = sql"""
     insert into ct_petstore.order (pet_id, user_id)
     values (${a.petId}, ${a.userId})
@@ -36,4 +36,3 @@ trait OrderSql{
     where order_id = $orderId
   """.update
 }
-

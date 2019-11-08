@@ -9,7 +9,6 @@ import h4sm.testutil.arbitraries._
 import tsec.common.SecureRandomId
 
 object arbitraries {
-
   implicit val userIdArb: Arbitrary[UserId] = Arbitrary(Gen.uuid)
 
   implicit val secureRandomIdArb: Arbitrary[SecureRandomId] = Arbitrary {
@@ -32,5 +31,3 @@ object arbitraries {
     } yield User(name, hash.getBytes)
   }
 }
-
-

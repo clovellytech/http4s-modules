@@ -13,13 +13,11 @@ trait UserSQL {
     from ct_auth.user
   """.query
 
-  def selectById(id: UserId): Query0[(User, UserId, Instant)] = (
-    select.toFragment ++ sql"""
+  def selectById(id: UserId): Query0[(User, UserId, Instant)] = (select.toFragment ++ sql"""
     where user_id = $id
   """).query
 
-  def byUsername(username: String): Query0[(User, UserId, Instant)] = (
-    select.toFragment ++ sql"""
+  def byUsername(username: String): Query0[(User, UserId, Instant)] = (select.toFragment ++ sql"""
     where username = $username
   """).query
 

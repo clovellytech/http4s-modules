@@ -6,7 +6,6 @@ import org.http4s.Response
 import tsec.authentication._
 
 package object auth {
-
   type Instant = java.time.Instant
   type UserId = java.util.UUID
 
@@ -22,10 +21,12 @@ package object auth {
   type BearerAuthService[F[_]] = UserAuthService[F, TSecBearerToken]
   type BearerSecuredRequest[F[_]] = UserSecuredRequest[F, TSecBearerToken]
 
-  def BearerAuthService[M[_]: Monad](pf: PartialFunction[UserSecuredRequest[M, TSecBearerToken], M[Response[M]]]) =
+  def BearerAuthService[M[_]: Monad](
+      pf: PartialFunction[UserSecuredRequest[M, TSecBearerToken], M[Response[M]]],
+  ) =
     UserAuthService[M, TSecBearerToken](pf)
 
   def UserAuthService[M[_]: Monad, T[_]](
-    pf: PartialFunction[UserSecuredRequest[M, T], M[Response[M]]]
+      pf: PartialFunction[UserSecuredRequest[M, T], M[Response[M]]],
   ): UserAuthService[M, T] = TSecAuthService(pf)
 }

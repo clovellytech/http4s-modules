@@ -14,7 +14,7 @@ import org.scalacheck.Arbitrary
 class ClientIntegrationTestSpec extends AsyncFlatSpec with ScalaCheckPropertyChecks with Matchers {
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val authClient = new Client[Future]{
+  val authClient = new Client[Future] {
     override def base: String = "http://localhost:8080/users"
   }
 
@@ -22,7 +22,7 @@ class ClientIntegrationTestSpec extends AsyncFlatSpec with ScalaCheckPropertyChe
     authClient.isTest.map(x => assert(!x))
   }
 
-  it should "allow login after signup" in {   
+  it should "allow login after signup" in {
     val user = implicitly[Arbitrary[UserRequest]].arbitrary.sample.get
 
     val state = for {
@@ -30,14 +30,13 @@ class ClientIntegrationTestSpec extends AsyncFlatSpec with ScalaCheckPropertyChe
       _ <- authClient.getSession(user)
       p <- authClient.currentUser
       _ <- authClient.logout
-      p2 <- authClient.currentUser.map(_.some).recover{ case _ => none }
+      p2 <- authClient.currentUser.map(_.some).recover { case _ => none }
       _ <- StateT.liftF(authClient.delete(user.username))
     } yield {
-      p.username should equal (user.username)
-      p2 should equal (none)
+      p.username should equal(user.username)
+      p2 should equal(none)
     }
 
     state.runEmptyA
   }
 }
-

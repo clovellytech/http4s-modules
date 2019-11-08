@@ -15,7 +15,7 @@ object arbitraries {
 
   implicit val uuidArb: Arbitrary[UUID] = Arbitrary(Gen.uuid)
 
-  implicit val fileInfoArb : Arbitrary[FileInfo] = Arbitrary {
+  implicit val fileInfoArb: Arbitrary[FileInfo] = Arbitrary {
     for {
       name <- nonEmptyString
       desc <- nonEmptyString
