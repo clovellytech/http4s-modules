@@ -46,7 +46,7 @@ jobs:
       env: TEST="all_tests"
       scala: *scala_213
     - env: TEST="docs"
-      script: sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
+      script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
       scala: *scala_212
     - stage: "release"
       script: sbt ci-release
