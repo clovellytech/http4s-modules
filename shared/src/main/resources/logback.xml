@@ -6,6 +6,14 @@
              Unix-based operating systems such as Linux and Mac OS X
              support ANSI color codes by default. -->
         <withJansi>true</withJansi>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+          <evaluator>
+            Ignore flyway messages about repeated schema migrations 
+            <expression>return message.contains("already exists, skipping");</expression>
+          </evaluator>
+          <OnMismatch>NEUTRAL</OnMismatch>
+          <OnMatch>DENY</OnMatch>
+        </filter>
         <encoder>
             <pattern>[%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n</pattern>
         </encoder>
