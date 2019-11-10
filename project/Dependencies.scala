@@ -26,6 +26,7 @@ object dependencies {
     val doobie = "0.8.4"
     val flyway = "6.0.8"
     val http4s = "0.21.0-M5"
+    val janino = "3.1.0"
     val kindProjector = "0.10.3"
     val logback = "1.2.3"
     val macroParadise = "2.1.0"
@@ -86,6 +87,7 @@ object dependencies {
   ).map(("org.typelevel" %% (_: String) % (_: String)).tupled) ++ Seq(
     "org.apache.commons" % "commons-lang3" % versions.apacheLang3,
     "ch.qos.logback" %  "logback-classic" % versions.logback,
+    "org.codehaus.janino" % "janino" % versions.janino,
     "org.typelevel" %% "simulacrum" % versions.simulacrum,
   ) ++ Seq(
     "circe-core",
