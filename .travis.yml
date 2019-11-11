@@ -38,7 +38,7 @@ jobs:
       env: TEST="all_tests"
       scala: *scala_213
     - env: TEST="docs"
-      script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
+      script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite && ls -la ./website/build/http4s-modules && pwd
       scala: *scala_212
       deploy:
         github-token: $GITHUB_TOKEN
