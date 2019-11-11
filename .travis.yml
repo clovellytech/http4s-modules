@@ -38,16 +38,16 @@ jobs:
       env: TEST="all_tests"
       scala: *scala_213
     - env: TEST="docs"
-      script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite && ls -la ./website/build/http4s-modules && pwd
+      script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
       scala: *scala_212
       deploy:
         github-token: $GITHUB_TOKEN
         keep-history: true
         local-dir: ./website/build/http4s-modules
         provider: pages
-        cleanup: false
+        skip_cleanup: true
         target-branch: gh-pages
-        true:
+        on:
           branch: master
     - stage: styling
       env: TEST="styling"
