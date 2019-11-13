@@ -21,7 +21,7 @@ inThisBuild(
 
 
 val scala212 = "2.12.9"
-val scala213 = "2.13.1"
+val scala213 = "2.13.0"
 
 lazy val JsTest = config("js").extend(Test)
 lazy val JvmTest = config("jvm").extend(Test)
