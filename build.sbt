@@ -258,7 +258,8 @@ lazy val docs = crossProject(JVMPlatform)
     mdocVariables := Map(
       "VERSION" -> version.value
     ),
-    cancelable in Global := true
+    cancelable in Global := true,
+    skip in publish := true,
   )
   .settings(commonSettings)
   .enablePlugins(MdocPlugin)
