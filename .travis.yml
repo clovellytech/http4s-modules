@@ -52,9 +52,4 @@ jobs:
         on:
           branch: master
     - stage: release
-      env: TEST="release_212"
-      scala: *scala_212
-      script: sbt ++$TRAVIS_SCALA_VERSION ci-release
-    - env: TEST="release_213"
-      scala: *scala_213
-      script: sbt ++$TRAVIS_SCALA_VERSION ci-release
+      script: sbt ci-release

@@ -251,6 +251,7 @@ lazy val invitations = crossProject(JVMPlatform)
 
 lazy val docs = crossProject(JVMPlatform)
   .in(file("./h4sm-docs"))
+  .settings(commonSettings)
   .settings(
     name := "h4sm-docs",
     crossScalaVersions := Seq(scala212),
@@ -261,7 +262,6 @@ lazy val docs = crossProject(JVMPlatform)
     cancelable in Global := true,
     skip in publish := true,
   )
-  .settings(commonSettings)
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
   .dependsOn(auth, db, testUtilDb, features, files, permissions, petstore)
