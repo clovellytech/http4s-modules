@@ -4,7 +4,7 @@ before_install:
   - "export PATH=${PATH}:./vendor/bundle"
 
 scala_212: &scala_212 2.12.10
-scala_213: &scala_213 2.13.0
+scala_213: &scala_213 2.13.1
 
 language: scala
 services:
@@ -54,4 +54,9 @@ jobs:
       scala: *scala_213
       script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheckAll
     - stage: release
-      script: sbt ci-release
+      env: TEST="release_212"
+      scala: *scala_212
+      script: sbt ++$TRAVIS_SCALA_VERSION ci-release
+    - env: TEST="release_213"
+      scala: *scala_213
+      script: sbt ++$TRAVIS_SCALA_VERSION ci-release
