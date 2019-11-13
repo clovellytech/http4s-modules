@@ -29,7 +29,7 @@ object dependencies {
     val janino = "3.1.0"
     val kindProjector = "0.10.3"
     val logback = "1.2.3"
-    val macroParadise = "2.1.0"
+    val macroParadise = "2.1.1"
     val notJavaTime = "0.2.0"
     val postgres = "42.2.8"
     val scalaCheck = "1.15.0-51107b8-SNAPSHOT"
