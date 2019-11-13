@@ -22,7 +22,6 @@ install:
   - "gem install sass"
 
 stages:
-  - name: styling
   - name: test
   - name: release
     if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
@@ -37,6 +36,9 @@ jobs:
     - <<: *all_tests
       env: TEST="all_tests"
       scala: *scala_213
+    - env: TEST="styling"
+      scala: *scala_213
+      script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheckAll
     - env: TEST="docs"
       script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
       scala: *scala_212
@@ -49,10 +51,6 @@ jobs:
         target-branch: gh-pages
         on:
           branch: master
-    - stage: styling
-      env: TEST="styling"
-      scala: *scala_213
-      script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheckAll
     - stage: release
       env: TEST="release_212"
       scala: *scala_212
