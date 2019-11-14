@@ -8,7 +8,6 @@ import doobie._
 import doobie.implicits._
 //import doobie.postgres._
 import doobie.postgres.implicits._
-import h4sm.db.implicits._
 
 trait OrderSql {
   val a = Read[OrderItem]

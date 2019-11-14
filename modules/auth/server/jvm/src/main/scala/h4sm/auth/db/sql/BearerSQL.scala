@@ -4,7 +4,6 @@ package db.sql
 import doobie._
 import doobie.implicits._
 import domain.tokens._
-import h4sm.db.implicits._
 import tsec.common.SecureRandomId
 
 trait BaseTokenSql {
