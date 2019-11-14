@@ -3,7 +3,6 @@ package store
 package infrastructure.repository.sql
 
 import cats.implicits._
-import db.implicits._
 import domain._
 import doobie._
 import doobie.implicits._

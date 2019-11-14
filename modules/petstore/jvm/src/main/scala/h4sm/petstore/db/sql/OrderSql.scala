@@ -5,7 +5,6 @@ import domain._
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import h4sm.db.implicits._
 import java.time.Instant
 
 trait OrderSql {

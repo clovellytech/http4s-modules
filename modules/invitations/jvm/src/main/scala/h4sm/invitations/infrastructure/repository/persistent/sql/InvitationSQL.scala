@@ -3,7 +3,6 @@ package invitations
 package infrastructure.repository.persistent.sql
 
 import auth.UserId
-import db.implicits._
 import domain._
 import doobie._
 import doobie.implicits._
