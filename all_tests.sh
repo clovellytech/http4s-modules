@@ -38,7 +38,7 @@ done
 
 echo "Server started, running all tests"
 
-sbt ++$TRAVIS_SCALA_VERSION test
+sbt ++$TRAVIS_SCALA_VERSION jvm:test && sbt ++$TRAVIS_SCALA_VERSION js:test
 
 TEST_RES=$?
 
