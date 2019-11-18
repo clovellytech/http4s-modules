@@ -162,7 +162,7 @@ lazy val auth = crossProject(JVMPlatform)
   .dependsOn(authComm % withTests)
 
 lazy val authClient = jsProject("authClient", "./modules/auth/client")
-  .settings(name := "auth-client")
+  .settings(name := "h4sm-auth-client")
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
@@ -222,7 +222,7 @@ lazy val featuresComm = crossProject(JVMPlatform, JSPlatform)
   .dependsOn(authComm % withTests)
 
 lazy val featuresClient = jsProject("featuresClient", "./modules/features/client")
-  .settings(name := "features-client")
+  .settings(name := "h4sm-features-client")
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(

@@ -21,8 +21,8 @@ To provide a library of production ready modules, complete with database schema,
 * store - A store with items and orders.
 * more to come! Something you would like to see here? Submit an issue!
 
-Contributors and Recognition
----
+## Contributors and Recognition
+
 PRs and issues are so welcome on this project. Generally contributors don't have to be people that commit code or even write issues. Thanks especially to:
 
 * [@pauljamescleary](https://github.com/pauljamescleary) for the [scala-pet-store](https://github.com/pauljamescleary/scala-pet-store) teaching project.
@@ -45,7 +45,18 @@ libraryDependencies ++= Seq(
 	"h4sm-invitations",
     "h4sm-store",
 	"h4sm-permissions"
-).map("com.clovellytech" %% _ % "0.0.32")
+).map("com.clovellytech" %% _ % "0.0.35")
+```
+
+## Scalajs Clients
+
+Clients are prebuilt for several modules. You can include them in your scalajs projects as:
+
+```
+libraryDependencies ++= Seq(
+    "h4sm-auth-client",
+    "h4sm-features-client",
+).map("com.clovellytech" %%% _ % "0.0.35")
 ```
 
 
