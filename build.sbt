@@ -310,7 +310,7 @@ lazy val exampleServer = crossProject(JVMPlatform)
     libraryDependencies ++= commonDeps,
   )
   .enablePlugins(JavaAppPackaging)
-  .dependsOn(auth, db, files, featuresServer, permissions, store, testUtilCommon, testUtilDb, invitations)
+  .dependsOn(auth, db, files, featuresServer, featuresComm, permissions, store, testUtilCommon, testUtilDb, invitations)
 
 lazy val root = crossProject(JVMPlatform)
   .in(file("."))

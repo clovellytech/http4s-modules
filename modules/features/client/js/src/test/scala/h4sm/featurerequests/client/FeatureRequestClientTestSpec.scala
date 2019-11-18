@@ -21,7 +21,7 @@ class FeatureRequestClientTestSpec extends AsyncFlatSpec with Matchers {
   }
 
   val featuresClient = new FeatureRequestClient[Future] {
-    override def base: String = "http://localhost:8080"
+    override def base: String = "http://localhost:8080/requests"
   }
 
   "A user" should "be able to add a feature" in {

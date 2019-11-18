@@ -15,8 +15,9 @@ import h4sm.auth.comm.SiteResult
 import h4sm.featurerequests.comm.codecs._
 import h4sm.featurerequests.infrastructure.repository.persistent.RequestRepositoryInterpreter
 import h4sm.featurerequests.comm.domain.features.{Feature, FeatureRequest}
+import h4sm.auth.domain.tokens.AsBaseToken
 
-class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra] extends Http4sDsl[F] {
+class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra, T[_]](implicit T: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
   def unAuthEndpoints: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "request" =>
       for {
@@ -25,12 +26,12 @@ class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra] extends Http4sDsl[F
       } yield resp
   }
 
-  def authEndpoints: BearerAuthService[F] = BearerAuthService {
+  def authEndpoints: UserAuthService[F, T] = UserAuthService {
     case req @ POST -> Root / "request" asAuthed _ =>
       for {
         featureRequest <- req.request.as[FeatureRequest]
         feature = Feature(
-          req.authenticator.identity.some,
+          T.asBase(req.authenticator).identity.some,
           featureRequest.title,
           featureRequest.description,
         )
@@ -41,10 +42,12 @@ class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra] extends Http4sDsl[F
 }
 
 object RequestEndpoints {
-  def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable]](
+  def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable], T[_]](
       xa: Transactor[F],
-  ): RequestEndpoints[F] = {
+  )(implicit
+    T: AsBaseToken[T[UserId]]
+  ): RequestEndpoints[F, T] = {
     implicit val requestRepo = new RequestRepositoryInterpreter(xa)
-    new RequestEndpoints[F]
+    new RequestEndpoints[F, T]
   }
 }

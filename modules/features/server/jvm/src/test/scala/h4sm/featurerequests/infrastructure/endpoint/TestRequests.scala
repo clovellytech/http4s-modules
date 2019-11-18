@@ -22,6 +22,7 @@ import org.http4s.dsl._
 import org.http4s.client.dsl._
 import org.http4s.circe.CirceEntityCodec._
 import tsec.passwordhashers.jca.BCrypt
+import tsec.authentication.TSecBearerToken
 
 class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http4sClientDsl[F] {
   implicit val userRepo = new UserRepositoryInterpreter(xa)
@@ -34,12 +35,12 @@ class TestRequests[F[_]: Sync](xa: Transactor[F]) extends Http4sDsl[F] with Http
   val Auth = authEndpoints.Auth
 
   implicit val rinterp = new RequestRepositoryInterpreter(xa)
-  val re = new RequestEndpoints[F]
+  val re = new RequestEndpoints[F, TSecBearerToken]
 
   val requestEndpoints: HttpRoutes[F] = re.unAuthEndpoints <+> Auth.liftService(re.authEndpoints)
 
   implicit val vinterp = new VoteRepositoryInterpreter[F](xa)
-  val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F].endpoints)
+  val voteEndpoints: HttpRoutes[F] = Auth.liftService(new VoteEndpoints[F, TSecBearerToken].endpoints)
 
   def addRequest(req: FeatureRequest)(resp: Response[F]): F[Response[F]] =
     for {

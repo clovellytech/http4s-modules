@@ -21,6 +21,7 @@ import org.http4s.implicits._
 
 import scala.concurrent.ExecutionContext
 import tsec.passwordhashers.jca.BCrypt
+import tsec.authentication.TSecBearerToken
 
 class Server[F[_]: ConcurrentEffect: Timer: ContextShift] {
   def app(xa: Transactor[F], port: Int, host: String): F[ExitCode] = {
@@ -29,8 +30,8 @@ class Server[F[_]: ConcurrentEffect: Timer: ContextShift] {
     implicit val tokenService = new TokenRepositoryInterpreter(xa)
     val authEndpoints = new AuthEndpoints(userService, Authenticators.bearer)
     val authService = authEndpoints.Auth
-    val requestEndpoints = RequestEndpoints.persistingEndpoints(xa)
-    val voteEndpoints = VoteEndpoints.persistingEndpoints(xa)
+    val requestEndpoints = RequestEndpoints.persistingEndpoints[F, TSecBearerToken](xa)
+    val voteEndpoints = VoteEndpoints.persistingEndpoints[F, TSecBearerToken](xa)
     val requestApp = requestEndpoints.unAuthEndpoints <+> authService.liftService(
       requestEndpoints.authEndpoints,
     )

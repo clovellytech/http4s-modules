@@ -10,6 +10,7 @@ import auth.infrastructure.repository.persistent.{
 import auth.domain._
 import auth.domain.tokens._
 import auth.domain.users.UserRepositoryAlgebra
+import h4sm.featurerequests.infrastructure.endpoint.{RequestEndpoints, VoteEndpoints}
 import db.config._
 import doobie._
 import doobie.hikari.HikariTransactor
@@ -20,6 +21,7 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import scala.concurrent.ExecutionContext
 import tsec.passwordhashers.jca._
+import tsec.authentication.TSecBearerToken
 
 /*
  * Build a server that uses every module in this project...
@@ -32,6 +34,8 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       testMode: Boolean,
       auth: AuthEndpoints[F, A, T],
       files: FileEndpoints[F, T],
+      requests: RequestEndpoints[F, T],
+      votes: VoteEndpoints[F, T]
   ): HttpRoutes[F] =
     Router(
       "/users" -> {
@@ -40,6 +44,7 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
         else auth.endpoints
       },
       "/files" -> files.endpoints,
+      "/requests" -> (requests.unAuthEndpoints <+> auth.Auth.liftService(requests.authEndpoints <+> votes.endpoints))
     )
 
   def createServer: Resource[F, Server[F]] =
@@ -63,13 +68,15 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       userService = new UserService[F, BCrypt](BCrypt)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
       authEndpoints = new AuthEndpoints(userService, Authenticators.bearer)
-      _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files"))
+      _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_files", "ct_feature_requests"))
       files = FileEndpoints.persistingEndpoints(
         xa,
         authEndpoints.Auth,
         Blocker.liftExecutionContext(ExecutionContext.Implicits.global),
       )
-      service = router(test, authEndpoints, files).orNotFound
+      requests = RequestEndpoints.persistingEndpoints[F, TSecBearerToken](xa)
+      votes = VoteEndpoints.persistingEndpoints[F, TSecBearerToken](xa)
+      service = router(test, authEndpoints, files, requests, votes).orNotFound
       withCors = if (allowCors) {
         import org.http4s.server.middleware.{CORS, CORSConfig}
         import scala.concurrent.duration._
