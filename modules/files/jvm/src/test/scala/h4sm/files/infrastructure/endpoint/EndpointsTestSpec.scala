@@ -9,8 +9,8 @@ import cats.effect.{Blocker, IO}
 import cats.implicits._
 import doobie.implicits._
 import auth.client.IOTestAuthClientChecks
+import auth.comm.arbitraries._
 import auth.comm.UserRequest
-import auth.infrastructure.endpoint.arbitraries._
 import files.client.FilesClientRunner
 import files.domain.FileInfo
 import files.db.sql.{files => filesSql}

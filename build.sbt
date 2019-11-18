@@ -133,8 +133,8 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
   .in(file("./modules/auth/comm"))
   .settings(commonSettings)
   .settings(
-    name := "h4sm-shared",
     skip in publish := true,
+    name := "h4sm-auth-comm",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
@@ -146,6 +146,7 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
       "circe-parser",
     ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test")
   )
+  .dependsOn(testUtilCommon % testOnly)
 
 lazy val auth = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
@@ -157,8 +158,8 @@ lazy val auth = crossProject(JVMPlatform)
     libraryDependencies ++= commonDeps ++ authDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(db)
-  .dependsOn(testUtilDb % testOnly)
-  .dependsOn(authComm)
+  .dependsOn(testUtilDb % testOnly, testUtilCommon % testOnly)
+  .dependsOn(authComm % withTests)
 
 lazy val authClient = jsProject("authClient", "./modules/auth/client")
   .settings(name := "auth-client")
@@ -189,9 +190,9 @@ lazy val files = crossProject(JVMPlatform)
   )
   .dependsOn(db % withTests, auth % withTests, testUtilDb % withTests)
 
-lazy val features = crossProject(JVMPlatform)
+lazy val featuresServer = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
-  .in(file("./modules/features"))
+  .in(file("./modules/features/server"))
   .settings(commonSettings)
   .settings(publishArtifact in Test := true)
   .settings(
@@ -199,7 +200,43 @@ lazy val features = crossProject(JVMPlatform)
     mainClass in reStart := Some("h4sm.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, testUtilDb % testOnly)
+  .dependsOn(auth % withTests, db % withTests, featuresComm % withTests, testUtilDb % testOnly)
+
+lazy val featuresComm = crossProject(JVMPlatform, JSPlatform)
+  .jvmConfigure(_.configs(JvmTest))
+  .jsConfigure(_.configs(JsTest))
+  .in(file("./modules/features/comm"))
+  .settings(commonSettings)
+  .settings(
+    name := "h4sm-features-comm",
+    libraryDependencies ++= Seq(
+      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
+      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+      "org.typelevel" %%% "simulacrum" % versions.simulacrum,
+    ) ++ Seq(
+      "circe-core",
+      "circe-generic",
+      "circe-parser",
+    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test")
+  )
+  .dependsOn(authComm % withTests)
+
+lazy val featuresClient = jsProject("featuresClient", "./modules/features/client")
+  .settings(name := "features-client")
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
+      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+      "org.scala-js" %%% "scalajs-dom" % versions.scalajs,
+      "org.typelevel" %%% "simulacrum" % versions.simulacrum,
+    ) ++ Seq(
+      "circe-core",
+      "circe-generic",
+      "circe-parser",
+    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test"),
+  )
+  .dependsOn(common, featuresComm % withTests, authClient, testUtilCommon % withTests)
 
 lazy val permissions = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
@@ -210,7 +247,7 @@ lazy val permissions = crossProject(JVMPlatform)
     name := "h4sm-permissions",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, authComm, db % withTests, testUtilDb % withTests)
+  .dependsOn(auth % withTests, authComm % withTests, db % withTests, testUtilDb % withTests)
 
 
 lazy val store = crossProject(JVMPlatform)
@@ -260,7 +297,7 @@ lazy val docs = crossProject(JVMPlatform)
   )
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
-  .dependsOn(auth, db, testUtilDb, features, files, permissions, petstore)
+  .dependsOn(auth, db, testUtilDb, featuresServer, files, permissions, petstore)
 
 lazy val exampleServer = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
@@ -273,7 +310,7 @@ lazy val exampleServer = crossProject(JVMPlatform)
     libraryDependencies ++= commonDeps,
   )
   .enablePlugins(JavaAppPackaging)
-  .dependsOn(auth, db, files, features, permissions, store, testUtilCommon, testUtilDb, invitations)
+  .dependsOn(auth, db, files, featuresServer, permissions, store, testUtilCommon, testUtilDb, invitations)
 
 lazy val root = crossProject(JVMPlatform)
   .in(file("."))
@@ -281,4 +318,4 @@ lazy val root = crossProject(JVMPlatform)
     name := "h4sm-root",
     skip in publish := true,
   )
-  .aggregate(auth, db, files, features, permissions, store, testUtilCommon, testUtilDb, invitations)
+  .aggregate(auth, db, files, featuresServer, permissions, store, testUtilCommon, testUtilDb, invitations)

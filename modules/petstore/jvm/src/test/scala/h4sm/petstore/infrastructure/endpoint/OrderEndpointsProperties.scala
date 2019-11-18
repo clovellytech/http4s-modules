@@ -5,7 +5,7 @@ package infrastructure.endpoint
 import cats.effect.IO
 import testutil.DbFixtureSuite
 import auth.client.IOTestAuthClientChecks
-import auth.infrastructure.endpoint.arbitraries._
+import auth.comm.arbitraries._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.matchers.should.Matchers
 import petstore.infrastructure.endpoint.arbitraries._

@@ -3,7 +3,7 @@ package permissions
 package infrastructure
 package endpoint
 
-import auth.infrastructure.endpoint.arbitraries._
+import auth.comm.arbitraries._
 import auth.comm.UserRequest
 import cats.data.OptionT
 import cats.effect.IO
