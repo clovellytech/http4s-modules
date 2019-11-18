@@ -124,9 +124,7 @@ lazy val common = jsProject("common", "./modules/common")
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ Seq(
-      "io.circe" %%% "not-java-time" % versions.notJavaTime,
-    ) ++ testDeps.map(_ % "test"),
+    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test"),
   )
 
 lazy val authComm = crossProject(JSPlatform, JVMPlatform)
@@ -141,7 +139,7 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+      "io.github.cquiroz" %%% "scala-java-time" % versions.scalaJavaTime,
     ) ++ Seq(
       "circe-core",
       "circe-generic",
@@ -171,14 +169,12 @@ lazy val authClient = jsProject("authClient", "./modules/auth/client")
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.scala-js" %%% "scalajs-dom" % versions.scalajs,
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+      "io.github.cquiroz" %%% "scala-java-time" % versions.scalaJavaTime
     ) ++ Seq(
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ Seq(
-      "io.circe" %%% "not-java-time" % versions.notJavaTime,
-    ) ++ testDeps.map(_ % "test"),
+    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test"),
   )
   .dependsOn(common, authComm, testUtilCommon % withTests)
 
