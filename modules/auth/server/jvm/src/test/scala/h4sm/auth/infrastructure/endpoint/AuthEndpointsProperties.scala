@@ -2,7 +2,7 @@ package h4sm
 package auth.infrastructure
 package endpoint
 
-import arbitraries._
+import auth.comm.arbitraries._
 import cats.effect.{Bracket, IO, Sync}
 import doobie.util.transactor.Transactor
 import h4sm.auth.client.AuthClient

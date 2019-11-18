@@ -4,7 +4,7 @@ package infrastructure.endpoint
 
 import arbitraries._
 import auth.client.IOTestAuthClientChecks
-import auth.infrastructure.endpoint.arbitraries._
+import auth.comm.arbitraries._
 import cats.effect.IO
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.matchers.should.Matchers

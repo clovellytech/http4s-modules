@@ -2,7 +2,7 @@ package h4sm
 package invitations.infrastructure.endpoint
 
 import auth.client.IOTestAuthClientChecks
-import auth.infrastructure.endpoint.arbitraries._
+import auth.comm.arbitraries._
 import auth.comm.UserRequest
 import cats.effect.{IO, Sync}
 import cats.implicits._

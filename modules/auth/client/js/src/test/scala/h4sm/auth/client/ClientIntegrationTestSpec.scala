@@ -8,10 +8,9 @@ import h4sm.auth.comm.UserRequest
 import scala.concurrent.Future
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalacheck.Arbitrary
 
-class ClientIntegrationTestSpec extends AsyncFlatSpec with ScalaCheckPropertyChecks with Matchers {
+class ClientIntegrationTestSpec extends AsyncFlatSpec with Matchers {
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val authClient = new Client[Future] {

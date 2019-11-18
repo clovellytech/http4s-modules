@@ -4,11 +4,9 @@ import cats.Monad
 import h4sm.auth.db.domain.User
 import org.http4s.Response
 import tsec.authentication._
+import h4sm.auth.comm.AuthTypes
 
-package object auth {
-  type Instant = java.time.Instant
-  type UserId = java.util.UUID
-
+package object auth extends AuthTypes {
   type SecureRandomId = tsec.common.SecureRandomId
 
   type UserSecuredRequest[F[_], T[_]] = SecuredRequest[F, User, T[UserId]]
