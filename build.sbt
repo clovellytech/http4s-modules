@@ -297,7 +297,7 @@ lazy val docs = crossProject(JVMPlatform)
   )
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
-  .dependsOn(auth, db, testUtilDb, featuresServer, files, permissions, petstore)
+  .dependsOn(auth, db, testUtilDb, testUtilCommon, featuresServer, files, permissions, petstore)
 
 lazy val exampleServer = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
