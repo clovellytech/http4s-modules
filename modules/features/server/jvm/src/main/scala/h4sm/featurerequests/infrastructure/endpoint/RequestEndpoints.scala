@@ -17,7 +17,9 @@ import h4sm.featurerequests.infrastructure.repository.persistent.RequestReposito
 import h4sm.featurerequests.comm.domain.features.{Feature, FeatureRequest}
 import h4sm.auth.domain.tokens.AsBaseToken
 
-class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra, T[_]](implicit T: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
+class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra, T[_]](
+    implicit T: AsBaseToken[T[UserId]],
+) extends Http4sDsl[F] {
   def unAuthEndpoints: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "request" =>
       for {
@@ -44,8 +46,9 @@ class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra, T[_]](implicit T: A
 object RequestEndpoints {
   def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable], T[_]](
       xa: Transactor[F],
-  )(implicit
-    T: AsBaseToken[T[UserId]]
+  )(
+      implicit
+      T: AsBaseToken[T[UserId]],
   ): RequestEndpoints[F, T] = {
     implicit val requestRepo = new RequestRepositoryInterpreter(xa)
     new RequestEndpoints[F, T]

@@ -6,7 +6,7 @@ import cats.effect.{Bracket, Sync}
 import cats.implicits._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec._
-import h4sm.auth.{UserId, UserAuthService}
+import h4sm.auth.{UserAuthService, UserId}
 import h4sm.auth.domain.tokens.AsBaseToken
 import h4sm.featurerequests.comm.codecs._
 import h4sm.featurerequests.comm.domain.votes._
@@ -16,7 +16,8 @@ import domain.votes.VoteRepositoryAlgebra
 import doobie.util.transactor.Transactor
 import tsec.authentication._
 
-class VoteEndpoints[F[_]: Sync: VoteRepositoryAlgebra, T[_]](implicit T: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
+class VoteEndpoints[F[_]: Sync: VoteRepositoryAlgebra, T[_]](implicit T: AsBaseToken[T[UserId]])
+    extends Http4sDsl[F] {
   def submitVote: UserAuthService[F, T] = UserAuthService {
     case req @ POST -> Root / "vote" asAuthed _ =>
       for {
@@ -38,8 +39,9 @@ class VoteEndpoints[F[_]: Sync: VoteRepositoryAlgebra, T[_]](implicit T: AsBaseT
 object VoteEndpoints {
   def persistingEndpoints[F[_]: Sync: Bracket[?[_], Throwable], T[_]](
       xa: Transactor[F],
-  )(implicit 
-    T: AsBaseToken[T[UserId]]
+  )(
+      implicit
+      T: AsBaseToken[T[UserId]],
   ): VoteEndpoints[F, T] = {
     implicit val voteRepo = new VoteRepositoryInterpreter(xa)
     new VoteEndpoints[F, T]

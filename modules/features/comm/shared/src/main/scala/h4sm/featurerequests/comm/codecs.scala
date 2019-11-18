@@ -6,7 +6,7 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 import h4sm.featurerequests.comm.domain.features.{Feature, FeatureRequest}
-import h4sm.featurerequests.comm.domain.votes.{VotedFeature, VoteRequest}
+import h4sm.featurerequests.comm.domain.votes.{VoteRequest, VotedFeature}
 
 object codecs {
   implicit val dateTimeEncoder: Encoder[Instant] = Encoder.instance(a => a.toEpochMilli.asJson)

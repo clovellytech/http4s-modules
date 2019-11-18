@@ -26,8 +26,8 @@ class FeatureRequestClientTestSpec extends AsyncFlatSpec with Matchers {
 
   "A user" should "be able to add a feature" in {
     // forAll and futures don't mix...
-    val (u, r) = implicitly[Arbitrary[(UserRequest, FeatureRequest)]].arbitrary.sample.get 
-    
+    val (u, r) = implicitly[Arbitrary[(UserRequest, FeatureRequest)]].arbitrary.sample.get
+
     val t = for {
       _ <- StateT.liftF(authClient.signup(u))
       _ <- authClient.getSession(u)
@@ -35,7 +35,7 @@ class FeatureRequestClientTestSpec extends AsyncFlatSpec with Matchers {
       fs <- StateT.liftF(featuresClient.getRequests)
       _ <- StateT.liftF(authClient.delete(u.username))
     } yield {
-      fs.map(rr => FeatureRequest(rr.feature.title, rr.feature.description)) should contain (r)
+      fs.map(rr => FeatureRequest(rr.feature.title, rr.feature.description)) should contain(r)
     }
 
     t.runEmptyA

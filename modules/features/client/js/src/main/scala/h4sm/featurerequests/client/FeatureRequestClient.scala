@@ -17,14 +17,15 @@ class FeatureRequestClient[F[_]: Monad](implicit val F: API[F]) {
 
   type Session[A] = StateT[F, F.H, A]
 
-  def getRequests: F[List[VotedFeature]] = for {
-    resp <- F.get(requestRoute)
-    res <- resp.as[SiteResult[List[VotedFeature]]]
-  } yield res.result
+  def getRequests: F[List[VotedFeature]] =
+    for {
+      resp <- F.get(requestRoute)
+      res <- resp.as[SiteResult[List[VotedFeature]]]
+    } yield res.result
 
-  def postRequest(req: FeatureRequest): Session[Unit] = 
+  def postRequest(req: FeatureRequest): Session[Unit] =
     F.postT(requestRoute, req).void
 
-  def submitVote(req: VoteRequest): Session[Unit] = 
+  def submitVote(req: VoteRequest): Session[Unit] =
     F.postT(voteRoute, req).void
 }
