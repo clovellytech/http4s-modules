@@ -23,12 +23,13 @@ object dependencies {
     val circe = "0.12.3"
     val circeConfig = "0.7.0"
     val cryptobits = "1.1"
-    val doobie = "0.8.4"
+    val doobie = "0.8.6"
     val flyway = "6.0.8"
     val http4s = "0.21.0-M5"
+    val janino = "3.1.0"
     val kindProjector = "0.10.3"
     val logback = "1.2.3"
-    val macroParadise = "2.1.0"
+    val macroParadise = "2.1.1"
     val notJavaTime = "0.2.0"
     val postgres = "42.2.8"
     val scalaCheck = "1.15.0-51107b8-SNAPSHOT"
@@ -86,6 +87,7 @@ object dependencies {
   ).map(("org.typelevel" %% (_: String) % (_: String)).tupled) ++ Seq(
     "org.apache.commons" % "commons-lang3" % versions.apacheLang3,
     "ch.qos.logback" %  "logback-classic" % versions.logback,
+    "org.codehaus.janino" % "janino" % versions.janino,
     "org.typelevel" %% "simulacrum" % versions.simulacrum,
   ) ++ Seq(
     "circe-core",

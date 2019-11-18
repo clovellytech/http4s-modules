@@ -66,7 +66,7 @@ import h4sm.db.CRUAlgebra
 trait PetAlgebra[F[_]] extends CRUAlgebra[F, UUID, Pet, Instant]
 ```
 
-And that's all we have to write. PetAlgebra will have a type member `Annotated`, which will be `(Pet, UUID, Instant)`, referring to the base datatype `Pet`, it's id type, and the remaining fields that the database is in control of. 
+And that's all we have to write. PetAlgebra will have a type member `Annotated`, which will be `(Pet, UUID, Instant)`, referring to the base datatype `Pet`, it's id type, and the remaining fields that the database is in control of.
 
 Let's see how this translates to writing a repository for this algebra:
 
@@ -80,11 +80,11 @@ class PetRepositoryUnimplemented[F[_]] extends PetAlgebra[F]{
   // OptionT is used here as a way to handle unresolved insert collisions. We don't have any unique fields on
   // our pets.
   def insertGetId(a: Pet): OptionT[F,UUID] = ???
-  
+
   // Members declared in h4sm.db.RAlgebra
   def byId(id: UUID): OptionT[F,Annotated] = ???
   def select: F[List[Annotated]] = ???
-  
+
   // Members declared in h4sm.db.UAlgebra
   def update(id: UUID, u: Pet): F[Unit] = ???
 }
@@ -98,7 +98,6 @@ Each of these methods will require a query available. So let's begin by writing 
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import h4sm.db.implicits._
 
 trait PetSql{
   def insert(a: Pet): Update0 = sql"""
@@ -155,7 +154,7 @@ object arbitraries {
 
 Now all our queries are available as `PetSql`. Let's write some typechecking tests:
 
-```scala mdoc 
+```scala mdoc
 import cats.effect.IO
 import h4sm.db.config.DatabaseConfig
 import h4sm.testutil.arbitraries._
@@ -185,7 +184,7 @@ val t = new PetSqlTestSpec
 t.execute(color = false)
 ```
 
-Doobie's typechecking has alerted us that there is a mismatch between our queries and our domain representation. We need to handle a possibly null bio, and a possibly empty or null photo_urls.  
+Doobie's typechecking has alerted us that there is a mismatch between our queries and our domain representation. We need to handle a possibly null bio, and a possibly empty or null photo_urls.
 
 We can handle a null bio by simply making that field optional in our domain object:
 
@@ -212,11 +211,11 @@ class PetRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends P
   def insert(a: Pet): F[Unit] = PetSql.insert(a).run.transact(xa).void
 
   def insertGetId(a: Pet): OptionT[F,UUID] = OptionT.liftF(PetSql.insertGetId(a).transact(xa))
-  
+
   // Members declared in h4sm.db.RAlgebra
   def byId(id: UUID): OptionT[F,Annotated] = OptionT(PetSql.selectById(id).option.transact(xa))
   def select: F[List[Annotated]] = PetSql.select.to[List].transact(xa)
-  
+
   // Members declared in h4sm.db.UAlgebra
   def update(id: UUID, u: Pet): F[Unit] = PetSql.update(id, u).run.transact(xa).void
 }

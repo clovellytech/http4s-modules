@@ -20,7 +20,7 @@ inThisBuild(
 )
 
 
-val scala212 = "2.12.9"
+val scala212 = "2.12.10"
 val scala213 = "2.13.0"
 
 lazy val JsTest = config("js").extend(Test)
@@ -29,12 +29,12 @@ lazy val JvmTest = config("jvm").extend(Test)
 val commonSettings = Seq(
   crossScalaVersions  := Seq(scala212, scala213),
   organization := "com.clovellytech",
-  scalaVersion := Version.scalaVersion,
   resolvers ++= addResolvers,
+  // Make sure every subproject is using a logging configuration.
+  Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
   scalacOptions ++= options.scalacOptionsForVersion(scalaVersion.value),
   scalacOptions in (Compile, console) ~= (_.diff(options.badScalacConsoleFlags)),
   scalacOptions in (Test, console) ~= (_.diff(options.badScalacConsoleFlags)),
-  updateOptions := updateOptions.value.withLatestSnapshots(false),
   libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
 )
 
@@ -251,6 +251,7 @@ lazy val invitations = crossProject(JVMPlatform)
 
 lazy val docs = crossProject(JVMPlatform)
   .in(file("./h4sm-docs"))
+  .settings(commonSettings)
   .settings(
     name := "h4sm-docs",
     crossScalaVersions := Seq(scala212),
@@ -258,9 +259,9 @@ lazy val docs = crossProject(JVMPlatform)
     mdocVariables := Map(
       "VERSION" -> version.value
     ),
-    cancelable in Global := true
+    cancelable in Global := true,
+    skip in publish := true,
   )
-  .settings(commonSettings)
   .enablePlugins(MdocPlugin)
   .enablePlugins(DocusaurusPlugin)
   .dependsOn(auth, db, testUtilDb, features, files, permissions, petstore)

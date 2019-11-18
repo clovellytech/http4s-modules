@@ -15,15 +15,6 @@ cache:
     - $HOME/.coursier/cache
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot
-deploy:
-  github-token: $GITHUB_TOKEN
-  keep-history: true
-  local-dir: ./website/build/http4s-modules
-  provider: pages
-  skip-cleanup: true
-  target-branch: gh-pages
-  true:
-    branch: master
 dist: xenial
 install:
   - "rvm use 2.3.0 --install --fuzzy"
@@ -31,7 +22,6 @@ install:
   - "gem install sass"
 
 stages:
-  - name: styling
   - name: test
   - name: release
     if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
@@ -46,12 +36,20 @@ jobs:
     - <<: *all_tests
       env: TEST="all_tests"
       scala: *scala_213
+    - env: TEST="styling"
+      scala: *scala_213
+      script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheckAll
     - env: TEST="docs"
       script: ./script/travis_init.sh && sbt ++$TRAVIS_SCALA_VERSION docsJVM/mdoc && sbt ++$TRAVIS_SCALA_VERSION docsJVM/docusaurusCreateSite
       scala: *scala_212
-    - stage: styling
-      env: TEST="styling"
-      scala: *scala_213
-      script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheckAll
+      deploy:
+        github-token: $GITHUB_TOKEN
+        keep-history: true
+        local-dir: ./website/build/http4s-modules
+        provider: pages
+        skip_cleanup: true
+        target-branch: gh-pages
+        on:
+          branch: master
     - stage: release
       script: sbt ci-release
