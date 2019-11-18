@@ -1,4 +1,4 @@
-h4sm - Scala Http4s Modules [![Join the chat][gitter-badge]][gitter-url] [![Build Status][travis-badge]][travis-url]
+h4sm - Scala Http4s Modules [![Join the chat][gitter-badge]][gitter-url] [![Build Status][travis-badge]][travis-url] [![Sonatype Release][sonatype-badge]][sonatype-url]
 ============
 
 
@@ -37,7 +37,7 @@ Get Started
 ---
 Add any of the following dependencies to your build.sbt. There are interdependencies too, so you may consult `build.sbt` to see which modules depend on which, and thus may not need to be declared in your `build.sbt`.
 
-```
+```scala
 libraryDependencies ++= Seq(
 	"h4sm-auth",
 	"h4sm-features",
@@ -45,22 +45,24 @@ libraryDependencies ++= Seq(
 	"h4sm-invitations",
     "h4sm-store",
 	"h4sm-permissions"
-).map("com.clovellytech" %% _ % "0.0.35")
+).map("com.clovellytech" %% _ % h4smVersion)
 ```
 
 ## Scalajs Clients
 
 Clients are prebuilt for several modules. You can include them in your scalajs projects as:
 
-```
+```scala
 libraryDependencies ++= Seq(
     "h4sm-auth-client",
     "h4sm-features-client",
-).map("com.clovellytech" %%% _ % "0.0.35")
+).map("com.clovellytech" %%% _ % h4smVersion)
 ```
 
 
-[gitter-badge]: https://badges.gitter.im/clovellytech/http4s-modules.svg
-[gitter-url]: https://gitter.im/clovellytech/http4s-modules?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[travis-badge]: https://travis-ci.com/clovellytech/http4s-modules.svg?branch=master
-[travis-url]: https://travis-ci.com/clovellytech/http4s-modules
+[gitter-badge]: https://badges.gitter.im/clovellytech/http4s-modules.svg "Chat"
+[gitter-url]: https://gitter.im/clovellytech/http4s-modules?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge "Chat"
+[travis-badge]: https://travis-ci.com/clovellytech/http4s-modules.svg?branch=master "Build Status"
+[travis-url]: https://travis-ci.com/clovellytech/http4s-modules "Build Status"
+[sonatype-badge]: https://img.shields.io/nexus/r/com.clovellytech/h4sm-auth_2.12.svg?server=https://oss.sonatype.org "Sonatype Releases"
+[sonatype-url]: https://oss.sonatype.org/content/groups/public/com/clovellytech/ "Sonatype Releases"
