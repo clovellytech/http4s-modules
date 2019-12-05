@@ -1,6 +1,6 @@
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.2.1")
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.0.2" )
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.0.3" )
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
 addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.4.31")
 

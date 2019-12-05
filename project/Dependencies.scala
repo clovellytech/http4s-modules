@@ -24,8 +24,8 @@ object dependencies {
     val circeConfig = "0.7.0"
     val cryptobits = "1.1"
     val doobie = "0.8.6"
-    val flyway = "6.0.8"
-    val http4s = "0.21.0-M5"
+    val flyway = "6.1.0"
+    val http4s = "0.21.0-M6"
     val janino = "3.1.0"
     val kindProjector = "0.10.3"
     val logback = "1.2.3"
@@ -37,7 +37,7 @@ object dependencies {
     val scalaTest = "3.2.0-M1"
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
     val simulacrum = "1.0.0"
-    val tsec = "0.2.0-M2"
+    val tsec = "0.2.0-M1"
   }
 
   val compilerPlugins = Seq(
