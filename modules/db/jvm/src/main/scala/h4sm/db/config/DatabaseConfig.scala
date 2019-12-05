@@ -27,6 +27,7 @@ object DatabaseConfig {
       Flyway
         .configure()
         .dataSource(ds)
+        .defaultSchema(schemaName)
         .schemas(schemaName)
         .locations(s"db/$schemaName/migration")
         .load()
