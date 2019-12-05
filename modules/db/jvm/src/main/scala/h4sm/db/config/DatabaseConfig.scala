@@ -19,6 +19,7 @@ final case class DatabaseConfig(
 }
 
 object DatabaseConfig {
+
   /**
     * Runs the flyway migrations against the target database
     */
