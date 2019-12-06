@@ -19,6 +19,7 @@ final case class DatabaseConfig(
 }
 
 object DatabaseConfig {
+
   /**
     * Runs the flyway migrations against the target database
     */
@@ -27,6 +28,7 @@ object DatabaseConfig {
       Flyway
         .configure()
         .dataSource(ds)
+        .defaultSchema(schemaName)
         .schemas(schemaName)
         .locations(s"db/$schemaName/migration")
         .load()
