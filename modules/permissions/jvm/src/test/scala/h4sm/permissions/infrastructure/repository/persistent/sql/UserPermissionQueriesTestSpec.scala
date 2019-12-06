@@ -12,8 +12,8 @@ class UserPermissionQueriesTestSpec extends DbFixtureSuite with IOChecker {
   def transactor = testutil.transactor.getTransactor[IO](cfg)
 
   test("insert query should typecheck")(_ => check(applyArb(userPermissions.insert _)))
-  test("userPermission query should typecheck")(
-    _ => check(applyArb((userPermissions.userPermission _).tupled)),
+  test("userPermission query should typecheck")(_ =>
+    check(applyArb((userPermissions.userPermission _).tupled)),
   )
   test("select should typecheck")(_ => check(userPermissions.select))
   test("byId should typecheck")(_ => check(applyArb(userPermissions.byId _)))
