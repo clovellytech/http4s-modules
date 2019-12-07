@@ -114,7 +114,6 @@ lazy val common = jsProject("common", "./modules/common")
   .settings(name := "h4sm-common")
   .settings(commonSettings)
   .settings(
-    skip in publish := true,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
       "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
@@ -133,7 +132,6 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
   .in(file("./modules/auth/comm"))
   .settings(commonSettings)
   .settings(
-    skip in publish := true,
     name := "h4sm-auth-comm",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
