@@ -18,7 +18,7 @@ class ClientIntegrationTestSpec extends AsyncFlatSpec with Matchers {
   }
 
   "the auth client" should "be in test" in {
-    authClient.isTest.map(x => assert(!x))
+    authClient.isTest.map(assert(_))
   }
 
   it should "allow login after signup" in {

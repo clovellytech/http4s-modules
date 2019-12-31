@@ -14,7 +14,7 @@ import scala.concurrent.Future
 import org.scalacheck._
 
 class FeatureRequestClientTestSpec extends AsyncFlatSpec with Matchers {
-  implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit override def executionContext = scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   val authClient = new AuthClient[Future] {
     override def base: String = "http://localhost:8080/users"
