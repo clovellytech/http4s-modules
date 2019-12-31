@@ -5,13 +5,15 @@ import cats.data.StateT
 import cats.implicits._
 import h4sm.auth.client.implicits._
 import h4sm.auth.comm.UserRequest
-import scala.concurrent.Future
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalacheck.Arbitrary
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext
+
 
 class ClientIntegrationTestSpec extends AsyncFlatSpec with Matchers {
-  implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit override def executionContext = JSExecutionContext.Implicits.queue
 
   val authClient = new Client[Future] {
     override def base: String = "http://localhost:8080/users"
