@@ -11,7 +11,6 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
-
 class ClientIntegrationTestSpec extends AsyncFlatSpec with Matchers {
   implicit override def executionContext = JSExecutionContext.Implicits.queue
 
