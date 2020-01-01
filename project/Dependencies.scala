@@ -27,7 +27,8 @@ object dependencies {
     val flyway = "6.1.3"
     val http4s = "0.21.0-M6"
     val janino = "3.1.0"
-    val kindProjector = "0.10.3"
+    val kindProjector212 = "0.10.3"
+    val kindProjector213 = "0.11.0"
     val logback = "1.2.3"
     val macroParadise = "2.1.1"
     val postgres = "42.2.9"
@@ -40,8 +41,7 @@ object dependencies {
     val tsec = "0.2.0-M1"
   }
 
-  val compilerPlugins = Seq(
-    compilerPlugin("org.typelevel" %% "kind-projector" % versions.kindProjector),
+  def compilerPlugins = Seq(
     compilerPlugin("com.olegpy" %% "better-monadic-for" % versions.betterMonadicFor)
   )
 
@@ -50,7 +50,11 @@ object dependencies {
       case Some((2, major)) if major < 13 =>
         compilerPlugins ++ Seq(
           compilerPlugin("org.scalamacros" % "paradise" % versions.macroParadise cross CrossVersion.full),
+          compilerPlugin("org.typelevel" %% "kind-projector" % versions.kindProjector212)
         )
+      case Some((2, major)) if major == 13 => compilerPlugins ++ Seq(
+        compilerPlugin("org.typelevel" % s"kind-projector_$version" % versions.kindProjector213)
+      )
       case _ => compilerPlugins
     }
 
