@@ -3,11 +3,10 @@ package permissions
 package infrastructure
 package repository.persistent.sql
 
-
 import doobie._
 import doobie.implicits._
 import domain._
-import h4sm.auth.db.sql._ 
+import h4sm.auth.db.sql._
 import h4sm.auth.comm.authIdTypes._
 
 trait UserPermissionSQL {

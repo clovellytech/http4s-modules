@@ -4,7 +4,7 @@ package db.sql
 import domain._
 import doobie._
 import doobie.implicits._
-import h4sm.auth.db.sql._ 
+import h4sm.auth.db.sql._
 import h4sm.auth.comm.authIdTypes._
 
 trait OrderSql {
