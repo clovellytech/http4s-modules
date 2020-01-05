@@ -98,6 +98,8 @@ Each of these methods will require a query available. So let's begin by writing 
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
+import h4sm.auth.db.sql._
+import h4sm.auth.comm.authIdTypes._
 
 trait PetSql{
   def insert(a: Pet): Update0 = sql"""
