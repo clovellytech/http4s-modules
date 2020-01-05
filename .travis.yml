@@ -53,3 +53,6 @@ jobs:
           branch: master
     - stage: release
       script: sbt ci-release
+  allow_failures:
+    - scala: *scala_212
+      env: TEST="all_tests"
