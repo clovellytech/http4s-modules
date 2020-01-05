@@ -8,13 +8,14 @@ import h4sm.auth.comm.arbitraries._
 import h4sm.auth.comm.UserRequest
 import h4sm.featurerequests.comm.arbitraries._
 import h4sm.featurerequests.comm.domain.features.FeatureRequest
+import org.scalacheck._
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
 import scala.concurrent.Future
-import org.scalacheck._
+import scala.scalajs.concurrent.JSExecutionContext
 
 class FeatureRequestClientTestSpec extends AsyncFlatSpec with Matchers {
-  implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit override def executionContext = JSExecutionContext.Implicits.queue
 
   val authClient = new AuthClient[Future] {
     override def base: String = "http://localhost:8080/users"

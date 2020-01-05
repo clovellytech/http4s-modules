@@ -4,7 +4,7 @@ before_install:
   - "export PATH=${PATH}:./vendor/bundle"
 
 scala_212: &scala_212 2.12.10
-scala_213: &scala_213 2.13.0
+scala_213: &scala_213 2.13.1
 
 language: scala
 services:
@@ -53,3 +53,5 @@ jobs:
           branch: master
     - stage: release
       script: sbt ci-release
+  allow_failures:
+    - scala: *scala_212

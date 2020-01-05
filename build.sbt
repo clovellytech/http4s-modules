@@ -1,7 +1,10 @@
 import dependencies._
 import xerial.sbt.Sonatype._
-import sbtcrossproject.CrossProject
+import sbtcrossproject.{CrossProject, Platform}
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+import ProjectImplicits._
+
+
 
 inThisBuild(
   Seq(
@@ -19,80 +22,21 @@ inThisBuild(
   )
 )
 
-
-val scala212 = "2.12.10"
-val scala213 = "2.13.0"
-
-lazy val JsTest = config("js").extend(Test)
-lazy val JvmTest = config("jvm").extend(Test)
-
-val commonSettings = Seq(
-  crossScalaVersions  := Seq(scala212, scala213),
-  organization := "com.clovellytech",
-  resolvers ++= addResolvers,
-  // Make sure every subproject is using a logging configuration.
-  Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
-  scalacOptions ++= options.scalacOptionsForVersion(scalaVersion.value),
-  scalacOptions in (Compile, console) ~= (_.diff(options.badScalacConsoleFlags)),
-  scalacOptions in (Test, console) ~= (_.diff(options.badScalacConsoleFlags)),
-  libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
-)
-
-lazy val copyFastOptJS = TaskKey[Unit]("copyFastOptJS", "Copy javascript files to target directory")
-
-
-def jsProject(id: String, in: String): CrossProject = CrossProject(id, file(in))(JSPlatform)
-  .configs(JsTest)
-  .enablePlugins(ScalaJSPlugin)
-  .enablePlugins(ScalaJSBundlerPlugin)
-  .settings(commonSettings)
-  .settings(
-    name := id,
-    scalacOptions += "-P:scalajs:sjsDefinedByDefault",
-    useYarn := true, // makes scalajs-bundler use yarn instead of npm
-    requireJsDomEnv in Test := true,
-    scalaJSUseMainModuleInitializer := true,
-    // configure Scala.js to emit a JavaScript module instead of a top-level script
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    // https://scalacenter.github.io/scalajs-bundler/cookbook.html#performance
-    webpackBundlingMode in fastOptJS := BundlingMode.LibraryOnly(),
-    copyFastOptJS := {
-      val inDir = (crossTarget in (Compile, fastOptJS)).value
-      val outDir = (baseDirectory in (Compile, fastOptJS)).value / ".." / "static/public" / id
-      val fileNames = Seq(
-        s"${name.value}-fastopt-loader.js",
-        s"${name.value}-fastopt-library.js",
-        s"${name.value}-fastopt-library.js.map",
-        s"${name.value}-fastopt.js",
-        s"${name.value}-fastopt.js.map",
-      )
-      val copies = fileNames.map(p => (inDir / p, outDir / p))
-      IO.copy(copies, overwrite = true, preserveLastModified = true, preserveExecutable = true)
-    },
-    // hot reloading configuration:
-    // https://github.com/scalacenter/scalajs-bundler/issues/180
-    addCommandAlias("dev", "; compile; fastOptJS::startWebpackDevServer; devwatch; fastOptJS::stopWebpackDevServer"),
-    addCommandAlias("devwatch", "~; compile; fastOptJS; copyFastOptJS"),
-  )
-
-
-val withTests : String = "compile->compile;test->test"
-val testOnly : String = "test->test"
-
 lazy val db = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/db"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(
     name := "h4sm-db",
     libraryDependencies ++= commonDeps ++ dbDeps ++ testDepsInTestOnly
   )
 
-lazy val testUtilCommon = crossProject(JVMPlatform, JSPlatform)
+lazy val testUtilCommon: CrossProject = crossProject(JVMPlatform, JSPlatform)
+  .addScalaTest()
+  .in(file("./modules/testutil/common"))
   .jsConfigure(_.configs(JsTest))
   .jvmConfigure(_.configs(JvmTest))
-  .in(file("./modules/testutil/common"))
-  .settings(commonSettings)
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-testutil-common",
@@ -100,9 +44,9 @@ lazy val testUtilCommon = crossProject(JVMPlatform, JSPlatform)
   )
 
 lazy val testUtilDb = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/testutil/db"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-testutil-db",
@@ -110,62 +54,61 @@ lazy val testUtilDb = crossProject(JVMPlatform)
   )
   .dependsOn(testUtilCommon, db)
 
-lazy val common = jsProject("common", "./modules/common")
-  .settings(name := "h4sm-common")
-  .settings(commonSettings)
+lazy val common = crossProject(JSPlatform)
+  .configureJsProject("common")
+  .in(file("./modules/common"))
+  .commonSettings()
   .settings(
+    name := "h4sm-common",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.scala-js" %%% "scalajs-dom" % versions.scalajs,
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
     ) ++ Seq(
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test"),
+    ).map("io.circe" %%% _ % versions.circe),
   )
 
 lazy val authComm = crossProject(JSPlatform, JVMPlatform)
+  .addScalaTest()
+  .in(file("./modules/auth/comm"))
   .jvmConfigure(_.configs(JvmTest))
   .jsConfigure(_.configs(JsTest))
-  .in(file("./modules/auth/comm"))
-  .settings(commonSettings)
+  .commonSettings()
   .settings(
     name := "h4sm-auth-comm",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
       "io.github.cquiroz" %%% "scala-java-time" % versions.scalaJavaTime,
     ) ++ Seq(
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test")
+    ).map("io.circe" %%% _ % versions.circe)
   )
-  .dependsOn(testUtilCommon % testOnly)
+  .dependsOn(testUtilCommon % inTestOnly)
 
 lazy val auth = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/auth/server"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-auth",
     libraryDependencies ++= commonDeps ++ authDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
   .dependsOn(db)
-  .dependsOn(testUtilDb % testOnly, testUtilCommon % testOnly)
+  .dependsOn(testUtilDb % inTestOnly, testUtilCommon % inTestOnly)
   .dependsOn(authComm % withTests)
 
-lazy val authClient = jsProject("authClient", "./modules/auth/client")
-  .settings(name := "h4sm-auth-client")
-  .settings(commonSettings)
+lazy val authClient = crossProject(JSPlatform)
+  .configureJsProject("authClient")
+  .commonSettings()
+  .in(file("./modules/auth/client"))
   .settings(
+    name := "h4sm-auth-client",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.scala-js" %%% "scalajs-dom" % versions.scalajs,
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
       "io.github.cquiroz" %%% "scala-java-time" % versions.scalaJavaTime
@@ -173,14 +116,14 @@ lazy val authClient = jsProject("authClient", "./modules/auth/client")
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test"),
+    ).map("io.circe" %%% _ % versions.circe),
   )
   .dependsOn(common, authComm, testUtilCommon % withTests)
 
 lazy val files = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/files"))
-  .settings(commonSettings)
+  .commonSettings()
+  .jvmConfigure(_.configs(JvmTest))
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-files",
@@ -189,57 +132,56 @@ lazy val files = crossProject(JVMPlatform)
   .dependsOn(db % withTests, auth % withTests, testUtilDb % withTests)
 
 lazy val featuresServer = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/features/server"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-features",
     mainClass in reStart := Some("h4sm.featurerequests.Server"),
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, featuresComm % withTests, testUtilDb % testOnly)
+  .dependsOn(auth % withTests, db % withTests, featuresComm % withTests, testUtilDb % inTestOnly)
 
 lazy val featuresComm = crossProject(JVMPlatform, JSPlatform)
+  .addScalaTest()
+  .in(file("./modules/features/comm"))
   .jvmConfigure(_.configs(JvmTest))
   .jsConfigure(_.configs(JsTest))
-  .in(file("./modules/features/comm"))
-  .settings(commonSettings)
+  .commonSettings()
   .settings(
     name := "h4sm-features-comm",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
     ) ++ Seq(
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test")
+    ).map("io.circe" %%% _ % versions.circe)
   )
   .dependsOn(authComm % withTests)
 
-lazy val featuresClient = jsProject("featuresClient", "./modules/features/client")
-  .settings(name := "h4sm-features-client")
-  .settings(commonSettings)
+lazy val featuresClient = crossProject(JSPlatform)
+  .configureJsProject("featuresClient")
+  .in(file("./modules/features/client"))
+  .commonSettings()
   .settings(
+    name := "h4sm-features-client",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-      "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
       "org.scala-js" %%% "scalajs-dom" % versions.scalajs,
       "org.typelevel" %%% "simulacrum" % versions.simulacrum,
     ) ++ Seq(
       "circe-core",
       "circe-generic",
       "circe-parser",
-    ).map("io.circe" %%% _ % versions.circe) ++ testDeps.map(_ % "test"),
+    ).map("io.circe" %%% _ % versions.circe)
   )
   .dependsOn(common, featuresComm % withTests, authClient, testUtilCommon % withTests)
 
 lazy val permissions = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/permissions"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-permissions",
@@ -249,30 +191,30 @@ lazy val permissions = crossProject(JVMPlatform)
 
 
 lazy val store = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/store"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-store",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, permissions, files, testUtilDb % testOnly)
+  .dependsOn(auth % withTests, db % withTests, permissions, files, testUtilDb % inTestOnly)
 
 lazy val petstore = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/petstore"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(
     name := "h4sm-petstore",
     libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
   )
-  .dependsOn(auth % withTests, db % withTests, permissions, files, testUtilDb % testOnly)
+  .dependsOn(auth % withTests, db % withTests, permissions, files, testUtilDb % inTestOnly)
 
 lazy val invitations = crossProject(JVMPlatform)
-  .jvmConfigure(_.configs(JvmTest))
   .in(file("./modules/invitations"))
-  .settings(commonSettings)
+  .jvmConfigure(_.configs(JvmTest))
+  .commonSettings()
   .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-invitations",
@@ -282,7 +224,7 @@ lazy val invitations = crossProject(JVMPlatform)
 
 lazy val docs = crossProject(JVMPlatform)
   .in(file("./h4sm-docs"))
-  .settings(commonSettings)
+  .commonSettings()
   .settings(
     name := "h4sm-docs",
     crossScalaVersions := Seq(scala212),
@@ -301,7 +243,7 @@ lazy val exampleServer = crossProject(JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .in(file("./example-server"))
   .settings(name := "example-server")
-  .settings(commonSettings)
+  .commonSettings()
   .settings(
     skip in publish := true,
     aggregate in reStart := false,
