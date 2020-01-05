@@ -9,6 +9,19 @@ import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
 
 
 object dependencies {
+
+
+  lazy val copyFastOptJS = TaskKey[Unit]("copyFastOptJS", "Copy javascript files to target directory")
+
+  val withTests : String = "compile->compile;test->test"
+  val inTestOnly : String = "test->test"
+
+  val scala212 = "2.12.10"
+  val scala213 = "2.13.0"
+
+  lazy val JsTest = config("js").extend(Test)
+  lazy val JvmTest = config("jvm").extend(Test)
+
   val addResolvers = Seq(
     Resolver.sonatypeRepo("public")
   )
@@ -35,7 +48,7 @@ object dependencies {
     val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
     val scalajs = "0.9.8"
     val scalaJavaTime = "2.0.0-RC3"
-    val scalaTest = "3.2.0-M2"
+    val scalaTest = "3.2.0-M1"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
     val simulacrum = "1.0.0"
     val tsec = "0.2.0-M1"
@@ -67,10 +80,10 @@ object dependencies {
   ).map("org.http4s" %% _ % versions.http4s)
 
   val testDeps = Seq(
-    "org.scalatest" %% "scalatest" % versions.scalaTest,
+    "org.scalatest" %% "scalatest" % versions.scalaTest213,
     "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
     "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
-    "org.scalacheck" %% "scalacheck" % versions.scalaCheck
+    "org.scalacheck" %% "scalacheck" % versions.scalaCheck,
   )
 
   val testDepsInTestOnly = testDeps.map(_ % "test")
