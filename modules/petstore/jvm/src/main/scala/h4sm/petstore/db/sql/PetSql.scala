@@ -5,7 +5,8 @@ import domain._
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import java.time.Instant
+import h4sm.auth.db.sql._
+import h4sm.auth.comm.authIdTypes._
 
 trait PetSql {
   def insert(a: Pet): Update0 = sql"""

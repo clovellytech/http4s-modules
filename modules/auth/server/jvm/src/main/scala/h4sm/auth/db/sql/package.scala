@@ -4,6 +4,7 @@ package db
 import doobie.Meta
 
 import tsec.common.SecureRandomId
+import doobie.implicits.legacy.instant._
 import doobie.postgres.implicits._
 
 package object sql {

@@ -2,12 +2,11 @@ package h4sm
 package featurerequests.db
 package sql
 
-import java.time.Instant
-
 import doobie._
 import doobie.implicits._
-import doobie.postgres.implicits._
 import domain._
+import h4sm.auth.db.sql._
+import h4sm.auth.comm.authIdTypes._
 import h4sm.featurerequests.comm.domain.features.Feature
 import h4sm.featurerequests.comm.domain.votes.VotedFeature
 

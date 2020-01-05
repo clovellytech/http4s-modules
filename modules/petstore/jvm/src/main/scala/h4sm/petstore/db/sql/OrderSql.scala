@@ -4,8 +4,8 @@ package db.sql
 import domain._
 import doobie._
 import doobie.implicits._
-import doobie.postgres.implicits._
-import java.time.Instant
+import h4sm.auth.db.sql._ 
+import h4sm.auth.comm.authIdTypes._
 
 trait OrderSql {
   def insert(a: Order): Update0 = sql"""

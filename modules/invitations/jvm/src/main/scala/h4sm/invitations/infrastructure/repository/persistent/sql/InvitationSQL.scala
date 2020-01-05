@@ -3,11 +3,12 @@ package invitations
 package infrastructure.repository.persistent.sql
 
 import auth.UserId
+import h4sm.auth.db.sql._
+import h4sm.auth.comm.authIdTypes._
 import domain._
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import java.time.Instant
 
 trait InvitationSQL {
   def insert(a: Invitation[UserId]): Update0 = sql"""

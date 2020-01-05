@@ -2,18 +2,14 @@ package h4sm
 package store
 package infrastructure.repository.sql
 
-import auth.UserId
 import domain._
 import doobie._
 import doobie.implicits._
-//import doobie.postgres._
 import doobie.postgres.implicits._
+import h4sm.auth.db.sql._
+import h4sm.auth.comm.authIdTypes._
 
 trait OrderSql {
-  val a = Read[OrderItem]
-  val b = Read[Instant]
-  val c = Read[OrderItem]
-  val d = Read[(Int, OrderItem)]
 
   type SelectInter = (
       UserId,
