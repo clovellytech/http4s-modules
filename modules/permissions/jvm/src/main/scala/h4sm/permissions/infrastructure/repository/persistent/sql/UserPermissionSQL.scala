@@ -3,13 +3,11 @@ package permissions
 package infrastructure
 package repository.persistent.sql
 
-import java.time.Instant
-
-import auth.UserId
 import doobie._
 import doobie.implicits._
-import doobie.postgres.implicits._
 import domain._
+import h4sm.auth.db.sql._
+import h4sm.auth.comm.authIdTypes._
 
 trait UserPermissionSQL {
   def insert(up: UserPermission[PermissionId]): Update0 = sql"""
