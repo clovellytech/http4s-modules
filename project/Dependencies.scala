@@ -80,7 +80,7 @@ object dependencies {
   ).map("org.http4s" %% _ % versions.http4s)
 
   val testDeps = Seq(
-    "org.scalatest" %% "scalatest" % versions.scalaTest213,
+    "org.scalatest" %% "scalatest" % versions.scalaTest,
     "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
     "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
     "org.scalacheck" %% "scalacheck" % versions.scalaCheck,
