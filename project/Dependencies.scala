@@ -3,12 +3,25 @@ import sbt.librarymanagement.DependencyBuilders
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSCrossVersion
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{crossProject => _, CrossType => _, _}
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
 
 
 object dependencies {
+
+
+  lazy val copyFastOptJS = TaskKey[Unit]("copyFastOptJS", "Copy javascript files to target directory")
+
+  val withTests : String = "compile->compile;test->test"
+  val inTestOnly : String = "test->test"
+
+  val scala212 = "2.12.10"
+  val scala213 = "2.13.0"
+
+  lazy val JsTest = config("js").extend(Test)
+  lazy val JvmTest = config("jvm").extend(Test)
+
   val addResolvers = Seq(
     Resolver.sonatypeRepo("public")
   )
@@ -24,24 +37,24 @@ object dependencies {
     val circeConfig = "0.7.0"
     val cryptobits = "1.1"
     val doobie = "0.8.6"
-    val flyway = "6.1.2"
+    val flyway = "6.1.3"
     val http4s = "0.21.0-M6"
     val janino = "3.1.0"
-    val kindProjector = "0.10.3"
+    val kindProjector212 = "0.10.3"
+    val kindProjector213 = "0.11.0"
     val logback = "1.2.3"
     val macroParadise = "2.1.1"
     val postgres = "42.2.9"
     val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
     val scalajs = "0.9.8"
     val scalaJavaTime = "2.0.0-RC3"
-    val scalaTest = "3.2.0-M1"
+    val scalaTest = "3.2.0-M1"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
     val simulacrum = "1.0.0"
     val tsec = "0.2.0-M1"
   }
 
-  val compilerPlugins = Seq(
-    compilerPlugin("org.typelevel" %% "kind-projector" % versions.kindProjector),
+  def compilerPlugins = Seq(
     compilerPlugin("com.olegpy" %% "better-monadic-for" % versions.betterMonadicFor)
   )
 
@@ -50,7 +63,11 @@ object dependencies {
       case Some((2, major)) if major < 13 =>
         compilerPlugins ++ Seq(
           compilerPlugin("org.scalamacros" % "paradise" % versions.macroParadise cross CrossVersion.full),
+          compilerPlugin("org.typelevel" %% "kind-projector" % versions.kindProjector212)
         )
+      case Some((2, major)) if major == 13 => compilerPlugins ++ Seq(
+        compilerPlugin("org.typelevel" % s"kind-projector_$version" % versions.kindProjector213)
+      )
       case _ => compilerPlugins
     }
 
@@ -66,7 +83,7 @@ object dependencies {
     "org.scalatest" %% "scalatest" % versions.scalaTest,
     "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
     "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
-    "org.scalacheck" %% "scalacheck" % versions.scalaCheck
+    "org.scalacheck" %% "scalacheck" % versions.scalaCheck,
   )
 
   val testDepsInTestOnly = testDeps.map(_ % "test")

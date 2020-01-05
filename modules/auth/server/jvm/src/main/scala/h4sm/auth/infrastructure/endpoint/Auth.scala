@@ -122,7 +122,7 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
   }
 
   def testService: HttpRoutes[F] = HttpRoutes.of {
-    case GET -> Root / "istest" => Ok("true")
+    case GET -> Root / "istest" => Ok(true)
     case DELETE -> Root / username =>
       (for {
         u <- UserRepositoryAlgebra[F].byUsername(username)
