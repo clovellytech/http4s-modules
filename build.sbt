@@ -76,6 +76,7 @@ lazy val authComm = crossProject(JSPlatform, JVMPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .jsConfigure(_.configs(JsTest))
   .commonSettings()
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-auth-comm",
     libraryDependencies ++= Seq(
@@ -149,6 +150,7 @@ lazy val featuresComm = crossProject(JVMPlatform, JSPlatform)
   .jvmConfigure(_.configs(JvmTest))
   .jsConfigure(_.configs(JsTest))
   .commonSettings()
+  .settings(publishArtifact in Test := true)
   .settings(
     name := "h4sm-features-comm",
     libraryDependencies ++= Seq(
