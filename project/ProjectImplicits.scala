@@ -24,9 +24,6 @@ object ProjectImplicits {
           resolvers ++= addResolvers,
           // Make sure every subproject is using a logging configuration.
           Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
-          scalacOptions ++= options.scalacOptionsForVersion(scalaVersion.value),
-          scalacOptions in (Compile, console) ~= (_.diff(options.badScalacConsoleFlags)),
-          scalacOptions in (Test, console) ~= (_.diff(options.badScalacConsoleFlags)),
           libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
         )
       )
