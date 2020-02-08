@@ -2,7 +2,7 @@ addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.1")
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.1.1" )
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
-addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.0")
+addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.2")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.32")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler-sjs06" % "0.16.0")
