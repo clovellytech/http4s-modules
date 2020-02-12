@@ -46,7 +46,7 @@ object dependencies {
     val macroParadise = "2.1.1"
     val postgres = "42.2.10"
     val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
-    val scalajs = "0.9.8"
+    val scalajs = "1.0.0"
     val scalaJavaTime = "2.0.0-RC3"
     val scalaTest = "3.2.0-M1"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
