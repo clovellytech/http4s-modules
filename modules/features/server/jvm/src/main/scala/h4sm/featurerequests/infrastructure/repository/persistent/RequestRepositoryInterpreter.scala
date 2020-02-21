@@ -25,12 +25,12 @@ class RequestRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transacto
     OptionT(requests.selectById(id).option.transact(xa))
 
   def insertGetId(a: Feature): OptionT[M, FeatureId] = OptionT {
-    (requests
+    requests
       .insertGetId(a)
       .map(_.some)
       .onUniqueViolation {
         HC.rollback.as(none[FeatureId])
-      })
+      }
       .transact(xa)
   }
 
