@@ -15,7 +15,5 @@ trait FileMetaAlgebra[F[_]] {
   def updateFileSaveTime(fileId: FileInfoId): F[Unit]
 
   def isOwner(fileId: FileInfoId, ownerId: UserId)(implicit F: Functor[F]): F[Boolean] =
-    retrieveMeta(fileId).map { fi =>
-      fi.uploadedBy.compareTo(ownerId) == 0
-    }
+    retrieveMeta(fileId).map(fi => fi.uploadedBy.compareTo(ownerId) == 0)
 }

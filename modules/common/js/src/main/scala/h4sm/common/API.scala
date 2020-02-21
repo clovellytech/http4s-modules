@@ -41,8 +41,7 @@ trait API[F[_]] {
   def getH(route: String, hs: H): F[(H, Resp)]
 
   def postT[A: Encoder](route: String, r: A)(implicit F: Applicative[F]): Session[Resp] = StateT {
-    hs =>
-      postH(route, r, hs)
+    hs => postH(route, r, hs)
   }
 
   def delete(route: String): F[Resp]
