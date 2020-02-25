@@ -30,7 +30,7 @@ object dependencies {
     val apacheLang3 = "3.9"
     val bcrypt = "3.1"
     val betterMonadicFor = "0.3.1"
-    val cats = "2.1.0"
+    val cats = "2.1.1"
     val catsMtl = "0.7.0"
     val catsEffect = "2.1.1"
     val circe = "0.13.0"
