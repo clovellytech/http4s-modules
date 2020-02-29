@@ -48,7 +48,7 @@ object dependencies {
     val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
     val scalajs = "1.0.0"
     val scalaJavaTime = "2.0.0-RC3"
-    val scalaTest = "3.2.0-M1"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
+    val scalaTest = "3.2.0-M3"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
     val simulacrum = "1.0.0"
     val tsec = "0.2.0"
