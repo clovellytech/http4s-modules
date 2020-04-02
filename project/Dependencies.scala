@@ -38,7 +38,7 @@ object dependencies {
     val cryptobits = "1.1"
     val doobie = "0.8.8"
     val flyway = "6.3.2"
-    val http4s = "0.21.2"
+    val http4s = "0.21.3"
     val janino = "3.1.2"
     val kindProjector212 = "0.10.3"
     val kindProjector213 = "0.11.0"
