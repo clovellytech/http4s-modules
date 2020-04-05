@@ -36,7 +36,7 @@ object dependencies {
     val circe = "0.13.0"
     val circeConfig = "0.8.0"
     val cryptobits = "1.1"
-    val doobie = "0.8.8"
+    val doobie = "0.9.0"
     val flyway = "6.3.2"
     val http4s = "0.21.3"
     val janino = "3.1.2"
