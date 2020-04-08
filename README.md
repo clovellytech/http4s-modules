@@ -1,12 +1,7 @@
 h4sm - Scala Http4s Modules [![Join the chat][gitter-badge]][gitter-url] [![Build Status][travis-badge]][travis-url] [![Sonatype Release][sonatype-badge]][sonatype-url]
 ============
 
-
-Create composable microservices or standalone servers with ease using Http4s, cats, Flyway, and PostgreSQL. Built for scala 2.12 and 2.13.
-
-[See documentation here](https://clovellytech.github.io/http4s-modules)
-
-Probably best place to start: [See a start to finish implementation example](https://clovellytech.github.io/http4s-modules/docs/by-example/petstore/)
+Create composable server modules with ease using Http4s, cats, Flyway, and PostgreSQL. Built for scala 2.12 and 2.13.
 
 Basic Idea
 ---
@@ -20,6 +15,10 @@ To provide a library of production ready modules, complete with database schema,
 * petstore - As a learning example, the scala-pet-store implemented with h4sm modules (not released)
 * store - A store with items and orders.
 * more to come! Something you would like to see here? Submit an issue!
+
+[See documentation here](https://clovellytech.github.io/http4s-modules)
+
+Creating a module: [See a start to finish implementation example](https://clovellytech.github.io/http4s-modules/docs/by-example/petstore/)
 
 ## Contributors and Recognition
 
