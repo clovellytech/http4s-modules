@@ -32,7 +32,7 @@ object dependencies {
     val betterMonadicFor = "0.3.1"
     val cats = "2.1.1"
     val catsMtl = "0.7.1"
-    val catsEffect = "2.1.2"
+    val catsEffect = "2.1.3"
     val circe = "0.13.0"
     val circeConfig = "0.8.0"
     val cryptobits = "1.1"
