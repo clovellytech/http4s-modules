@@ -21,14 +21,14 @@ object arbitraries {
       secureRandomIdArb.arbitrary,
       Gen.uuid,
       arbInstant.arbitrary,
-      Gen.option(arbInstant.arbitrary)
+      Gen.option(arbInstant.arbitrary),
     ).mapN(BaseToken.apply _)
   }
 
   implicit val userArb: Arbitrary[User] = Arbitrary {
     (
       nonEmptyString,
-      Gen.listOf(Gen.choose(Byte.MinValue, Byte.MaxValue)).map(_.toArray)
+      Gen.listOf(Gen.choose(Byte.MinValue, Byte.MaxValue)).map(_.toArray),
     ).mapN(User.apply _)
   }
 }

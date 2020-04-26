@@ -22,7 +22,8 @@ trait MessageSql {
     from ct_messages.message
   """.query
 
-  def byId(messageId: MessageId): Query0[(UserMessage, MessageId, Instant)] = (select.toFragment ++ fr"""
+  def byId(messageId: MessageId): Query0[(UserMessage, MessageId, Instant)] =
+    (select.toFragment ++ fr"""
     where message_id = $messageId
   """).query
 
@@ -37,7 +38,8 @@ trait MessageSql {
     order by create_date asc
   """).query
 
-  def thread(ua: UserId, ub: UserId): Query0[(UserMessage, MessageId, Instant)] = (select.toFragment ++ fr"""
+  def thread(ua: UserId, ub: UserId): Query0[(UserMessage, MessageId, Instant)] =
+    (select.toFragment ++ fr"""
     where (to_user_id = $ua and from_user_id = $ub) or (to_user_id = $ub and from_user_id = $ua)
     order by create_date desc
   """).query

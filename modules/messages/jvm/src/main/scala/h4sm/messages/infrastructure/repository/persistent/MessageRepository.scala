@@ -11,7 +11,8 @@ import h4sm.auth.UserId
 import h4sm.messages.domain._
 import h4sm.messages.infrastructure.repository.persistent.sql.messages
 
-class MessageRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F]) extends MessageAlgebra[F] {
+class MessageRepository[F[_]: Bracket[?[_], Throwable]](xa: Transactor[F])
+    extends MessageAlgebra[F] {
 
   // Members declared in h4sm.db.CAlgebra
   def insert(a: UserMessage): F[Unit] =

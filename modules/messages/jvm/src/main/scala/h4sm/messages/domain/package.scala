@@ -7,6 +7,7 @@ package object domain {
 
   type MessageId = UUID
   object MessageId {
-    def fromString[F[_]](name: String)(implicit F: ApplicativeError[F, Throwable]): F[UUID] = F.catchNonFatal(UUID.fromString(name))
+    def fromString[F[_]](name: String)(implicit F: ApplicativeError[F, Throwable]): F[UUID] =
+      F.catchNonFatal(UUID.fromString(name))
   }
 }

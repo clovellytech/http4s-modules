@@ -39,8 +39,8 @@ trait IOTestAuthClientChecks { this: ScalaCheckPropertyChecks =>
   }
 
   def forAnyUser3[A: Arbitrary, B: Arbitrary, Alg, T[_]](
-    tc: TestAuthClient[IO, Alg, T]
+      tc: TestAuthClient[IO, Alg, T],
   )(f: Headers => (UserRequest, A, B) => IO[Assertion])(
-    implicit arb: Arbitrary[UserRequest]
+      implicit arb: Arbitrary[UserRequest],
   ): Assertion = forAnyUser2(tc)(h => (u: UserRequest, x: (A, B)) => f(h)(u, x._1, x._2))
 }

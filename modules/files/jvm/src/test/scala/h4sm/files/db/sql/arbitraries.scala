@@ -9,7 +9,6 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.cats.implicits._
 import h4sm.testutil.arbitraries._
 
-
 object arbitraries {
   implicit val backends: Gen[Backend] = Gen.oneOf(Seq(Backend.LocalBackend))
 
@@ -25,7 +24,7 @@ object arbitraries {
       Gen.option(nonEmptyString),
       Gen.uuid,
       Gen.oneOf(true, false),
-      backends
+      backends,
     ).mapN(FileInfo.apply _)
   }
 }

@@ -113,7 +113,7 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
         resp <- Ok(SiteResult(UserDetailId(user.username, joinTime, userId)))
       } yield resp
 
-      case req @ GET -> Root / "user" asAuthed _ =>
+    case req @ GET -> Root / "user" asAuthed _ =>
       for {
         (user, _, joinTime) <- userService.byUserId(req.authenticator.asBase.identity)
         resp <- Ok(SiteResult(UserDetail(user.username, joinTime)))

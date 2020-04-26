@@ -20,8 +20,10 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.circe.CirceEntityCodec._
 import testutil.infrastructure.endpoints._
 
-class MessageClient[F[_]: Sync, T[_]](es: MessageEndpoints[F, T], auth: UserSecuredRequestHandler[F, T])
-    extends Http4sDsl[F]
+class MessageClient[F[_]: Sync, T[_]](
+    es: MessageEndpoints[F, T],
+    auth: UserSecuredRequestHandler[F, T],
+) extends Http4sDsl[F]
     with Http4sClientDsl[F]
     with SessionClientDsl[F] {
   val endpoints: Kleisli[F, Request[F], Response[F]] = auth.liftService(es.authEndpoints).orNotFound

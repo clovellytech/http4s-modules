@@ -13,7 +13,8 @@ import h4sm.auth.domain.tokens.AsBaseToken.ops._
 import h4sm.auth._
 import org.http4s.circe.CirceEntityCodec._
 
-class MessageEndpoints[F[_]: Sync: MessageAlgebra, T[_]](implicit T: AsBaseToken[T[UserId]]) extends Http4sDsl[F] {
+class MessageEndpoints[F[_]: Sync: MessageAlgebra, T[_]](implicit T: AsBaseToken[T[UserId]])
+    extends Http4sDsl[F] {
 
   val thread: UserAuthService[F, T] = UserAuthService {
     case req @ GET -> Root / "thread" / withUserId asAuthed _ =>
@@ -29,7 +30,9 @@ class MessageEndpoints[F[_]: Sync: MessageAlgebra, T[_]](implicit T: AsBaseToken
     case req @ POST -> Root asAuthed _ =>
       val res: F[Response[F]] = for {
         sendReq <- req.request.as[CreateMessageRequest]
-        _ <- MessageAlgebra[F].insert(UserMessage(req.authenticator.asBase.identity, sendReq.to, sendReq.content, none))
+        _ <- MessageAlgebra[F].insert(
+          UserMessage(req.authenticator.asBase.identity, sendReq.to, sendReq.content, none),
+        )
         resp <- Ok()
       } yield resp
 

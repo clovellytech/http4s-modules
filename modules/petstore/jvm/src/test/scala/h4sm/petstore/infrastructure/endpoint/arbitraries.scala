@@ -11,6 +11,6 @@ object arbitraries {
       nonEmptyString,
       Gen.option(nonEmptyString),
       nonEmptyString,
-    ).mapN(PetRequest.apply _)
+    ).mapN(PetRequest.apply _),
   )
 }

@@ -1,6 +1,5 @@
 package h4sm.testutil
 
-
 import cats.implicits._
 import java.time.Instant
 import org.scalacheck.{Arbitrary, Gen}

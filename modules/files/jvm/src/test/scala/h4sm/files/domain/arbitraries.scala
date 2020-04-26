@@ -3,7 +3,7 @@ package h4sm.files.domain
 import java.util.UUID
 
 import cats.implicits._
-import org.scalacheck.{Gen, Arbitrary}
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.cats.implicits._
 import h4sm.testutil.arbitraries.nonEmptyString
 import h4sm.files.infrastructure.endpoint.FileUpload
@@ -32,6 +32,6 @@ object arbitraries {
       nonEmptyString,
       Gen.option(nonEmptyString),
       Gen.oneOf(true, false),
-    ).mapN(FileUpload.apply _)
+    ).mapN(FileUpload.apply _),
   )
 }
