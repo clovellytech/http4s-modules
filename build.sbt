@@ -224,6 +224,15 @@ lazy val invitations = crossProject(JVMPlatform)
   )
   .dependsOn(auth % withTests, db % withTests, testUtilDb % withTests)
 
+lazy val messages = crossProject(JVMPlatform)
+  .in(file("./modules/messages"))
+  .commonSettings()
+  .settings(
+    name := "h4sm-messages",
+    libraryDependencies ++= commonDeps ++ dbDeps ++ httpDeps ++ testDepsInTestOnly
+  )
+  .dependsOn(auth % withTests, db % withTests, testUtilDb % withTests)
+
 lazy val docs = crossProject(JVMPlatform)
   .in(file("./h4sm-docs"))
   .commonSettings()

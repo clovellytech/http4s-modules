@@ -1,14 +1,16 @@
 package h4sm.petstore.infrastructure.endpoint
 
+import cats.implicits._
 import h4sm.testutil.arbitraries._
 import org.scalacheck._
+import org.scalacheck.cats.implicits._
 
 object arbitraries {
   implicit val petReqArb: Arbitrary[PetRequest] = Arbitrary(
-    for {
-      name <- nonEmptyString
-      bio <- Gen.option(nonEmptyString)
-      status <- nonEmptyString
-    } yield PetRequest(name, bio, status),
+    (
+      nonEmptyString,
+      Gen.option(nonEmptyString),
+      nonEmptyString,
+    ).mapN(PetRequest.apply _)
   )
 }

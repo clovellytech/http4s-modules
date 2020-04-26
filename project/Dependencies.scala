@@ -31,6 +31,7 @@ object dependencies {
     val bcrypt = "3.1"
     val betterMonadicFor = "0.3.1"
     val cats = "2.1.1"
+    val catsScalacheck = "0.2.0"
     val catsMtl = "0.7.1"
     val catsEffect = "2.1.2"
     val circe = "0.13.0"
@@ -84,6 +85,7 @@ object dependencies {
     "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
     "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
     "org.scalacheck" %% "scalacheck" % versions.scalaCheck,
+    "io.chrisdavenport" %% "cats-scalacheck" % versions.catsScalacheck,
   )
 
   val testDepsInTestOnly = testDeps.map(_ % "test")

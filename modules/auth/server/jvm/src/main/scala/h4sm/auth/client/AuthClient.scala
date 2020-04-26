@@ -4,7 +4,7 @@ package client
 import cats.data.OptionT
 import cats.implicits._
 import cats.effect.Sync
-import h4sm.auth.comm.{UserDetail, UserRequest}
+import h4sm.auth.comm.{UserDetailId, UserRequest}
 import h4sm.auth.comm.codecs._
 import h4sm.auth.infrastructure.endpoint.AuthEndpoints
 import org.http4s._
@@ -17,6 +17,7 @@ import domain.UserService
 import domain.users.UserRepositoryAlgebra
 import domain.tokens.TokenRepositoryAlgebra
 import domain.tokens._
+import h4sm.auth.comm.SiteResult
 
 class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra, A, T[_]](
     userService: UserService[F, A],
@@ -71,10 +72,10 @@ class AuthClient[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra, A, T
           } yield result,
       )
 
-  def getUser(headers: Headers): F[UserDetail] =
+  def getUser(headers: Headers): F[UserDetailId] =
     for {
-      req <- GET(uri("/user"))
+      req <- GET(uri("/"))
       res <- auth.run(req.withHeaders(headers))
-      userDetail <- res.as[UserDetail]
-    } yield userDetail
+      userDetail <- res.as[SiteResult[UserDetailId]]
+    } yield userDetail.result
 }

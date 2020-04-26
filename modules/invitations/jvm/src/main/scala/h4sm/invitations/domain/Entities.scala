@@ -8,10 +8,10 @@ final case class Invitation[A](
     toName: String,
     toEmail: String,
     code: String,
-    sendDate: Option[Instant] = None,
-    openDate: Option[Instant] = None,
-    acceptDate: Option[Instant] = None,
-    rejectDate: Option[Instant] = None,
+    sendDate: Option[Instant],
+    openDate: Option[Instant],
+    acceptDate: Option[Instant],
+    rejectDate: Option[Instant],
 )
 
 object Invitation {
@@ -20,5 +20,9 @@ object Invitation {
     toName,
     toEmail,
     ShortCode.generate(),
+    None,
+    None,
+    None,
+    None,
   )
 }

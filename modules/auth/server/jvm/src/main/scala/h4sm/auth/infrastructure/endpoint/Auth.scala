@@ -20,6 +20,7 @@ import domain.tokens.AsBaseToken.ops._
 import domain.tokens._
 import tsec.cipher.symmetric.{AES, IvGen}
 import tsec.cipher.symmetric.jca._
+import h4sm.auth.comm.UserDetailId
 
 object Authenticators {
   def statelessCookie[F[_]: Sync: UserRepositoryAlgebra, Alg: JAuthEncryptor[F, ?]: IvGen[F, ?]](
@@ -105,7 +106,14 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
   }
 
   val authService: UserAuthService[F, T] = UserAuthService {
-    case req @ GET -> Root / "user" asAuthed _ =>
+
+    case req @ GET -> Root asAuthed _ =>
+      for {
+        (user, userId, joinTime) <- userService.byUserId(req.authenticator.asBase.identity)
+        resp <- Ok(SiteResult(UserDetailId(user.username, joinTime, userId)))
+      } yield resp
+
+      case req @ GET -> Root / "user" asAuthed _ =>
       for {
         (user, _, joinTime) <- userService.byUserId(req.authenticator.asBase.identity)
         resp <- Ok(SiteResult(UserDetail(user.username, joinTime)))
