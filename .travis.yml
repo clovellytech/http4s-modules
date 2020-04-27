@@ -10,6 +10,9 @@ language: scala
 services:
   - postgresql
 
+jdk:
+  - openjdk8
+
 cache:
   directories:
     - $HOME/.coursier/cache
