@@ -1,4 +1,7 @@
-# NEXT VERSION
+# v[Next]
+
+## Features
+Add messages module
 
 ## Bug fixes
 

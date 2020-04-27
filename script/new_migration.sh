@@ -5,8 +5,8 @@ if [[ $# < 3 ]]; then
 	exit;
 fi
 
-dir="./$1/src/main/resources/db/$2/migration/"
+dir="./modules/$1/jvm/src/main/resources/db/$2/migration/"
 time=`date '+%Y%m%d%H%M%S'`
 file=$dir/V${time}__$3.sql
 mkdir -p $dir
-touch $file && emacs $file -nw
+touch $file && `eval $EDITOR $file`

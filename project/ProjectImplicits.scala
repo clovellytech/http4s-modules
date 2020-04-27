@@ -40,6 +40,7 @@ object ProjectImplicits {
           libraryDependencies ++= Seq(
             "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
             "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+            "io.chrisdavenport" %%% "cats-scalacheck" % versions.catsScalacheck,
           )
         )
       )
@@ -63,6 +64,7 @@ object ProjectImplicits {
         libraryDependencies ++= Seq(
           "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
           "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+          "io.chrisdavenport" %%% "cats-scalacheck" % versions.catsScalacheck,
         ),
         useYarn := true, // makes scalajs-bundler use yarn instead of npm
         requireJsDomEnv in Test := true,

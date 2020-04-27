@@ -24,7 +24,7 @@ import tsec.passwordhashers.jca._
 import tsec.authentication.TSecBearerToken
 
 /*
- * Build a server that uses every module in this project...
+ * Build a server that uses several modules in this project...
  */
 class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.ConfigAsk](
     implicit
