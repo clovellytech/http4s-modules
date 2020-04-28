@@ -235,7 +235,7 @@ lazy val messages = crossProject(JVMPlatform)
 
 lazy val docs = crossProject(JVMPlatform)
   .in(file("./h4sm-docs"))
-  .commonSettings()
+  .commonSettingsNoResource()
   .settings(
     name := "h4sm-docs",
     crossScalaVersions := Seq(scala212),

@@ -16,17 +16,23 @@ import sbtcrossproject.CrossPlugin.autoImport._
 object ProjectImplicits {
 
   implicit class CommonSettings(val p: CrossProject) extends AnyVal {
-    def commonSettings(): CrossProject = {
+    def commonSettingsNoResource(): CrossProject = {
       p.settings(
-        Seq(
           crossScalaVersions  := Seq(scala212, scala213),
           organization := "com.clovellytech",
           resolvers ++= addResolvers,
           // Make sure every subproject is using a logging configuration and conf file
-          Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
-          Test / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/test/resources"),
           scalacOptions ++= options.scalacExtraOptionsForVersion(scalaVersion.value),
           libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
+      )
+    }
+
+    def commonSettings(): CrossProject = {
+      commonSettingsNoResource()
+      .settings(
+        Seq(
+          Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
+          Test / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/test/resources"),
         )
       )
     }
