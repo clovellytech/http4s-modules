@@ -8,7 +8,6 @@ Now that we have our inital endpoints and database set up, all that remains is t
 ```scala mdoc 
 
 import cats.effect._
-import cats.implicits._
 import h4sm.auth.infrastructure.endpoint._
 import h4sm.auth.infrastructure.repository.persistent._
 import h4sm.auth.domain.tokens._
