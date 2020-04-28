@@ -2,10 +2,6 @@
 # and application.conf should be ignored.
 application.conf
 
-# But for now, it seems with the crossproject structure, reference.conf is not found.
-!/h4sm-docs/**/application.conf
-
-
 # Created by https://www.gitignore.io/api/sbt,scala,emacs,intellij,sublimetext
 
 ### Emacs ###
