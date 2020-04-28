@@ -22,7 +22,9 @@ import org.http4s.server.Router
 
 import scala.concurrent.ExecutionContext
 
-class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfigAsk: DBConfigAsk](ec: ExecutionContext) {
+class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfigAsk: DBConfigAsk](
+    ec: ExecutionContext,
+) {
   def app(xa: Transactor[F], serverConf: ServerConfig, blk: Blocker): F[ExitCode] = {
     implicit val b = blk
     implicit val userAlg = new UserRepositoryInterpreter(xa)
