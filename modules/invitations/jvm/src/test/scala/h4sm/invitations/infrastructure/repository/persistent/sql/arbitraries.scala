@@ -1,31 +1,24 @@
 package h4sm
 package invitations.infrastructure.repository.persistent.sql
 
+import cats.implicits._
 import testutil.arbitraries._
 import h4sm.invitations.domain.Invitation
 import org.scalacheck._
+import org.scalacheck.cats.implicits._
 
 object arbitraries {
   implicit def invitationArbitrary[A](implicit A: Arbitrary[A]): Arbitrary[Invitation[A]] =
     Arbitrary {
-      for {
-        fromUser <- A.arbitrary
-        toName <- nonEmptyString
-        toEmail <- nonEmptyString
-        code <- nonEmptyString
-        sendDate <- Gen.option(arbInstant.arbitrary)
-        openDate <- Gen.option(arbInstant.arbitrary)
-        acceptDate <- Gen.option(arbInstant.arbitrary)
-        rejectDate <- Gen.option(arbInstant.arbitrary)
-      } yield Invitation(
-        fromUser,
-        toName,
-        toEmail,
-        code,
-        sendDate,
-        openDate,
-        acceptDate,
-        rejectDate,
-      )
+      (
+        A.arbitrary,
+        nonEmptyString,
+        nonEmptyString,
+        nonEmptyString,
+        Gen.option(arbInstant.arbitrary),
+        Gen.option(arbInstant.arbitrary),
+        Gen.option(arbInstant.arbitrary),
+        Gen.option(arbInstant.arbitrary),
+      ).mapN(Invitation.apply[A])
     }
 }

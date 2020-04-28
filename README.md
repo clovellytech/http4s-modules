@@ -11,6 +11,7 @@ To provide a library of production ready modules, complete with database schema,
 * features - An example library that allows users to submit feature requests and vote on features.
 * files - A complete file upload and retrieval module. Only local file storage is implemented so far. AWS or other backends can be added by providing a typeclass instance.
 * invitations - Add the ability for users to invite new users.
+* messages - Allow authenticated users to pass messages to each other if they know the other's user id.
 * permissions - Built on top of tsec-http4s, an easy way to create routes that are guarded by a user having certain permissions.
 * petstore - As a learning example, the scala-pet-store implemented with h4sm modules (not released)
 * store - A store with items and orders.
@@ -42,7 +43,8 @@ libraryDependencies ++= Seq(
 	"h4sm-features",
 	"h4sm-files",
 	"h4sm-invitations",
-    "h4sm-store",
+	"h4sm-store",
+	"h4sm-messages",
 	"h4sm-permissions"
 ).map("com.clovellytech" %% _ % h4smVersion)
 ```

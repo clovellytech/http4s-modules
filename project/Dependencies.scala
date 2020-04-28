@@ -31,13 +31,14 @@ object dependencies {
     val bcrypt = "3.1"
     val betterMonadicFor = "0.3.1"
     val cats = "2.1.1"
+    val catsScalacheck = "0.2.0"
     val catsMtl = "0.7.1"
     val catsEffect = "2.1.3"
     val circe = "0.13.0"
     val circeConfig = "0.8.0"
     val cryptobits = "1.1"
     val doobie = "0.9.0"
-    val flyway = "6.3.3"
+    val flyway = "6.4.0"
     val http4s = "0.21.3"
     val janino = "3.1.2"
     val kindProjector212 = "0.10.3"
@@ -47,11 +48,11 @@ object dependencies {
     val postgres = "42.2.12"
     val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
     val scalajs = "1.0.0"
-    val scalaJavaTime = "2.0.0-RC5"
+    val scalaJavaTime = "2.0.0"
     val scalaTest = "3.2.0-M4"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
     val simulacrum = "1.0.0"
-    val tsec = "0.2.0"
+    val tsec = "0.2.0.2"
   }
 
   def compilerPlugins = Seq(
@@ -84,6 +85,7 @@ object dependencies {
     "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
     "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
     "org.scalacheck" %% "scalacheck" % versions.scalaCheck,
+    "io.chrisdavenport" %% "cats-scalacheck" % versions.catsScalacheck,
   )
 
   val testDepsInTestOnly = testDeps.map(_ % "test")
@@ -125,5 +127,5 @@ object dependencies {
     "tsec-jwt-mac",
     "tsec-jwt-sig",
     "tsec-http4s"
-  ).map("io.github.jmcardon" %% _ % versions.tsec)
+  ).map("com.clovellytech" %% _ % versions.tsec)
 }

@@ -2,8 +2,9 @@ package h4sm.files.domain
 
 import java.util.UUID
 
-import org.scalacheck._
 import cats.implicits._
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.cats.implicits._
 import h4sm.testutil.arbitraries.nonEmptyString
 import h4sm.files.infrastructure.endpoint.FileUpload
 
@@ -14,21 +15,23 @@ object arbitraries {
 
   implicit val uuidArb: Arbitrary[UUID] = Arbitrary(Gen.uuid)
 
-  implicit val fileInfoGen: Gen[FileInfo] = for {
-    name <- nonEmptyString
-    desc <- nonEmptyString
-    filename <- nonEmptyString
-    url <- nonEmptyString
-    uploadedBy <- Gen.uuid
-    isPublic <- Gen.oneOf(Seq(true, false))
-    backend <- backends
-  } yield FileInfo(name.some, desc.some, filename.some, url.some, uploadedBy, isPublic, backend)
+  implicit val fileInfoGen: Gen[FileInfo] = (
+    Gen.option(nonEmptyString),
+    Gen.option(nonEmptyString),
+    Gen.option(nonEmptyString),
+    Gen.option(nonEmptyString),
+    Gen.uuid,
+    Gen.oneOf(true, false),
+    backends,
+  ).mapN(FileInfo.apply _)
 
   implicit val fileInfoArb: Arbitrary[FileInfo] = Arbitrary(fileInfoGen)
 
-  implicit val fileUploadArb: Arbitrary[FileUpload] = Arbitrary(for {
-    name <- nonEmptyString
-    desc <- nonEmptyString
-    isPublic <- Gen.oneOf(Seq(true, false))
-  } yield FileUpload(name, desc.some, isPublic))
+  implicit val fileUploadArb: Arbitrary[FileUpload] = Arbitrary(
+    (
+      nonEmptyString,
+      Gen.option(nonEmptyString),
+      Gen.oneOf(true, false),
+    ).mapN(FileUpload.apply _),
+  )
 }
