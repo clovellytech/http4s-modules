@@ -101,3 +101,5 @@ website/node_modules
 website/i18n/*
 
 /project/metals.sbt
+
+/h4sm-docs/jvm/src/main/resources/application.conf
