@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext
 import tsec.passwordhashers.jca.BCrypt
 import tsec.authentication.TSecBearerToken
 
-class Server[F[_]: ConcurrentEffect: Timer: ContextShift] {
+class Server[F[_]: ConcurrentEffect: Timer: ContextShift](ec: ExecutionContext) {
   def app(xa: Transactor[F], port: Int, host: String): F[ExitCode] = {
     implicit val userAlg = new UserRepositoryInterpreter(xa)
     val userService = new UserService[F, BCrypt](BCrypt)
@@ -40,7 +40,7 @@ class Server[F[_]: ConcurrentEffect: Timer: ContextShift] {
       "/" -> requestApp,
       "/vote" -> authService.liftService(voteEndpoints.endpoints),
     ).orNotFound
-    BlazeServerBuilder[F]
+    BlazeServerBuilder[F](ec)
       .bindHttp(port, host)
       .withHttpApp(httpApp)
       .serve

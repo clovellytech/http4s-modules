@@ -22,7 +22,7 @@ import org.http4s.server.Router
 
 import scala.concurrent.ExecutionContext
 
-class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfigAsk: DBConfigAsk] {
+class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfigAsk: DBConfigAsk](ec: ExecutionContext) {
   def app(xa: Transactor[F], serverConf: ServerConfig, blk: Blocker): F[ExitCode] = {
     implicit val b = blk
     implicit val userAlg = new UserRepositoryInterpreter(xa)
@@ -38,7 +38,7 @@ class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfi
       "/files" -> fileEndpoints.endpoints,
     ).orNotFound
 
-    BlazeServerBuilder[F]
+    BlazeServerBuilder[F](ec)
       .bindHttp(serverConf.port, serverConf.host)
       .withHttpApp(httpApp)
       .serve
