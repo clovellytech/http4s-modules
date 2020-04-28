@@ -3,26 +3,28 @@ package permissions.infrastructure.repository.persistent.sql
 
 import java.util.UUID
 
+import cats.implicits._
 import h4sm.permissions.domain._
 import org.scalacheck._
+import org.scalacheck.cats.implicits._
 import testutil.arbitraries._
 
 object arbitraries {
   implicit val uuidArb: Arbitrary[UUID] = Arbitrary(Gen.uuid)
 
   implicit val arbPermission: Arbitrary[Permission] = Arbitrary {
-    for {
-      name <- nonEmptyString
-      description <- nonEmptyString
-      appName <- nonEmptyString
-    } yield Permission(name, description, appName)
+    (
+      nonEmptyString,
+      nonEmptyString,
+      nonEmptyString,
+    ).mapN(Permission.apply _)
   }
 
   implicit val userPermissionArb: Arbitrary[UserPermission[PermissionId]] = Arbitrary {
-    for {
-      uid <- Gen.uuid
-      pid <- Gen.uuid
-      gby <- Gen.uuid
-    } yield UserPermission(uid, pid, gby)
+    (
+      Gen.uuid,
+      Gen.uuid,
+      Gen.uuid,
+    ).mapN(UserPermission.apply _)
   }
 }

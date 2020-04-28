@@ -1,10 +1,11 @@
 package h4sm.auth
 package db.sql
 
-import cats.syntax.option._
+import cats.implicits._
 import h4sm.auth.db.domain.User
 import h4sm.auth.domain.tokens.BaseToken
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.cats.implicits._
 import h4sm.testutil.arbitraries._
 import tsec.common.SecureRandomId
 
@@ -16,18 +17,18 @@ object arbitraries {
   }
 
   implicit val baseTokenArb: Arbitrary[BaseToken] = Arbitrary {
-    for {
-      sid <- secureRandomIdArb.arbitrary
-      uuid <- Gen.uuid
-      time <- arbInstant.arbitrary
-      otherTime <- arbInstant.arbitrary
-    } yield BaseToken(sid, uuid, time, otherTime.some)
+    (
+      secureRandomIdArb.arbitrary,
+      Gen.uuid,
+      arbInstant.arbitrary,
+      Gen.option(arbInstant.arbitrary),
+    ).mapN(BaseToken.apply _)
   }
 
   implicit val userArb: Arbitrary[User] = Arbitrary {
-    for {
-      name <- nonEmptyString
-      hash <- nonEmptyString
-    } yield User(name, hash.getBytes)
+    (
+      nonEmptyString,
+      Gen.listOf(Gen.choose(Byte.MinValue, Byte.MaxValue)).map(_.toArray),
+    ).mapN(User.apply _)
   }
 }

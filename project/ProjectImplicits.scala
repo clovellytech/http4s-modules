@@ -16,16 +16,23 @@ import sbtcrossproject.CrossPlugin.autoImport._
 object ProjectImplicits {
 
   implicit class CommonSettings(val p: CrossProject) extends AnyVal {
-    def commonSettings(): CrossProject = {
+    def commonSettingsNoResource(): CrossProject = {
       p.settings(
-        Seq(
           crossScalaVersions  := Seq(scala212, scala213),
           organization := "com.clovellytech",
           resolvers ++= addResolvers,
-          // Make sure every subproject is using a logging configuration.
-          Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
+          // Make sure every subproject is using a logging configuration and conf file
           scalacOptions ++= options.scalacExtraOptionsForVersion(scalaVersion.value),
           libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
+      )
+    }
+
+    def commonSettings(): CrossProject = {
+      commonSettingsNoResource()
+      .settings(
+        Seq(
+          Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
+          Test / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/test/resources"),
         )
       )
     }
@@ -40,6 +47,7 @@ object ProjectImplicits {
           libraryDependencies ++= Seq(
             "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
             "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+            "io.chrisdavenport" %%% "cats-scalacheck" % versions.catsScalacheck,
           )
         )
       )
@@ -63,6 +71,7 @@ object ProjectImplicits {
         libraryDependencies ++= Seq(
           "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
           "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+          "io.chrisdavenport" %%% "cats-scalacheck" % versions.catsScalacheck,
         ),
         useYarn := true, // makes scalajs-bundler use yarn instead of npm
         requireJsDomEnv in Test := true,

@@ -2,7 +2,6 @@ package h4sm
 package petstore
 
 import cats.effect._
-import cats.implicits._
 import auth.infrastructure.endpoint.{AuthEndpoints, Authenticators}
 import auth.infrastructure.repository.persistent.{
   TokenRepositoryInterpreter,

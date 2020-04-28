@@ -1,8 +1,14 @@
 package h4sm.auth.comm
 
-import java.time.Instant
+import authIdTypes._
 
 final case class UserDetail(
     username: String,
     joinTime: Instant,
+)
+
+final case class UserDetailId(
+    username: String,
+    joinTime: Instant,
+    userId: UserId,
 )

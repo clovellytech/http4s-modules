@@ -135,19 +135,21 @@ object PetSql extends PetSql
 To make our testing easier, I'll write an arbitrary generator to build `Pet`s:
 
 ```scala mdoc
-import org.scalacheck._
+import cats.implicits._
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.cats.implicits._
 import h4sm.testutil.arbitraries._
 
 object arbitraries {
   implicit val arbPet: Arbitrary[Pet] = Arbitrary(
-    for {
-      name <- nonEmptyString
-      bio <- nonEmptyString
-      createdBy <- Gen.option(Gen.uuid)
-      status <- nonEmptyString
-      photoUrls <- Gen.listOf(nonEmptyString)
-      updateTime <- Gen.option(arbInstant.arbitrary)
-    } yield Pet(name, bio, createdBy, status, photoUrls, updateTime)
+    (
+      nonEmptyString,
+      nonEmptyString,
+      Gen.option(Gen.uuid),
+      nonEmptyString,
+      Gen.listOf(nonEmptyString),
+      Gen.option(arbInstant.arbitrary),
+    ).mapN(Pet.apply _)
   )
 }
 
