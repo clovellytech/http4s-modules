@@ -22,8 +22,9 @@ object ProjectImplicits {
           crossScalaVersions  := Seq(scala212, scala213),
           organization := "com.clovellytech",
           resolvers ++= addResolvers,
-          // Make sure every subproject is using a logging configuration.
+          // Make sure every subproject is using a logging configuration and conf file
           Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
+          Test / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/test/resources"),
           scalacOptions ++= options.scalacExtraOptionsForVersion(scalaVersion.value),
           libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
         )
