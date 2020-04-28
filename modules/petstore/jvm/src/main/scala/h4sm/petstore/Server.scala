@@ -44,6 +44,7 @@ class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
     for {
       cfg <- Resource.liftF(parser.decodeF[F, MainConfig])
       MainConfig(db, ServerConfig(host, port, numThreads)) = cfg
+      serverEc <- ExecutionContexts.cachedThreadPool[F]
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
       tranec <- ExecutionContexts.cachedThreadPool[F]
       xa <- HikariTransactor.newHikariTransactor[F](
@@ -66,7 +67,7 @@ class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
       petEndpoints = new PetEndpoints(auth)
       orderEndpoints = new OrderEndpoints(auth)
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_petstore"))
-      server <- BlazeServerBuilder[F]
+      server <- BlazeServerBuilder[F](serverEc)
         .bindHttp(port, host)
         .withHttpApp(router(authEndpoints, petEndpoints, orderEndpoints).orNotFound)
         .resource

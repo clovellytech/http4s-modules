@@ -5,7 +5,7 @@ title:   "Http4s Modules by Example - Build Endpoints"
 
 Now that we have our inital endpoints and database set up, all that remains is to tie them together by creating a server:
 
-```scala mdoc 
+```scala mdoc
 
 import cats.effect._
 import h4sm.auth.infrastructure.endpoint._
@@ -38,6 +38,7 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
     for {
       // Set up requirements for Doobie:
       db <- Resource.liftF(parser.decodePathF[F, DatabaseConfig]("db"))
+      serverEc <- ExecutionContexts.cachedThreadPool[F]
       connec <- ExecutionContexts.fixedThreadPool[F](10)
       tranec <- ExecutionContexts.cachedThreadPool[F]
       blk = Blocker.liftExecutionContext(tranec)
@@ -45,7 +46,7 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
 
       // Migrate the database, including all of our dependent schemas!
       _ <- Resource.liftF(DatabaseConfig.initialize[F](db)("ct_auth", "ct_petstore"))
-      
+
       // Repositories for endpoints
       implicit0(us: UserRepositoryAlgebra[F]) = new UserRepositoryInterpreter(xa)
       implicit0(ts: TokenRepositoryAlgebra[F]) = new TokenRepositoryInterpreter(xa)
@@ -61,7 +62,7 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
       authEndpoints = new AuthEndpoints(userService, authenticator)
       petEndpoints = new PetEndpoints(auth)
       orderEndpoints = new OrderEndpoints(auth)
- 
+
       // Connect endpoints to base urls:
       httpApp = Router(
         "/users" -> authEndpoints.endpoints,
@@ -69,7 +70,7 @@ class PetstoreServer[F[_] : ContextShift : ConcurrentEffect : Timer] {
         "/orders" -> orderEndpoints.endpoints
       ).orNotFound
 
-      server <- BlazeServerBuilder[F]
+      server <- BlazeServerBuilder[F](serverEc)
                 .bindHttp(8080, "localhost")
                 .withHttpApp(httpApp)
                 .resource
