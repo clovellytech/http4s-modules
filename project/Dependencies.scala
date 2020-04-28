@@ -51,7 +51,7 @@ object dependencies {
     val scalaTest = "3.2.0-M4"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.1.0.0-RC2"
     val simulacrum = "1.0.0"
-    val tsec = "0.2.0"
+    val tsec = "0.2.0.2"
   }
 
   def compilerPlugins = Seq(
@@ -125,5 +125,5 @@ object dependencies {
     "tsec-jwt-mac",
     "tsec-jwt-sig",
     "tsec-http4s"
-  ).map("io.github.jmcardon" %% _ % versions.tsec)
+  ).map("com.clovellytech" %% _ % versions.tsec)
 }
