@@ -46,7 +46,7 @@ object ProjectImplicits {
         _.settings(
           libraryDependencies ++= Seq(
             "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-            "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+            "org.scalatestplus" %%% "scalacheck-1-14" % versions.scalaTestPlusScalacheck % "test",
             "io.chrisdavenport" %%% "cats-scalacheck" % versions.catsScalacheck,
           )
         )
@@ -70,7 +70,7 @@ object ProjectImplicits {
         scalacOptions += "-P:scalajs:sjsDefinedByDefault",
         libraryDependencies ++= Seq(
           "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-          "org.scalatestplus" %%% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck % "test",
+          "org.scalatestplus" %%% "scalacheck-1-14" % versions.scalaTestPlusScalacheck % "test",
           "io.chrisdavenport" %%% "cats-scalacheck" % versions.catsScalacheck,
         ),
         useYarn := true, // makes scalajs-bundler use yarn instead of npm
