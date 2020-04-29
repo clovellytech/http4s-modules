@@ -16,8 +16,8 @@ object dependencies {
   val withTests : String = "compile->compile;test->test"
   val inTestOnly : String = "test->test"
 
-  val scala212 = "2.12.10"
-  val scala213 = "2.13.0"
+  val scala212 = "2.12.11"
+  val scala213 = "2.13.2"
 
   lazy val JsTest = config("js").extend(Test)
   lazy val JvmTest = config("jvm").extend(Test)
@@ -39,7 +39,7 @@ object dependencies {
     val cryptobits = "1.1"
     val doobie = "0.9.0"
     val flyway = "6.4.0"
-    val http4s = "0.21.3"
+    val http4s = "0.21.4"
     val janino = "3.1.2"
     val kindProjector212 = "0.10.3"
     val kindProjector213 = "0.11.0"
@@ -50,9 +50,9 @@ object dependencies {
     val scalajs = "1.0.0"
     val scalaJavaTime = "2.0.0"
     val scalaTest = "3.2.0-M4"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
-    val scalaTestPlusScalacheck = "3.1.0.0-RC2"
+    val scalaTestPlusScalacheck = "3.1.1.1"
     val simulacrum = "1.0.0"
-    val tsec = "0.2.0.2"
+    val tsec = "0.2.0.3"
   }
 
   def compilerPlugins = Seq(
@@ -82,7 +82,7 @@ object dependencies {
 
   val testDeps = Seq(
     "org.scalatest" %% "scalatest" % versions.scalaTest,
-    "org.scalatestplus" %% "scalatestplus-scalacheck" % versions.scalaTestPlusScalacheck,
+    "org.scalatestplus" %% "scalacheck-1-14" % versions.scalaTestPlusScalacheck,
     "org.tpolecat" %% "doobie-scalatest" % versions.doobie,
     "org.scalacheck" %% "scalacheck" % versions.scalaCheck,
     "io.chrisdavenport" %% "cats-scalacheck" % versions.catsScalacheck,

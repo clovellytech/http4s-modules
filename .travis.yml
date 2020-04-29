@@ -3,8 +3,8 @@ before_install:
   - "git fetch --tags"
   - "export PATH=${PATH}:./vendor/bundle"
 
-scala_212: &scala_212 2.12.10
-scala_213: &scala_213 2.13.1
+scala_212: &scala_212 2.12.11
+scala_213: &scala_213 2.13.2
 
 language: scala
 services:

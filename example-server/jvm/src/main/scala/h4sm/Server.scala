@@ -57,6 +57,7 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       _ = println(cfg)
       MainConfig(db, fc, ServerConfig(host, port, numThreads), test, allowCors, logging) = cfg
       _ = if (test) println("DANGER, RUNNING IN TEST MODE!!")
+      serverEc <- ExecutionContexts.cachedThreadPool[F]
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)
       tranec <- ExecutionContexts.cachedThreadPool[F]
       xa <- HikariTransactor.newHikariTransactor[F](
@@ -109,7 +110,7 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       } else {
         withCors
       }
-      server <- BlazeServerBuilder[F]
+      server <- BlazeServerBuilder[F](serverEc)
         .bindHttp(port, host)
         .withHttpApp(withMiddleware)
         .resource
