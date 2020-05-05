@@ -30,9 +30,7 @@ class OrderEndpointsProperties
           _ <- petstoreClient.orderPet(OrderRequest(insertedPetId))
           allorders <- orders.select
           _ <- pets.delete(insertedPetId)
-        } yield {
-          allorders.map(_._1.petId) should contain(insertedPetId)
-        }
+        } yield allorders.map(_._1.petId) should contain(insertedPetId)
       }
     }
   }

@@ -24,15 +24,16 @@ class RequestRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transacto
   def byId(id: FeatureId): OptionT[M, (Feature, FeatureId, Instant)] =
     OptionT(requests.selectById(id).option.transact(xa))
 
-  def insertGetId(a: Feature): OptionT[M, FeatureId] = OptionT {
-    requests
-      .insertGetId(a)
-      .map(_.some)
-      .onUniqueViolation {
-        HC.rollback.as(none[FeatureId])
-      }
-      .transact(xa)
-  }
+  def insertGetId(a: Feature): OptionT[M, FeatureId] =
+    OptionT {
+      requests
+        .insertGetId(a)
+        .map(_.some)
+        .onUniqueViolation {
+          HC.rollback.as(none[FeatureId])
+        }
+        .transact(xa)
+    }
 
   def selectWithVoteCounts: M[List[VotedFeature]] =
     requests.selectAllWithVoteCounts.to[List].transact(xa)

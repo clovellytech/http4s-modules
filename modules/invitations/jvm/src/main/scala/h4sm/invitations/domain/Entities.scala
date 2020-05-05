@@ -15,14 +15,15 @@ final case class Invitation[A](
 )
 
 object Invitation {
-  def apply[A](fromUser: A, toName: String, toEmail: String): Invitation[A] = Invitation(
-    fromUser,
-    toName,
-    toEmail,
-    ShortCode.generate(),
-    None,
-    None,
-    None,
-    None,
-  )
+  def apply[A](fromUser: A, toName: String, toEmail: String): Invitation[A] =
+    Invitation(
+      fromUser,
+      toName,
+      toEmail,
+      ShortCode.generate(),
+      None,
+      None,
+      None,
+      None,
+    )
 }

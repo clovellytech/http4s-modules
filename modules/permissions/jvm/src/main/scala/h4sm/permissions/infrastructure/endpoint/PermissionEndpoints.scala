@@ -19,31 +19,34 @@ class PermissionEndpoints[F[_]: Sync: UserPermissionAlgebra: PermissionAlgebra, 
     auth: UserSecuredRequestHandler[F, T],
 )(implicit b: AsBaseToken[T[UserId]])
     extends Http4sDsl[F] {
-  def createEndpoint: UserAuthService[F, T] = PermissionedRoutes("ct_permissions" -> "admin") {
-    case req @ POST -> Root asAuthed _ =>
-      for {
-        perm <- req.request.as[Permission]
-        _ <- PermissionAlgebra[F].insert(perm)
-        result <- Ok()
-      } yield result
-  }
+  def createEndpoint: UserAuthService[F, T] =
+    PermissionedRoutes("ct_permissions" -> "admin") {
+      case req @ POST -> Root asAuthed _ =>
+        for {
+          perm <- req.request.as[Permission]
+          _ <- PermissionAlgebra[F].insert(perm)
+          result <- Ok()
+        } yield result
+    }
 
-  def listEndpoint: UserAuthService[F, T] = PermissionedRoutes("permissions" -> "view") {
-    case GET -> Root asAuthed _ =>
-      for {
-        perms <- PermissionAlgebra[F].select
-        sendPerms = perms.map { case (perm, permid, _) => (perm, permid) }
-        res <- Ok(SiteResult(sendPerms))
-      } yield res
-  }
+  def listEndpoint: UserAuthService[F, T] =
+    PermissionedRoutes("permissions" -> "view") {
+      case GET -> Root asAuthed _ =>
+        for {
+          perms <- PermissionAlgebra[F].select
+          sendPerms = perms.map { case (perm, permid, _) => (perm, permid) }
+          res <- Ok(SiteResult(sendPerms))
+        } yield res
+    }
 
-  def selectByAppEndpoint: UserAuthService[F, T] = PermissionedRoutes("permissions" -> "view") {
-    case GET -> Root / appName asAuthed _ =>
-      for {
-        perms <- PermissionAlgebra[F].selectByAppName(appName)
-        res <- Ok(SiteResult(perms))
-      } yield res
-  }
+  def selectByAppEndpoint: UserAuthService[F, T] =
+    PermissionedRoutes("permissions" -> "view") {
+      case GET -> Root / appName asAuthed _ =>
+        for {
+          perms <- PermissionAlgebra[F].selectByAppName(appName)
+          res <- Ok(SiteResult(perms))
+        } yield res
+    }
 
   def authServices: UserAuthService[F, T] =
     List(

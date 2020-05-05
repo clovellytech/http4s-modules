@@ -41,7 +41,8 @@ class Client[F[_]: MonadError[?[_], Throwable]](implicit val F: API[F]) {
 }
 
 object Client {
-  def apply[F[_]: MonadError[?[_], Throwable]: API](baseUrl: String): Client[F] = new Client[F] {
-    override def base = baseUrl
-  }
+  def apply[F[_]: MonadError[?[_], Throwable]: API](baseUrl: String): Client[F] =
+    new Client[F] {
+      override def base = baseUrl
+    }
 }

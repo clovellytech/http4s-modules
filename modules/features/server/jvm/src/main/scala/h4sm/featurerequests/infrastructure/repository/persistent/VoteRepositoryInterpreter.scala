@@ -20,7 +20,8 @@ class VoteRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](val xa: Transact
   def insert(a: Vote): M[Unit] =
     votes.insert(a).run.onUniqueViolation(votes.update(a).run).transact(xa).as(())
 
-  def insertGetId(a: Vote): OptionT[M, VoteId] = OptionT {
-    votes.insertGetId(a).map(_.some).onUniqueViolation(HC.rollback.as(none[VoteId])).transact(xa)
-  }
+  def insertGetId(a: Vote): OptionT[M, VoteId] =
+    OptionT {
+      votes.insertGetId(a).map(_.some).onUniqueViolation(HC.rollback.as(none[VoteId])).transact(xa)
+    }
 }

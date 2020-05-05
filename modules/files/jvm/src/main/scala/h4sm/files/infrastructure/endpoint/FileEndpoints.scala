@@ -22,8 +22,7 @@ import h4sm.files.domain._
 import h4sm.files.infrastructure.backends.{FileMetaService, LocalFileStoreService}
 import tsec.authentication._
 
-class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(
-    implicit
+class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
     S: Sync[F],
     F: FileMetaAlgebra[F],
     FS: FileStoreAlgebra[F],
@@ -47,29 +46,30 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(
       _ <- if (allowPred(fileInfo)) (new File(baseFile, uuid.toString)).pure[F] else fileNotExists
     } yield (fileInfo, uuid, FS.retrieve(uuid))
 
-  def unAuthEndpoints: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "request" / uuidstr =>
-      for {
-        fileInfo <- getFile(uuidstr, _.isPublic)
-        (meta, _, bytes) = fileInfo
-        // need to figure out content type and filename parts.
-        resp <- Ok(bytes)
-      } yield resp
+  def unAuthEndpoints: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case GET -> Root / "request" / uuidstr =>
+        for {
+          fileInfo <- getFile(uuidstr, _.isPublic)
+          (meta, _, bytes) = fileInfo
+          // need to figure out content type and filename parts.
+          resp <- Ok(bytes)
+        } yield resp
 
-    case GET -> Root / "config" => C.ask.flatMap(c => Ok(c.uploadMax.toString))
-  }
-
-  def authFileEndpoints: UserAuthService[F, T] = UserAuthService {
-    case req @ GET -> Root / uuidstr asAuthed _ => {
-      val pred = (i: FileInfo) =>
-        i.isPublic || (i.uploadedBy.compareTo(req.authenticator.asBase.identity) == 0)
-      for {
-        fileInfo <- getFile(uuidstr, pred)
-        (_, _, bytes) = fileInfo
-        resp <- Ok(bytes)
-      } yield resp
+      case GET -> Root / "config" => C.ask.flatMap(c => Ok(c.uploadMax.toString))
     }
-  }
+
+  def authFileEndpoints: UserAuthService[F, T] =
+    UserAuthService {
+      case req @ GET -> Root / uuidstr asAuthed _ =>
+        val pred = (i: FileInfo) =>
+          i.isPublic || (i.uploadedBy.compareTo(req.authenticator.asBase.identity) == 0)
+        for {
+          fileInfo <- getFile(uuidstr, pred)
+          (_, _, bytes) = fileInfo
+          resp <- Ok(bytes)
+        } yield resp
+    }
 
   def authInfoEndpoints: UserAuthService[F, T] = {
     // I import this here to avoid clashing with the raw bytes in authFileEndpoints
@@ -84,7 +84,7 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(
           resp <- Ok(SiteResult(infos))
         } yield resp
 
-      case req @ POST -> Root asAuthed _ => {
+      case req @ POST -> Root asAuthed _ =>
         val decoded = EntityDecoder[F, Multipart[F]].decode(req.request, true)
         decoded.value.flatMap(
           _.fold(
@@ -113,16 +113,16 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(
               } yield resp,
           ),
         )
-      }
 
       case POST -> Root / uuid asAuthed _ =>
         for {
           uuid <- S.delay(UUID.fromString(uuid))
           fileInfo <- F.retrieveMeta(uuid)
-          url <- Uri
-            .fromString(s"/$uuid/${fileInfo.filename.getOrElse("download")}")
-            .leftWiden[Throwable]
-            .liftTo[F]
+          url <-
+            Uri
+              .fromString(s"/$uuid/${fileInfo.filename.getOrElse("download")}")
+              .leftWiden[Throwable]
+              .liftTo[F]
           resp <- TemporaryRedirect(Location(url))
         } yield resp
 

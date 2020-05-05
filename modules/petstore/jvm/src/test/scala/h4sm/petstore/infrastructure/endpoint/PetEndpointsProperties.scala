@@ -25,12 +25,10 @@ class PetEndpointsProperties
         for {
           _ <- petstoreClient.addPet(p)
           ls <- pets.select
-          _ <- ls
-            .collectFirst { case (pet, id, _) if pet.name == p.name => pets.delete(id) }
-            .getOrElse(IO(()))
-        } yield {
-          ls.map(_._1.name) should contain(p.name)
-        }
+          _ <-
+            ls.collectFirst { case (pet, id, _) if pet.name == p.name => pets.delete(id) }
+              .getOrElse(IO(()))
+        } yield ls.map(_._1.name) should contain(p.name)
       }
     }
   }

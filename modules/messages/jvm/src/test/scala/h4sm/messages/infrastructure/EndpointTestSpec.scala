@@ -29,9 +29,7 @@ class MessagesEndpointsTestSpec
               uu2 <- authClient.getUser(h2)
               _ <- messageClient.sendMesssage(m.copy(to = uu2.userId))
               s <- messageClient.getInbox
-            } yield {
-              s.head.to should equal(uu2.userId)
-            }
+            } yield s.head.to should equal(uu2.userId)
           }
       }
     }

@@ -19,10 +19,11 @@ object Backend {
   }
 
   implicit val backendUnshow: Unshow[Backend] = new Unshow[Backend] {
-    def unshow(name: String): Backend = name match {
-      case "local" => LocalBackend
-      case _ => NoBackend
-    }
+    def unshow(name: String): Backend =
+      name match {
+        case "local" => LocalBackend
+        case _ => NoBackend
+      }
   }
 }
 

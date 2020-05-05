@@ -37,9 +37,7 @@ class AuthEndpointsTestSpec extends EndpointTestSpec {
     for {
       post <- authClient.postUser(user)
       _ <- authClient.deleteUser(user.username)
-    } yield {
-      post.status should equal(Status.Ok)
-    }
+    } yield post.status should equal(Status.Ok)
   }
 
   testIO("a user exists request should return false for no user") { p =>

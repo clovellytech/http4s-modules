@@ -42,9 +42,10 @@ class InvitationEndpointTestSpec
           val job = for {
             (invite, _, _) <- createInvite(toName, newU)
             _ <- invitationClient.openInvite(InvitationByCodeRequest(newU.username, invite.code))
-            (savedInvite, _, _) <- invitationAlg
-              .fromToEmail(newU.username)
-              .getOrElseF(Sync[IO].raiseError(new Exception("invite not found")))
+            (savedInvite, _, _) <-
+              invitationAlg
+                .fromToEmail(newU.username)
+                .getOrElseF(Sync[IO].raiseError(new Exception("invite not found")))
           } yield savedInvite.openDate shouldBe defined
 
           job.recoverWith {

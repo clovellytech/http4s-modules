@@ -43,14 +43,15 @@ object Authenticators {
     )
 
   def bearer[F[_]: Sync: UserRepositoryAlgebra: TokenRepositoryAlgebra]
-      : UserAuthenticator[F, TSecBearerToken] = BearerTokenAuthenticator(
-    tokenTrans[TSecBearerToken].apply(TokenRepositoryAlgebra[F]),
-    userTrans(UserRepositoryAlgebra[F]),
-    TSecTokenSettings(
-      expiryDuration = 10.minutes,
-      maxIdle = None,
-    ),
-  )
+      : UserAuthenticator[F, TSecBearerToken] =
+    BearerTokenAuthenticator(
+      tokenTrans[TSecBearerToken].apply(TokenRepositoryAlgebra[F]),
+      userTrans(UserRepositoryAlgebra[F]),
+      TSecTokenSettings(
+        expiryDuration = 10.minutes,
+        maxIdle = None,
+      ),
+    )
 }
 
 class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
@@ -73,7 +74,7 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
   )
 
   val unauthService: HttpRoutes[F] = HttpRoutes.of {
-    case req @ POST -> Root / "user" => {
+    case req @ POST -> Root / "user" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
         _ <- userService.signupUser(userRequest.username, userRequest.password)
@@ -84,9 +85,8 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
         case _: Error.Duplicate => Conflict("Username already exists")
         case _ => BadRequest()
       }
-    }
 
-    case req @ POST -> Root / "login" => {
+    case req @ POST -> Root / "login" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
         (user, userId) <- userService.lookup(userRequest.username, userRequest.password)
@@ -99,7 +99,6 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
         case _: Error.NotFound => badResp
         case _ => BadRequest("Not found")
       }
-    }
 
     case GET -> Root / "exists" / username =>
       UserRepositoryAlgebra[F].byUsername(username).isDefined.flatMap(Ok.apply(_))
@@ -129,15 +128,16 @@ class AuthEndpoints[F[_]: Sync: UserRepositoryAlgebra, A, T[_]](
       authenticator.discard(req.authenticator) *> Ok()
   }
 
-  def testService: HttpRoutes[F] = HttpRoutes.of {
-    case GET -> Root / "istest" => Ok(true)
-    case DELETE -> Root / username =>
-      (for {
-        u <- UserRepositoryAlgebra[F].byUsername(username)
-        _ <- OptionT.liftF(UserRepositoryAlgebra[F].delete(u._2))
-        resp <- OptionT.liftF(Ok())
-      } yield resp).getOrElseF(BadRequest())
-  }
+  def testService: HttpRoutes[F] =
+    HttpRoutes.of {
+      case GET -> Root / "istest" => Ok(true)
+      case DELETE -> Root / username =>
+        (for {
+          u <- UserRepositoryAlgebra[F].byUsername(username)
+          _ <- OptionT.liftF(UserRepositoryAlgebra[F].delete(u._2))
+          resp <- OptionT.liftF(Ok())
+        } yield resp).getOrElseF(BadRequest())
+    }
 
   def endpoints = unauthService <+> Auth.liftService(authService)
 }

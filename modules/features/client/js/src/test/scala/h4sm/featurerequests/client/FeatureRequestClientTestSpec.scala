@@ -35,9 +35,7 @@ class FeatureRequestClientTestSpec extends AsyncFlatSpec with Matchers {
       _ <- featuresClient.postRequest(r)
       fs <- StateT.liftF(featuresClient.getRequests)
       _ <- StateT.liftF(authClient.delete(u.username))
-    } yield {
-      fs.map(rr => FeatureRequest(rr.feature.title, rr.feature.description)) should contain(r)
-    }
+    } yield fs.map(rr => FeatureRequest(rr.feature.title, rr.feature.description)) should contain(r)
 
     t.runEmptyA
   }

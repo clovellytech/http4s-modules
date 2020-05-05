@@ -24,14 +24,15 @@ abstract class InvitationClientRunner[F[_]: Sync: Bracket[?[_], Throwable]]
   def invitationClient(implicit P: PasswordHasher[F, BCrypt]) =
     new InvitationsClient[F, BCrypt, TSecBearerToken](invitationEndpoints)
 
-  def createInvite(toName: String, toUser: UserRequest)(
-      implicit h: Headers,
+  def createInvite(toName: String, toUser: UserRequest)(implicit
+      h: Headers,
       P: PasswordHasher[F, BCrypt],
   ): F[(Invitation[UserId], InvitationId, Instant)] =
     for {
       _ <- invitationClient.sendInvite(InvitationRequest(toName, toUser.username))
-      res <- invitationAlg
-        .fromToEmail(toUser.username)
-        .getOrElseF(Sync[F].raiseError(new Exception("Invitation not found")))
+      res <-
+        invitationAlg
+          .fromToEmail(toUser.username)
+          .getOrElseF(Sync[F].raiseError(new Exception("Invitation not found")))
     } yield res
 }

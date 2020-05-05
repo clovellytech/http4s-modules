@@ -38,11 +38,12 @@ trait AsBaseTokenInstances {
 trait BaseTokenReaderInstances {
   implicit val asBearer: BaseTokenReader[TSecBearerToken[UserId]] =
     new BaseTokenReader[TSecBearerToken[UserId]] {
-      def read(b: BaseToken): TSecBearerToken[UserId] = TSecBearerToken(
-        b.secureId,
-        b.identity,
-        b.expiry,
-        b.lastTouched,
-      )
+      def read(b: BaseToken): TSecBearerToken[UserId] =
+        TSecBearerToken(
+          b.secureId,
+          b.identity,
+          b.expiry,
+          b.lastTouched,
+        )
     }
 }

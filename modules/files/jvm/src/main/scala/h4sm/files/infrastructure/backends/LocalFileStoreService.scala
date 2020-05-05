@@ -9,8 +9,8 @@ import h4sm.files.config.ConfigAsk
 import h4sm.files.domain._
 import fs2.Stream
 
-class LocalFileStoreService[F[_]: Sync: ContextShift](
-    implicit C: ConfigAsk[F],
+class LocalFileStoreService[F[_]: Sync: ContextShift](implicit
+    C: ConfigAsk[F],
     blk: Blocker,
 ) extends FileStoreAlgebra[F] {
   def retrieveFile(fileId: FileInfoId): F[File] =
@@ -25,12 +25,12 @@ class LocalFileStoreService[F[_]: Sync: ContextShift](
   def write(fileId: FileInfoId, fileInfo: FileInfo, s: Stream[F, Byte]): F[Unit] =
     for {
       conf <- C.ask
-      _ <- s
-        .through(
-          fs2.io.file.writeAll[F](new java.io.File(conf.basePath, fileId.toString).toPath, blk),
-        )
-        .compile
-        .drain
+      _ <-
+        s.through(
+            fs2.io.file.writeAll[F](new java.io.File(conf.basePath, fileId.toString).toPath, blk),
+          )
+          .compile
+          .drain
     } yield ()
 
   def writeAll(fileInfo: FileInfo, ss: Seq[Stream[F, Byte]]): F[Unit] = ???
