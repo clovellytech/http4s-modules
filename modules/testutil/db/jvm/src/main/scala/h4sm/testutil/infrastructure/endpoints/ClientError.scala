@@ -13,8 +13,9 @@ trait ClientErrors {
   def commError(status: Status): Throwable = CommunicationError(status, "Error, status was not Ok")
   def uriError(message: String): Throwable = UriError(message)
 
-  def passOk[F[_]: Sync, A](response: Response[F]): F[Response[F]] = response.status match {
-    case Status.Ok => response.pure[F]
-    case _ => commError(response.status).raiseError[F, Response[F]]
-  }
+  def passOk[F[_]: Sync, A](response: Response[F]): F[Response[F]] =
+    response.status match {
+      case Status.Ok => response.pure[F]
+      case _ => commError(response.status).raiseError[F, Response[F]]
+    }
 }

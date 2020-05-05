@@ -29,9 +29,7 @@ class VoteEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureSuit
         _ <- addRequest(feat)(login)
         featuresResp <- getRequests
         allFeatures <- featuresResp.as[SiteResult[List[VotedFeature]]]
-      } yield {
-        allFeatures.result.exists(_.feature.title == feat.title)
-      }
+      } yield allFeatures.result.exists(_.feature.title == feat.title)
 
       test.unsafeRunSync()
     }

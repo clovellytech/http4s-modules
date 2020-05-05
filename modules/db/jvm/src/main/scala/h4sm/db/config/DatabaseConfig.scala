@@ -23,36 +23,36 @@ object DatabaseConfig {
   /**
     * Runs the flyway migrations against the target database
     */
-  def initializeDb[M[_]: Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] = Sync[M].delay {
-    val fw = {
-      Flyway
-        .configure()
-        .dataSource(ds)
-        .defaultSchema(schemaName)
-        .schemas(schemaName)
-        .locations(s"db/$schemaName/migration")
-        .load()
-    }
-    Try {
-      fw.migrate()
-      ()
-    }.recoverWith {
-      case e: FlywayException =>
-        println("Got flyway exception")
-        println(e)
-        println("Attempting to recover.")
-        Try {
-          fw.repair()
-          fw.migrate()
-          ()
-        }.recover {
-          case e: FlywayException =>
-            println("Recovery failed")
-            println(e)
+  def initializeDb[M[_]: Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] =
+    Sync[M].delay {
+      val fw =
+        Flyway
+          .configure()
+          .dataSource(ds)
+          .defaultSchema(schemaName)
+          .schemas(schemaName)
+          .locations(s"db/$schemaName/migration")
+          .load()
+      Try {
+        fw.migrate()
+        ()
+      }.recoverWith {
+        case e: FlywayException =>
+          println("Got flyway exception")
+          println(e)
+          println("Attempting to recover.")
+          Try {
+            fw.repair()
+            fw.migrate()
             ()
-        }
+          }.recover {
+            case e: FlywayException =>
+              println("Recovery failed")
+              println(e)
+              ()
+          }
+      }
     }
-  }
 
   def getDataSource(cfg: DatabaseConfig): DataSource = {
     val ds = new org.postgresql.ds.PGSimpleDataSource()

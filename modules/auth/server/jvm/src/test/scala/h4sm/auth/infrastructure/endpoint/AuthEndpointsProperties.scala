@@ -40,9 +40,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
         _ <- authClient.deleteUser(u.username)
-      } yield {
-        login.status should equal(Status.Ok)
-      }
+      } yield login.status should equal(Status.Ok)
 
       test.unsafeRunSync()
     }
@@ -55,9 +53,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         _ <- authClient.postUser(u)
         post <- authClient.postUser(u)
         _ <- authClient.deleteUser(u.username)
-      } yield {
-        post.status should equal(Status.Conflict)
-      }
+      } yield post.status should equal(Status.Conflict)
 
       test.unsafeRunSync()
     }
@@ -72,9 +68,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         user <- authClient.getUser(u.username, login).getOrElse(fail)
         detail <- user.as[SiteResult[UserDetail]]
         _ <- authClient.deleteUser(u.username)
-      } yield {
-        u.username should equal(detail.result.username)
-      }
+      } yield u.username should equal(detail.result.username)
 
       test.unsafeRunSync()
     }
@@ -87,9 +81,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u.copy(password = u.password ++ u.password))
         _ <- authClient.deleteUser(u.username)
-      } yield {
-        login.status should equal(Status.BadRequest)
-      }
+      } yield login.status should equal(Status.BadRequest)
     }
   }
 }

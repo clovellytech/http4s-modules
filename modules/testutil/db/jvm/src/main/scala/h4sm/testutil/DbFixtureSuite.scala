@@ -46,15 +46,12 @@ trait DbFixtureSuite extends RandomDbCreation with funsuite.FixtureAnyFunSuiteLi
       tr <- getInitializedTransactor(cfg, schemaNames: _*)
     } yield tr
 
-    try {
-      withFixture(test.toNoArgTest(FixtureParam(transactor.unsafeRunSync())))
-    } catch {
+    try withFixture(test.toNoArgTest(FixtureParam(transactor.unsafeRunSync())))
+    catch {
       case e: Throwable =>
         println(e)
         e.printStackTrace()
         fail("Failed to create test database")
-    } finally {
-      dropDb[IO](cfg).unsafeRunSync()
-    }
+    } finally dropDb[IO](cfg).unsafeRunSync()
   }
 }

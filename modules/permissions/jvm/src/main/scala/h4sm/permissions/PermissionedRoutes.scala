@@ -27,9 +27,9 @@ object PermissionedRoutes {
     Kleisli { (req: UserSecuredRequest[F, T]) =>
       for {
         _ <- OptionT.liftF(hasPermission(req.authenticator.asBase.identity)).filter(identity)
-        resp <- pf
-          .andThen(OptionT.liftF(_))
-          .applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
+        resp <-
+          pf.andThen(OptionT.liftF(_))
+            .applyOrElse(req, Function.const(OptionT.none[F, Response[F]]))
       } yield resp
     }
   }

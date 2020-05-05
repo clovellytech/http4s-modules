@@ -21,7 +21,7 @@ abstract class AuthClientRunner[F[_]: Sync: Bracket[?[_], Throwable]] {
   def auth = Authenticators.bearer[F]
   def authClient(implicit P: PasswordHasher[F, BCrypt]) =
     new AuthClient[F, BCrypt, TSecBearerToken](userService, auth)
-  def testAuthClient(
-      implicit P: PasswordHasher[F, BCrypt],
+  def testAuthClient(implicit
+      P: PasswordHasher[F, BCrypt],
   ): TestAuthClient[F, BCrypt, TSecBearerToken] = new TestAuthClient(authClient)
 }

@@ -22,25 +22,25 @@ class TestAuthClient[F[_]: Sync, Alg, T[_]](client: AuthClient[F, Alg, T]) {
 trait IOTestAuthClientChecks { this: ScalaCheckPropertyChecks =>
   def forAnyUser[Alg, T[_]](
       tc: TestAuthClient[IO, Alg, T],
-  )(f: Headers => UserRequest => IO[Assertion])(
-      implicit
+  )(f: Headers => UserRequest => IO[Assertion])(implicit
       arb: Arbitrary[UserRequest],
-  ): Assertion = forAll { (u: UserRequest) =>
-    tc.withUser(u)(headers => f(headers)(u)).unsafeRunSync()
-  }
+  ): Assertion =
+    forAll { (u: UserRequest) =>
+      tc.withUser(u)(headers => f(headers)(u)).unsafeRunSync()
+    }
 
   def forAnyUser2[A: Arbitrary, Alg, T[_]](
       tc: TestAuthClient[IO, Alg, T],
-  )(f: Headers => (UserRequest, A) => IO[Assertion])(
-      implicit
+  )(f: Headers => (UserRequest, A) => IO[Assertion])(implicit
       arb: Arbitrary[UserRequest],
-  ): Assertion = forAll { (u: UserRequest, a: A) =>
-    tc.withUser(u)(headers => f(headers)(u, a)).unsafeRunSync()
-  }
+  ): Assertion =
+    forAll { (u: UserRequest, a: A) =>
+      tc.withUser(u)(headers => f(headers)(u, a)).unsafeRunSync()
+    }
 
   def forAnyUser3[A: Arbitrary, B: Arbitrary, Alg, T[_]](
       tc: TestAuthClient[IO, Alg, T],
-  )(f: Headers => (UserRequest, A, B) => IO[Assertion])(
-      implicit arb: Arbitrary[UserRequest],
+  )(f: Headers => (UserRequest, A, B) => IO[Assertion])(implicit
+      arb: Arbitrary[UserRequest],
   ): Assertion = forAnyUser2(tc)(h => (u: UserRequest, x: (A, B)) => f(h)(u, x._1, x._2))
 }

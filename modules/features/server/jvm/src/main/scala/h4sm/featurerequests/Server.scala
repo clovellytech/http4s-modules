@@ -56,8 +56,9 @@ class Server[F[_]: ConcurrentEffect: Timer: ContextShift](ec: ExecutionContext) 
       _ <- ConcurrentEffect[F].delay(
         DatabaseConfig.initialize(db)("ct_auth", "ct_feature_requests"),
       )
-      exitCode <- HikariTransactor
-        .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
-        .use(app(_, port, host))
+      exitCode <-
+        HikariTransactor
+          .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
+          .use(app(_, port, host))
     } yield exitCode
 }

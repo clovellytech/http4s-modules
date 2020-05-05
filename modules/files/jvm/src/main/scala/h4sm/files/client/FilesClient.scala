@@ -22,8 +22,8 @@ import org.http4s.circe.CirceEntityCodec._
 
 import testutil.infrastructure.endpoints._
 
-class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
-    implicit F: Sync[F],
+class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(implicit
+    F: Sync[F],
     blk: Blocker,
 ) extends Http4sDsl[F]
     with Http4sClientDsl[F] {
@@ -32,8 +32,8 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
 
   val files = fileEndpoints.endpoints.orNotFound
 
-  def postFile(fileInfo: FileInfo, file: File)(
-      implicit h: Headers,
+  def postFile(fileInfo: FileInfo, file: File)(implicit
+      h: Headers,
   ): F[SiteResult[List[FileInfoId]]] = {
     val mp: Multipart[F] = Multipart(
       Vector(
@@ -53,8 +53,8 @@ class FilesClient[F[_]: ContextShift, T[_]](fileEndpoints: FileEndpoints[F, T])(
     } yield fileRes
   }
 
-  def getFile(fileId: FileInfoId, name: String = "download")(
-      implicit h: Headers,
+  def getFile(fileId: FileInfoId, name: String = "download")(implicit
+      h: Headers,
   ): F[Stream[F, Byte]] =
     for {
       u <- Uri.fromString(s"/${fileId.toString}/$name").leftWiden[Throwable].liftTo[F]

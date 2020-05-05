@@ -18,22 +18,25 @@ class UserService[F[_]: MonadError[?[_], Throwable]: UserRepositoryAlgebra, A](
       _ <- if (foundUser) Error.Duplicate().raiseError[F, Throwable] else ().pure[F]
       hash <- hasher.hashpw[F](plainPassword.getBytes())
       user = User(username, hash.getBytes)
-      uid <- UserRepositoryAlgebra[F]
-        .insertGetId(user)
-        .toRight[Throwable](Error.Duplicate())
-        .rethrowT
+      uid <-
+        UserRepositoryAlgebra[F]
+          .insertGetId(user)
+          .toRight[Throwable](Error.Duplicate())
+          .rethrowT
     } yield (user, uid)
 
   def lookup(username: String, password: String): F[(User, UserId)] =
     for {
-      (user, userId, joinTime) <- UserRepositoryAlgebra[F]
-        .byUsername(username)
-        .toRight[Throwable](Error.NotFound())
-        .rethrowT
+      (user, userId, joinTime) <-
+        UserRepositoryAlgebra[F]
+          .byUsername(username)
+          .toRight[Throwable](Error.NotFound())
+          .rethrowT
       hash = PasswordHash[A](new String(user.hash))
       status <- hasher.checkpw[F](password.getBytes, hash)
-      res <- if (status == Verified) (user, userId).pure[F]
-      else MonadError[F, Throwable].raiseError(Error.BadLogin())
+      res <-
+        if (status == Verified) (user, userId).pure[F]
+        else MonadError[F, Throwable].raiseError(Error.BadLogin())
     } yield res
 
   def byUserId(userId: UserId): F[(User, UserId, Instant)] =

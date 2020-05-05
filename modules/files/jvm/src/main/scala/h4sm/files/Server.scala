@@ -55,8 +55,9 @@ class Server[F[_]: ConcurrentEffect: ConfigAsk: ContextShift: Timer: ServerConfi
       serverConf <- ServerConfigAsk[F].ask
       _ <- ConfigAsk[F].ask
       _ <- ConcurrentEffect[F].delay(DatabaseConfig.initialize(db)("ct_auth", "ct_files"))
-      exitCode <- HikariTransactor
-        .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
-        .use(app(_, serverConf, blk))
+      exitCode <-
+        HikariTransactor
+          .newHikariTransactor(db.driver, db.url, db.user, db.password, connEc, blk)
+          .use(app(_, serverConf, blk))
     } yield exitCode
 }

@@ -26,8 +26,7 @@ import tsec.authentication.TSecBearerToken
 /*
  * Build a server that uses several modules in this project...
  */
-class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.ConfigAsk](
-    implicit
+class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.ConfigAsk](implicit
     C: ConfigAsk[F],
 ) {
   def router[A, T[_]](
@@ -83,33 +82,33 @@ class H4SMServer[F[_]: ContextShift: ConcurrentEffect: Timer: files.config.Confi
       requests = RequestEndpoints.persistingEndpoints[F, TSecBearerToken](xa)
       votes = VoteEndpoints.persistingEndpoints[F, TSecBearerToken](xa)
       service = router(test, authEndpoints, files, requests, votes).orNotFound
-      withCors = if (allowCors) {
-        import org.http4s.server.middleware.{CORS, CORSConfig}
-        import scala.concurrent.duration._
+      withCors =
+        if (allowCors) {
+          import org.http4s.server.middleware.{CORS, CORSConfig}
+          import scala.concurrent.duration._
 
-        val methodConfig = CORSConfig(
-          anyOrigin = true,
-          anyMethod = true,
-          allowCredentials = true,
-          maxAge = 1.day.toSeconds,
-          exposedHeaders = Set("Authorization").some,
-        )
-        CORS(service, methodConfig).map { resp =>
-          resp.putHeaders(
-            Header.apply("Access-Control-Expose-Headers", "Authorization"),
-            Header.apply("Access-Control-Allow-Headers", "Authorization"),
+          val methodConfig = CORSConfig(
+            anyOrigin = true,
+            anyMethod = true,
+            allowCredentials = true,
+            maxAge = 1.day.toSeconds,
+            exposedHeaders = Set("Authorization").some,
           )
-        }
-      } else {
-        service
-      }
-      withMiddleware = if (logging) {
-        import org.http4s.server.middleware.Logger
+          CORS(service, methodConfig).map { resp =>
+            resp.putHeaders(
+              Header.apply("Access-Control-Expose-Headers", "Authorization"),
+              Header.apply("Access-Control-Allow-Headers", "Authorization"),
+            )
+          }
+        } else
+          service
+      withMiddleware =
+        if (logging) {
+          import org.http4s.server.middleware.Logger
 
-        Logger.httpApp(true, true, redactHeadersWhen = _ => false)(withCors)
-      } else {
-        withCors
-      }
+          Logger.httpApp(true, true, redactHeadersWhen = _ => false)(withCors)
+        } else
+          withCors
       server <- BlazeServerBuilder[F](serverEc)
         .bindHttp(port, host)
         .withHttpApp(withMiddleware)

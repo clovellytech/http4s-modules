@@ -53,9 +53,7 @@ class EndpointsTestSpec
         for {
           upload <- fileClient.postFile(fi, textFile)
           _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(p.transactor)
-        } yield {
-          upload.result should not be (empty)
-        }
+        } yield upload.result should not be (empty)
       }
     }
   }
@@ -68,9 +66,7 @@ class EndpointsTestSpec
           upload <- fileClient.postFile(fi, textFile)
           fs <- fileClient.listFiles()
           _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(p.transactor)
-        } yield {
-          fs.result should not be empty
-        }
+        } yield fs.result should not be empty
       }
     }
   }
@@ -99,9 +95,7 @@ class EndpointsTestSpec
             bs
           }
           _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(p.transactor)
-        } yield {
-          bs.toString should not be empty
-        }
+        } yield bs.toString should not be empty
       }
     }
   }

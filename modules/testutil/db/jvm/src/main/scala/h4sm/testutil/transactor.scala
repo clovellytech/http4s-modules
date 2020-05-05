@@ -37,8 +37,7 @@ object transactor {
     )
 
   def getInitializedTransactor[F[_]: ContextShift](cfg: DatabaseConfig, schemaNames: String*)(
-      implicit
-      F: Async[F],
+      implicit F: Async[F],
   ): F[Transactor[F]] =
     DatabaseConfig.initialize[F](cfg)(schemaNames: _*) *> F.delay(getTransactor[F](cfg))
 

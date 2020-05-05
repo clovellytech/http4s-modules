@@ -30,9 +30,7 @@ class RequestEndpointProperties extends ScalaCheckPropertyChecks with DbFixtureS
         all <- getRequests
         res <- all.as[SiteResult[List[VotedFeature]]]
         _ <- deleteUser(u.username)
-      } yield {
-        res.result.exists(_.feature.title == feat.title)
-      }
+      } yield res.result.exists(_.feature.title == feat.title)
 
       test.unsafeRunSync()
     }

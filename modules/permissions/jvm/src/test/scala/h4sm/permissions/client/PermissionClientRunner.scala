@@ -25,10 +25,11 @@ abstract class PermissionClientRunner[F[_]: Sync: Bracket[?[_], Throwable]]
   def permitUser(ur: UserRequest, p: Permission): OptionT[F, PermissionId] =
     for {
       userDetails <- userAlg.byUsername(ur.username)
-      permId <- permRepo
-        .selectByAttributes(p.appName, p.name)
-        .map(_._2)
-        .orElse(permRepo.insertGetId(p))
+      permId <-
+        permRepo
+          .selectByAttributes(p.appName, p.name)
+          .map(_._2)
+          .orElse(permRepo.insertGetId(p))
       _ <- OptionT.liftF(
         userPermRepo.insert(UserPermission(userDetails._2, permId, userDetails._2)),
       )
