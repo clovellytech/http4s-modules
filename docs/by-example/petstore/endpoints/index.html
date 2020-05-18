@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Http4s Modules by Example - Build Endpoints · Http4s Modules Docs</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Now that our algebras are complete for storing and querying pets and orders, let us work through adding endpoints for interacting with these data."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Http4s Modules by Example - Build Endpoints · Http4s Modules Docs"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clovellytech.github.io/http4s-modules/"/><meta property="og:description" content="Now that our algebras are complete for storing and querying pets and orders, let us work through adding endpoints for interacting with these data."/><meta property="og:image" content="https://clovellytech.github.io/http4s-modules/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clovellytech.github.io/http4s-modules/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/http4s-modules/"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/http4s-modules/js/scrollSpy.js"></script><link rel="stylesheet" href="/http4s-modules/css/main.css"/><script src="/http4s-modules/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/http4s-modules/"><h2 class="headerTitle">Http4s Modules Docs</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"></ul></nav></div></header></div></div><div class="navPusher singleRowMobileNav"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Http4s Modules by Example - Build Endpoints</h1></header><article><div><span><p>Now that our algebras are complete for storing and querying pets and orders, let us work through adding endpoints for interacting with these data.</p>
+<p>Eventually we will need to handle permissions, to allow only employees of the petstore to add pets and update ship dates on orders. For now let's implement the endpoints only requiring registered users.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> cats.effect.<span class="hljs-type">Sync</span>
+<span class="hljs-keyword">import</span> cats.implicits._
+<span class="hljs-keyword">import</span> h4sm.auth._
+<span class="hljs-keyword">import</span> h4sm.auth.comm.<span class="hljs-type">SiteResult</span>
+<span class="hljs-keyword">import</span> h4sm.auth.comm.codecs._
+<span class="hljs-keyword">import</span> h4sm.auth.domain.tokens._
+<span class="hljs-keyword">import</span> h4sm.auth.domain.tokens.<span class="hljs-type">AsBaseToken</span>.ops._
+<span class="hljs-keyword">import</span> h4sm.petstore.domain._
+<span class="hljs-keyword">import</span> io.circe.generic.auto._
+<span class="hljs-keyword">import</span> org.http4s.circe.<span class="hljs-type">CirceEntityCodec</span>._
+<span class="hljs-keyword">import</span> org.http4s.dsl.<span class="hljs-type">Http4sDsl</span>
+<span class="hljs-keyword">import</span> tsec.authentication._
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetRequest</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, bio: <span class="hljs-type">Option</span>[<span class="hljs-type">String</span>], status: <span class="hljs-type">String</span></span>)</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetEndpoints</span>[<span class="hljs-type">F</span>[_]</span>: <span class="hljs-type">Sync</span>: <span class="hljs-type">PetAlgebra</span>, <span class="hljs-type">T</span>[_]](auth : <span class="hljs-type">UserSecuredRequestHandler</span>[<span class="hljs-type">F</span>, <span class="hljs-type">T</span>])(<span class="hljs-keyword">implicit</span>
+  <span class="hljs-type">B</span>: <span class="hljs-type">AsBaseToken</span>[<span class="hljs-type">T</span>[<span class="hljs-type">UserId</span>]]
+) <span class="hljs-keyword">extends</span> <span class="hljs-type">Http4sDsl</span>[<span class="hljs-type">F</span>]{
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">addPet</span></span>: <span class="hljs-type">UserAuthService</span>[<span class="hljs-type">F</span>, <span class="hljs-type">T</span>] = <span class="hljs-type">UserAuthService</span> {
+    <span class="hljs-keyword">case</span> req<span class="hljs-meta">@POST</span> -&gt; <span class="hljs-type">Root</span> asAuthed _ =&gt; <span class="hljs-keyword">for</span> {
+      pr &lt;- req.request.as[<span class="hljs-type">PetRequest</span>]
+      createdBy = req.authenticator.asBase.identity
+      _ &lt;- <span class="hljs-type">PetAlgebra</span>[<span class="hljs-type">F</span>].insert(<span class="hljs-type">Pet</span>(pr.name, pr.bio, createdBy, pr.status))
+      res &lt;- <span class="hljs-type">Ok</span>()
+    } <span class="hljs-keyword">yield</span> res
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">listPets</span></span>: <span class="hljs-type">UserAuthService</span>[<span class="hljs-type">F</span>, <span class="hljs-type">T</span>] = <span class="hljs-type">UserAuthService</span> {
+    <span class="hljs-keyword">case</span> _<span class="hljs-meta">@GET</span> -&gt; <span class="hljs-type">Root</span> asAuthed _ =&gt; <span class="hljs-keyword">for</span> {
+      ps &lt;- <span class="hljs-type">PetAlgebra</span>[<span class="hljs-type">F</span>].select
+      res &lt;- <span class="hljs-type">Ok</span>(<span class="hljs-type">SiteResult</span>(ps))
+    } <span class="hljs-keyword">yield</span> res
+  }
+ 
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">authService</span> </span>= addPet &lt;+&gt; listPets
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">endpoints</span> </span>= auth.liftService(authService)
+}
+</code></pre>
+<p><em>/petstore/infrastructure/endpoints/PetEndpoints.scala</em></p>
+<p>Note we're using PetAlgebra as a typeclass. This means when it comes time to create these endpoints, we'll need an implicit instance of PetAlgebra[F] available for whatever F gets chosen to run our server with. You'll see how that comes together in the next section. See <code>petstore/domain/PetAlgebra.scala</code>.</p>
+<p>This and other endpoints have been defined in <code>petstore/infrastructure/endpoint/PetEndpoints</code>, and the endpoints for orders should be reviewed as well.</p>
+<h3><a class="anchor" aria-hidden="true" id="about-those-endpoints"></a><a href="#about-those-endpoints" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>About those endpoints...</h3>
+<p>See the <code>auth</code> argument, and that weird <code>T[_]</code> type parameter? This allows the user to specify what token type they are using for our authentication. This is what allows these pet endpoints to be used with any kind of authentication we may choose later. <code>AsBaseToken[T[UserId]]</code> is stated as a requirement that whatever <code>T</code> we choose later, the T must allow us to view the Token as a BaseToken that provides a UserId directly after authenticating the user.</p>
+<p><a href="/http4s-modules/docs/by-example/petstore/server">Now let's write a Server class that will hook these endpoints up.</a></p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/http4s-modules/" class="nav-home"></a><div><h5>Docs</h5><a href="/http4s-modules/docs/">Getting Started</a></div><div><h5>Community</h5><a href="https://gitter.io/clovellytech/http4s-modules">Project Gitter Chat</a><a href="https://github.com/clovellytech/http4s-modules">GitHub</a><a class="github-button" href="https://github.com/clovellytech/http4s-modules" data-icon="octicon-star" data-count-href="/clovellytech/http4s-modules/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 ClovellyTech</section></footer></div></body></html>
