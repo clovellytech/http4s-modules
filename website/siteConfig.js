@@ -25,7 +25,7 @@ const siteConfig = {
   tagline: '',
   url: 'https://clovellytech.github.io', // Your website URL
   baseUrl: '/http4s-modules/', // Base URL for your project */
-  customDocsPath: "h4sm-docs/target/mdoc",
+  customDocsPath: "h4sm-docs/jvm/target/mdoc",
   // Used for publishing and more
   projectName: 'http4s-modules',
   organizationName: 'clovellytech',
@@ -39,7 +39,7 @@ const siteConfig = {
   ],
 
   // If you have users set above, you add it here:
-//  users,
+  //  users,
 
   /* path to images for header/footer */
   headerIcon: "",
