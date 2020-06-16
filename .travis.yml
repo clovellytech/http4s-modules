@@ -27,7 +27,7 @@ install:
 stages:
   - name: test
   - name: release
-    if: "((branch = master AND type = push) OR (tag IS present)) AND NOT fork"
+    if: "((branch = main AND type = push) OR (tag IS present)) AND NOT fork"
 
 jobs:
   include:
@@ -53,7 +53,7 @@ jobs:
         skip_cleanup: true
         target-branch: gh-pages
         on:
-          branch: master
+          branch: main
     - stage: release
       script: sbt ci-release
   allow_failures:
