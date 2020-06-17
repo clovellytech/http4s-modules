@@ -26,9 +26,8 @@ class UserRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transactor[M
     OptionT {
       val q: ConnectionIO[Option[UserId]] = users.insertGetId(a).map(_.some)
       q.exceptSomeSqlState {
-          case UNIQUE_VIOLATION => HC.rollback.as(none[UserId])
-        }
-        .transact(xa)
+        case UNIQUE_VIOLATION => HC.rollback.as(none[UserId])
+      }.transact(xa)
     }
 
   def select: M[List[(User, UserId, Instant)]] = users.select.to[List].transact(xa)
