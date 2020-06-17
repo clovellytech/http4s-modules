@@ -27,9 +27,8 @@ class LocalFileStoreService[F[_]: Sync: ContextShift](implicit
       conf <- C.ask
       _ <-
         s.through(
-            fs2.io.file.writeAll[F](new java.io.File(conf.basePath, fileId.toString).toPath, blk),
-          )
-          .compile
+          fs2.io.file.writeAll[F](new java.io.File(conf.basePath, fileId.toString).toPath, blk),
+        ).compile
           .drain
     } yield ()
 
