@@ -27,7 +27,7 @@ object dependencies {
   )
 
   object versions {
-    val apacheLang3 = "3.10"
+    val apacheLang3 = "3.11"
     val bcrypt = "3.1"
     val betterMonadicFor = "0.3.1"
     val cats = "2.1.1"
