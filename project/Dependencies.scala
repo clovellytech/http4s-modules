@@ -52,7 +52,7 @@ object dependencies {
     val scalaTest = "3.2.0"      // scalaTest 3.2.0-M2 is causing a failure on scala 2.13...
     val scalaTestPlusScalacheck = "3.2.0.0"
     val simulacrum = "1.0.0"
-    val tsec = "0.2.0.3"
+    val tsec = "0.2.1-ct-2"
   }
 
   def compilerPlugins = Seq(
