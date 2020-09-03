@@ -6,7 +6,7 @@ import auth.comm.SiteResult
 import auth.comm.codecs._
 import auth.UserSecuredRequestHandler
 import cats.data.Kleisli
-import cats.implicits._
+import cats.syntax.all._
 import cats.effect.Sync
 import domain._
 import infrastructure.endpoint._
