@@ -26,17 +26,16 @@ class MessageEndpoints[F[_]: Sync: MessageAlgebra, T[_]](implicit T: AsBaseToken
       res
   }
 
-  val send: UserAuthService[F, T] = UserAuthService {
-    case req @ POST -> Root asAuthed _ =>
-      val res: F[Response[F]] = for {
-        sendReq <- req.request.as[CreateMessageRequest]
-        _ <- MessageAlgebra[F].insert(
-          UserMessage(req.authenticator.asBase.identity, sendReq.to, sendReq.content, none),
-        )
-        resp <- Ok()
-      } yield resp
+  val send: UserAuthService[F, T] = UserAuthService { case req @ POST -> Root asAuthed _ =>
+    val res: F[Response[F]] = for {
+      sendReq <- req.request.as[CreateMessageRequest]
+      _ <- MessageAlgebra[F].insert(
+        UserMessage(req.authenticator.asBase.identity, sendReq.to, sendReq.content, none),
+      )
+      resp <- Ok()
+    } yield resp
 
-      res
+    res
   }
 
   val inbox: UserAuthService[F, T] = UserAuthService {

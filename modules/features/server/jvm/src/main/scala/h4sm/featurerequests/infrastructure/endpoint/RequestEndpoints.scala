@@ -21,27 +21,25 @@ class RequestEndpoints[F[_]: Sync: RequestRepositoryAlgebra, T[_]](implicit
     T: AsBaseToken[T[UserId]],
 ) extends Http4sDsl[F] {
   def unAuthEndpoints: HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case GET -> Root / "request" =>
-        for {
-          feats <- RequestRepositoryAlgebra[F].selectWithVoteCounts
-          resp <- Ok(SiteResult(feats))
-        } yield resp
+    HttpRoutes.of[F] { case GET -> Root / "request" =>
+      for {
+        feats <- RequestRepositoryAlgebra[F].selectWithVoteCounts
+        resp <- Ok(SiteResult(feats))
+      } yield resp
     }
 
   def authEndpoints: UserAuthService[F, T] =
-    UserAuthService {
-      case req @ POST -> Root / "request" asAuthed _ =>
-        for {
-          featureRequest <- req.request.as[FeatureRequest]
-          feature = Feature(
-            T.asBase(req.authenticator).identity.some,
-            featureRequest.title,
-            featureRequest.description,
-          )
-          _ <- RequestRepositoryAlgebra[F].insert(feature)
-          resp <- Ok()
-        } yield resp
+    UserAuthService { case req @ POST -> Root / "request" asAuthed _ =>
+      for {
+        featureRequest <- req.request.as[FeatureRequest]
+        feature = Feature(
+          T.asBase(req.authenticator).identity.some,
+          featureRequest.title,
+          featureRequest.description,
+        )
+        _ <- RequestRepositoryAlgebra[F].insert(feature)
+        resp <- Ok()
+      } yield resp
     }
 }
 

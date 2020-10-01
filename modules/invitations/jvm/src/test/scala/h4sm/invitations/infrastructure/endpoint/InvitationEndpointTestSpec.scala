@@ -26,8 +26,8 @@ class InvitationEndpointTestSpec
       forAnyUser2(testAuthClient) {
         implicit h: Headers => (_: UserRequest, ps: (String, UserRequest)) =>
           val (toName, newU) = ps
-          createInvite(toName, newU).map {
-            case (invite, _, _) => invite.toEmail should equal(newU.username)
+          createInvite(toName, newU).map { case (invite, _, _) =>
+            invite.toEmail should equal(newU.username)
           }
       }
     }
@@ -48,8 +48,8 @@ class InvitationEndpointTestSpec
                 .getOrElseF(Sync[IO].raiseError(new Exception("invite not found")))
           } yield savedInvite.openDate shouldBe defined
 
-          job.recoverWith {
-            case e: Throwable => fail(e)
+          job.recoverWith { case e: Throwable =>
+            fail(e)
           }
       }
     }

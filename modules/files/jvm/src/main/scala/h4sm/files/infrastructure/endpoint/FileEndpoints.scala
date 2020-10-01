@@ -60,15 +60,14 @@ class FileEndpoints[F[_], T[_]](auth: UserSecuredRequestHandler[F, T])(implicit
     }
 
   def authFileEndpoints: UserAuthService[F, T] =
-    UserAuthService {
-      case req @ GET -> Root / uuidstr asAuthed _ =>
-        val pred = (i: FileInfo) =>
-          i.isPublic || (i.uploadedBy.compareTo(req.authenticator.asBase.identity) == 0)
-        for {
-          fileInfo <- getFile(uuidstr, pred)
-          (_, _, bytes) = fileInfo
-          resp <- Ok(bytes)
-        } yield resp
+    UserAuthService { case req @ GET -> Root / uuidstr asAuthed _ =>
+      val pred = (i: FileInfo) =>
+        i.isPublic || (i.uploadedBy.compareTo(req.authenticator.asBase.identity) == 0)
+      for {
+        fileInfo <- getFile(uuidstr, pred)
+        (_, _, bytes) = fileInfo
+        resp <- Ok(bytes)
+      } yield resp
     }
 
   def authInfoEndpoints: UserAuthService[F, T] = {
