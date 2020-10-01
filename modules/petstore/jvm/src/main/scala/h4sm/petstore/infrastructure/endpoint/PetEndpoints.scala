@@ -16,24 +16,22 @@ class PetEndpoints[F[_]: Sync: PetAlgebra, T[_]](auth: UserSecuredRequestHandler
     B: AsBaseToken[T[UserId]],
 ) extends Http4sDsl[F] {
   def addPet =
-    UserAuthService[F, T] {
-      case req @ POST -> Root asAuthed _ =>
-        for {
-          pr <- req.request.as[PetRequest]
-          _ <- PetAlgebra[F].insert(
-            Pet(pr.name, pr.bio, req.authenticator.asBase.identity, pr.status),
-          )
-          res <- Ok()
-        } yield res
+    UserAuthService[F, T] { case req @ POST -> Root asAuthed _ =>
+      for {
+        pr <- req.request.as[PetRequest]
+        _ <- PetAlgebra[F].insert(
+          Pet(pr.name, pr.bio, req.authenticator.asBase.identity, pr.status),
+        )
+        res <- Ok()
+      } yield res
     }
 
   def listPets =
-    UserAuthService[F, T] {
-      case GET -> Root asAuthed _ =>
-        for {
-          pets <- PetAlgebra[F].select
-          res <- Ok(pets)
-        } yield res
+    UserAuthService[F, T] { case GET -> Root asAuthed _ =>
+      for {
+        pets <- PetAlgebra[F].select
+        res <- Ok(pets)
+      } yield res
     }
 
   val authService = addPet <+> listPets

@@ -23,9 +23,8 @@ trait OrderSql {
       Instant,
   )
   type Annotated = (Order, OrderId, Instant)
-  val selectAdjust: SelectInter => Annotated = {
-    case (a, bs, cs, ds, e, f, g, h, i) =>
-      (Order(a, bs.zip(cs).zip(ds).map { case ((a, b), c) => OrderItem(a, b, c) }, e, f, g), h, i)
+  val selectAdjust: SelectInter => Annotated = { case (a, bs, cs, ds, e, f, g, h, i) =>
+    (Order(a, bs.zip(cs).zip(ds).map { case ((a, b), c) => OrderItem(a, b, c) }, e, f, g), h, i)
   }
 
   def select: Query0[(Order, OrderId, Instant)] = sql"""
