@@ -1,7 +1,8 @@
 package h4sm.common
 
 import cats.syntax.all._
-
+import cats.instances.either._
+import cats.instances.future._
 import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import io.circe.parser
