@@ -20,8 +20,7 @@ final case class DatabaseConfig(
 
 object DatabaseConfig {
 
-  /**
-    * Runs the flyway migrations against the target database
+  /** Runs the flyway migrations against the target database
     */
   def initializeDb[M[_]: Sync](ds: DataSource)(schemaName: String): M[Try[Unit]] =
     Sync[M].delay {
@@ -36,21 +35,19 @@ object DatabaseConfig {
       Try {
         fw.migrate()
         ()
-      }.recoverWith {
-        case e: FlywayException =>
-          println("Got flyway exception")
+      }.recoverWith { case e: FlywayException =>
+        println("Got flyway exception")
+        println(e)
+        println("Attempting to recover.")
+        Try {
+          fw.repair()
+          fw.migrate()
+          ()
+        }.recover { case e: FlywayException =>
+          println("Recovery failed")
           println(e)
-          println("Attempting to recover.")
-          Try {
-            fw.repair()
-            fw.migrate()
-            ()
-          }.recover {
-            case e: FlywayException =>
-              println("Recovery failed")
-              println(e)
-              ()
-          }
+          ()
+        }
       }
     }
 
