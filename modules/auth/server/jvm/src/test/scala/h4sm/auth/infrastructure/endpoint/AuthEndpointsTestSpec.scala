@@ -7,7 +7,6 @@ import cats.effect.IO
 import cats.syntax.all._
 import h4sm.auth.comm.{SiteResult, UserDetail, UserRequest}
 import h4sm.auth.comm.codecs._
-import h4sm.auth.domain.UserService
 import org.http4s.circe.CirceEntityCodec._
 import testutil.EndpointTestSpec
 import domain.UserService

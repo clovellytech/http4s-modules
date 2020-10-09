@@ -16,8 +16,8 @@ object dependencies {
   val withTests : String = "compile->compile;test->test"
   val inTestOnly : String = "test->test"
 
-  val scala212 = "2.12.11"
-  val scala213 = "2.13.2"
+  val scala212 = "2.12.12"
+  val scala213 = "2.13.3"
 
   lazy val JsTest = config("js").extend(Test)
   lazy val JvmTest = config("jvm").extend(Test)
@@ -38,18 +38,18 @@ object dependencies {
     val circeConfig = "0.8.0"
     val cryptobits = "1.1"
     val doobie = "0.9.2"
-    val flyway = "7.0.0"
+    val flyway = "7.0.2"
     val http4s = "0.21.7"
     val janino = "3.1.2"
     val kindProjector212 = "0.10.3"
     val kindProjector213 = "0.11.0"
     val logback = "1.2.3"
     val macroParadise = "2.1.1"
-    val postgres = "42.2.16"
+    val postgres = "42.2.17"
     val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
     val scalajs = "1.0.0"
     val scalaJavaTime = "2.0.0"
-    val scalaTest = "3.2.0"      // scalaTest 3.2.2-M2 is causing a failure on scala 2.13...
+    val scalaTest = "3.2.2"
     val scalaTestPlusScalacheck = "3.2.2.0"
     val simulacrum = "1.0.0"
     val tsec = "0.2.1-ct-2"

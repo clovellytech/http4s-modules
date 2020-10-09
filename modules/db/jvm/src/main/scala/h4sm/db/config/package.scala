@@ -14,7 +14,7 @@ package object config {
       ev: ApplicativeError[F, Throwable],
   ): ApplicativeAsk[F, C] =
     new DefaultApplicativeAsk[F, C] {
-      val c: F[C] = name.fold(parser.decodeF[F, C])(parser.decodePathF[F, C](_))
+      val c: F[C] = name.fold(parser.decodeF[F, C]())(parser.decodePathF[F, C](_))
       val applicative: Applicative[F] = implicitly
       def ask: F[C] = c
     }

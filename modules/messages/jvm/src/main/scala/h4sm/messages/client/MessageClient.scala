@@ -8,10 +8,8 @@ import auth.UserSecuredRequestHandler
 import cats.data.Kleisli
 import cats.syntax.all._
 import cats.effect.Sync
-import domain._
 import infrastructure.endpoint._
 import messages.domain._
-import messages.infrastructure.endpoint._
 import messages.infrastructure.endpoint.Codecs._
 import org.http4s._
 import org.http4s.implicits._

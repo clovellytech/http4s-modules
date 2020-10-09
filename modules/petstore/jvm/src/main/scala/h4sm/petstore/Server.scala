@@ -42,7 +42,7 @@ class PetstoreServer[F[_]: ContextShift: ConcurrentEffect: Timer] {
     implicit val encryptor = AES128GCM.genEncryptor[F]
     implicit val gcmstrategy = AES128GCM.defaultIvStrategy[F]
     for {
-      cfg <- Resource.liftF(parser.decodeF[F, MainConfig])
+      cfg <- Resource.liftF(parser.decodeF[F, MainConfig]())
       MainConfig(db, ServerConfig(host, port, numThreads)) = cfg
       serverEc <- ExecutionContexts.cachedThreadPool[F]
       connec <- ExecutionContexts.fixedThreadPool[F](numThreads)

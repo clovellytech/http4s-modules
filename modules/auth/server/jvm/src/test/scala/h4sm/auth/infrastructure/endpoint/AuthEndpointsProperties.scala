@@ -65,7 +65,7 @@ class AuthEndpointsProperties extends DbFixtureSuite with Matchers with ScalaChe
       val test: IO[Assertion] = for {
         _ <- authClient.postUser(u)
         login <- authClient.loginUser(u)
-        user <- authClient.getUser(u.username, login).getOrElse(fail)
+        user <- authClient.getUser(u.username, login).getOrElse(fail())
         detail <- user.as[SiteResult[UserDetail]]
         _ <- authClient.deleteUser(u.username)
       } yield u.username should equal(detail.result.username)

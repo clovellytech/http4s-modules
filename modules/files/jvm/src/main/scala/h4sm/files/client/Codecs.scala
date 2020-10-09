@@ -7,9 +7,7 @@ import io.circe.Decoder
 import org.http4s.EntityDecoder
 import cats.effect.Sync
 import io.circe.generic.semiauto.deriveDecoder
-import io.circe.Decoder
 import org.http4s.circe.jsonOf
-import org.http4s.EntityDecoder
 
 class FileCodecs[F[_]: Sync] {
   implicit def backendDecoder[A <: Backend](implicit U: Unshow[A]): Decoder[Backend] =
