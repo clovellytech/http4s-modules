@@ -53,7 +53,7 @@ class EndpointsTestSpec
         for {
           upload <- fileClient.postFile(fi, textFile)
           _ <- upload.result.traverse(filesSql.deleteById(_).run).transact(p.transactor)
-        } yield upload.result should not be (empty)
+        } yield upload.result should not be empty
       }
     }
   }

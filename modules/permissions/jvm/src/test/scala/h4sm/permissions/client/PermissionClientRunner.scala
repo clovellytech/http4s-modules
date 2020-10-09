@@ -6,7 +6,6 @@ import cats.effect.{Bracket, Sync}
 
 import auth.comm.UserRequest
 import auth.client.AuthClientRunner
-import cats.effect.{Bracket, Sync}
 import cats.data.OptionT
 import domain._
 import infrastructure.endpoint.PermissionEndpoints

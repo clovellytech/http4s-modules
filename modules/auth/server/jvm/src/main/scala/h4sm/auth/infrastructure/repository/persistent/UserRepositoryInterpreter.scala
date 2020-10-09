@@ -17,16 +17,16 @@ class UserRepositoryInterpreter[M[_]: Bracket[?[_], Throwable]](xa: Transactor[M
       .insert(a)
       .run
       .as(())
-      .exceptSomeSqlState {
-        case UNIQUE_VIOLATION => HC.rollback
+      .exceptSomeSqlState { case UNIQUE_VIOLATION =>
+        HC.rollback
       }
       .transact(xa)
 
   def insertGetId(a: User): OptionT[M, UserId] =
     OptionT {
       val q: ConnectionIO[Option[UserId]] = users.insertGetId(a).map(_.some)
-      q.exceptSomeSqlState {
-        case UNIQUE_VIOLATION => HC.rollback.as(none[UserId])
+      q.exceptSomeSqlState { case UNIQUE_VIOLATION =>
+        HC.rollback.as(none[UserId])
       }.transact(xa)
     }
 

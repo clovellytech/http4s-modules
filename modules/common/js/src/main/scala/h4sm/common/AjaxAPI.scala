@@ -13,8 +13,7 @@ import scala.concurrent.ExecutionContext
 abstract class AjaxAPI(implicit ec: ExecutionContext) extends API[Future] {
   type Request = XMLHttpRequest
 
-  /**
-    * Define a set of headers to pull from responses and thread into our following
+  /** Define a set of headers to pull from responses and thread into our following
     * requests. This is mostly useful for bearer Authorization tokens. If you add
     * "Authorization" to this set, then each time an Authorization header is present
     * in a response, this header will be added to the client's state and sent in the
