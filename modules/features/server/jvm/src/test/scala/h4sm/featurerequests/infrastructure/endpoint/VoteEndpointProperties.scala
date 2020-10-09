@@ -3,7 +3,6 @@ package infrastructure.endpoint
 
 import cats.effect.IO
 import h4sm.auth.comm.arbitraries._
-import h4sm.auth.comm.codecs._
 import h4sm.auth.comm.{SiteResult, UserRequest}
 import h4sm.auth.comm.codecs._
 import h4sm.testutil.DbFixtureSuite

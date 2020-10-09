@@ -4,7 +4,6 @@ import cats.implicits._
 import h4sm.db.config._
 import h4sm.files.config.FileConfig
 import io.circe.generic.auto._
-import h4sm.db.config._
 
 package object h4sm {
   type ConfigAsk[F[_]] = MainConfig.ConfigAsk[F]

@@ -2,7 +2,6 @@ package h4sm.messages.infrastructure.endpoint
 
 import cats.implicits._
 import cats.effect.Sync
-import h4sm.auth._
 import h4sm.messages.domain._
 import Codecs._
 import org.http4s._
