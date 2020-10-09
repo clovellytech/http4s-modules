@@ -51,7 +51,7 @@ class Server[F[_]: ConcurrentEffect: Timer: ContextShift](ec: ExecutionContext) 
 
   def run(connEc: ExecutionContext, blk: Blocker): F[ExitCode] =
     for {
-      cfg <- parser.decodeF[F, FeatureRequestConfig]
+      cfg <- parser.decodeF[F, FeatureRequestConfig]()
       FeatureRequestConfig(host, port, db) = cfg
       _ <- ConcurrentEffect[F].delay(
         DatabaseConfig.initialize(db)("ct_auth", "ct_feature_requests"),
