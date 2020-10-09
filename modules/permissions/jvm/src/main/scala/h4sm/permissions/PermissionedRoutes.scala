@@ -8,8 +8,7 @@ import AsBaseToken.ops._
 import h4sm.permissions.domain.UserPermissionAlgebra
 import org.http4s._
 
-/**
-  * Route creator for routes blocked by user permissions for authenticated users.
+/** Route creator for routes blocked by user permissions for authenticated users.
   *
   * Example:
   *
