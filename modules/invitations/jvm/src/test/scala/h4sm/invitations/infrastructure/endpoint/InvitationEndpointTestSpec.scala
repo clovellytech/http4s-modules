@@ -5,7 +5,6 @@ import auth.client.IOTestAuthClientChecks
 import auth.comm.arbitraries._
 import auth.comm.UserRequest
 import cats.effect.{IO, Sync}
-import cats.implicits._
 import testutil.EndpointTestSpec
 import doobie.Transactor
 import invitations.client.InvitationClientRunner

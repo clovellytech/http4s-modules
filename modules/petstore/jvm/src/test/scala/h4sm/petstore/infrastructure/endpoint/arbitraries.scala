@@ -1,6 +1,4 @@
 package h4sm.petstore.infrastructure.endpoint
-
-import cats.implicits._
 import h4sm.testutil.arbitraries._
 import org.scalacheck._
 import org.scalacheck.cats.implicits._

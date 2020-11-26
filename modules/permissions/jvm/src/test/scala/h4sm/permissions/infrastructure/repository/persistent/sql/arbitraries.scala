@@ -2,8 +2,6 @@ package h4sm
 package permissions.infrastructure.repository.persistent.sql
 
 import java.util.UUID
-
-import cats.implicits._
 import h4sm.permissions.domain._
 import org.scalacheck._
 import org.scalacheck.cats.implicits._

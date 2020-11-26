@@ -1,6 +1,4 @@
 package h4sm.auth.client
-
-import cats.implicits._
 import h4sm.testutil.arbitraries._
 import h4sm.auth.comm._
 import org.scalacheck._
