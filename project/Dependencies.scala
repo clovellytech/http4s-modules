@@ -46,7 +46,7 @@ object dependencies {
     val logback = "1.2.3"
     val macroParadise = "2.1.1"
     val postgres = "42.2.18"
-    val scalaCheck = "1.15.0-e5dc7d1-SNAPSHOT"
+    val scalaCheck = "1.15.1"
     val scalajs = "1.0.0"
     val scalaJavaTime = "2.0.0"
     val scalaTest = "3.2.3"
