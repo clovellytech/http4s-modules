@@ -6,7 +6,6 @@ import auth.client.AuthClientRunner
 import auth.comm.UserRequest
 import auth.domain.tokens._
 import cats.effect.{Bracket, Sync}
-import cats.implicits._
 import invitations.domain._
 import invitations.infrastructure.repository.persistent.InvitationRepository
 import invitations.infrastructure.endpoint._

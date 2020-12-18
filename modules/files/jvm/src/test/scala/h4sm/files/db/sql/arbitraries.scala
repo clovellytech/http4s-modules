@@ -2,8 +2,6 @@ package h4sm.files
 package db.sql
 
 import java.util.UUID
-
-import cats.implicits._
 import h4sm.files.domain.{Backend, FileInfo}
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.cats.implicits._

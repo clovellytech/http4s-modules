@@ -6,7 +6,6 @@ package endpoint
 import java.io.{ByteArrayOutputStream, File, PrintStream}
 
 import cats.effect.{Blocker, IO}
-import cats.implicits._
 import doobie.implicits._
 import auth.client.IOTestAuthClientChecks
 import auth.comm.arbitraries._

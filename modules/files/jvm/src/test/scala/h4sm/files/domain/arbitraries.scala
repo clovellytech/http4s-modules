@@ -1,8 +1,6 @@
 package h4sm.files.domain
 
 import java.util.UUID
-
-import cats.implicits._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.cats.implicits._
 import h4sm.testutil.arbitraries.nonEmptyString
