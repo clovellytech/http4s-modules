@@ -49,7 +49,7 @@ object dependencies {
     val postgres = "42.2.23"
     val scalaCheck = "1.15.2"
     val scalajs = "1.0.0"
-    val scalaJavaTime = "2.0.0"
+    val scalaJavaTime = "2.3.0"
     val scalaTest = "3.2.3"
     val scalaTestPlusScalacheck = "3.2.2.0"
     val simulacrum = "1.0.0"
