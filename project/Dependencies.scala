@@ -41,7 +41,7 @@ object dependencies {
     val flyway = "7.3.2"
     val http4s = "0.21.25"
     val flyway = "7.11.3"
-    val janino = "3.1.2"
+    val janino = "3.1.4"
     val kindProjector212 = "0.10.3"
     val kindProjector213 = "0.11.0"
     val logback = "1.2.4"
