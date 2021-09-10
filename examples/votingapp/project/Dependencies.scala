@@ -27,7 +27,7 @@ object dependencies {
   val h4sm = "0.0.8"
   val fs2 = "0.10.6"
   val http4s = "0.18.21"
-  val logback = "1.2.3"
+  val logback = "1.2.6"
   val pureConfig = "0.9.2"
   val scalaCheck = "1.14.0"
   val scalaTest = "3.0.8"
