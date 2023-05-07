@@ -16,87 +16,93 @@ import sbtcrossproject.CrossPlugin.autoImport._
 object ProjectImplicits {
 
   implicit class CommonSettings(val p: CrossProject) extends AnyVal {
-    def commonSettingsNoResource(): CrossProject = {
+    def commonSettingsNoResource(): CrossProject =
       p.settings(
-          crossScalaVersions  := Seq(scala212, scala213),
-          organization := "com.clovellytech",
-          resolvers ++= addResolvers,
-          // Make sure every subproject is using a logging configuration and conf file
-          scalacOptions ++= options.scalacExtraOptionsForVersion(scalaVersion.value),
-          libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
+        crossScalaVersions := Seq(scala212, scala213),
+        organization := "com.clovellytech",
+        resolvers ++= addResolvers,
+        // Make sure every subproject is using a logging configuration and conf file
+        scalacOptions ++= options.scalacExtraOptionsForVersion(scalaVersion.value),
+        libraryDependencies ++= compilerPluginsForVersion(scalaVersion.value),
       )
-    }
 
-    def commonSettings(): CrossProject = {
+    def commonSettings(): CrossProject =
       commonSettingsNoResource()
-      .settings(
-        Seq(
-          Compile / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/main/resources"),
-          Test / unmanagedResourceDirectories ++= Seq((ThisBuild / baseDirectory).value / "shared/src/test/resources"),
+        .settings(
+          Seq(
+            Compile / unmanagedResourceDirectories ++= Seq(
+              (ThisBuild / baseDirectory).value / "shared/src/main/resources",
+            ),
+            Test / unmanagedResourceDirectories ++= Seq(
+              (ThisBuild / baseDirectory).value / "shared/src/test/resources",
+            ),
+          ),
         )
-      )
-    }
   }
-
 
   implicit class AddDependenciesOps(val p: CrossProject.Builder) extends AnyVal {
-    def addScalaTest(): CrossProject = {
+    def addScalaTest(): CrossProject =
       p
-      .jsConfigure(
-        _.settings(
-          libraryDependencies ++= Seq(
-            "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-            "org.scalatestplus" %%% "scalacheck-1-14" % versions.scalaTestPlusScalacheck % "test",
-            "com.clovellytech" %%% "cats-scalacheck" % versions.catsScalacheck,
-          )
+        .jsConfigure(
+          _.settings(
+            libraryDependencies ++= Seq(
+              "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
+              "org.scalatestplus" %%% "scalacheck-1-15" % versions.scalaTestPlusScalacheck % "test",
+              "com.clovellytech" %%% "cats-scalacheck" % versions.catsScalacheck,
+            ),
+          ),
         )
-      )
-      .jvmConfigure(
-        _.settings(
-          libraryDependencies ++= testDepsInTestOnly
+        .jvmConfigure(
+          _.settings(
+            libraryDependencies ++= testDepsInTestOnly,
+          ),
         )
-      )
-    }
   }
 
-
   implicit class ConfigureJSProjectOps(val p: CrossProject.Builder) extends AnyVal {
-    def configureJsProject(id: String): CrossProject = {
+    def configureJsProject(id: String): CrossProject =
       p
-      .configs(JsTest)
-      .enablePlugins(ScalaJSPlugin)
-      .enablePlugins(ScalaJSBundlerPlugin)
-      .settings(
-        libraryDependencies ++= Seq(
-          "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
-          "org.scalatestplus" %%% "scalacheck-1-14" % versions.scalaTestPlusScalacheck % "test",
-          "com.clovellytech" %%% "cats-scalacheck" % versions.catsScalacheck,
-        ),
-        useYarn := true, // makes scalajs-bundler use yarn instead of npm
-        requireJsDomEnv in Test := true,
-        scalaJSUseMainModuleInitializer := true,
-        // configure Scala.js to emit a JavaScript module instead of a top-level script
-        scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-        // https://scalacenter.github.io/scalajs-bundler/cookbook.html#performance
-        webpackBundlingMode in fastOptJS := BundlingMode.LibraryOnly(),
-        copyFastOptJS := {
-          val inDir = (crossTarget in (Compile, fastOptJS)).value
-          val outDir = (baseDirectory in (Compile, fastOptJS)).value / ".." / "static/public" / id
-          val fileNames = Seq(
-            s"${name.value}-fastopt-loader.js",
-            s"${name.value}-fastopt-library.js",
-            s"${name.value}-fastopt-library.js.map",
-            s"${name.value}-fastopt.js",
-            s"${name.value}-fastopt.js.map",
-          )
-          val copies = fileNames.map(p => (inDir / p, outDir / p))
-          IO.copy(copies, overwrite = true, preserveLastModified = true, preserveExecutable = true)
-        },
-        // hot reloading configuration:
-        // https://github.com/scalacenter/scalajs-bundler/issues/180
-        addCommandAlias("dev", "; compile; fastOptJS::startWebpackDevServer; devwatch; fastOptJS::stopWebpackDevServer"),
-        addCommandAlias("devwatch", "~; compile; fastOptJS; copyFastOptJS"),
-      )
-    }
+        .configs(JsTest)
+        .enablePlugins(ScalaJSPlugin)
+        .enablePlugins(ScalaJSBundlerPlugin)
+        .settings(
+          libraryDependencies ++= Seq(
+            "org.scalatest" %%% "scalatest" % versions.scalaTest % "test",
+            "org.scalatestplus" %%% "scalacheck-1-15" % versions.scalaTestPlusScalacheck % "test",
+            "com.clovellytech" %%% "cats-scalacheck" % versions.catsScalacheck,
+          ),
+          useYarn := true, // makes scalajs-bundler use yarn instead of npm
+          requireJsDomEnv in Test := true,
+          scalaJSUseMainModuleInitializer := true,
+          // configure Scala.js to emit a JavaScript module instead of a top-level script
+          scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+          // https://scalacenter.github.io/scalajs-bundler/cookbook.html#performance
+          webpackBundlingMode in fastOptJS := BundlingMode.LibraryOnly(),
+          copyFastOptJS := {
+            val inDir = (crossTarget in (Compile, fastOptJS)).value
+            val outDir = (baseDirectory in (Compile, fastOptJS)).value / ".." / "static/public" / id
+            val fileNames = Seq(
+              s"${name.value}-fastopt-loader.js",
+              s"${name.value}-fastopt-library.js",
+              s"${name.value}-fastopt-library.js.map",
+              s"${name.value}-fastopt.js",
+              s"${name.value}-fastopt.js.map",
+            )
+            val copies = fileNames.map(p => (inDir / p, outDir / p))
+            IO.copy(
+              copies,
+              overwrite = true,
+              preserveLastModified = true,
+              preserveExecutable = true,
+            )
+          },
+          // hot reloading configuration:
+          // https://github.com/scalacenter/scalajs-bundler/issues/180
+          addCommandAlias(
+            "dev",
+            "; compile; fastOptJS::startWebpackDevServer; devwatch; fastOptJS::stopWebpackDevServer",
+          ),
+          addCommandAlias("devwatch", "~; compile; fastOptJS; copyFastOptJS"),
+        )
   }
 }
